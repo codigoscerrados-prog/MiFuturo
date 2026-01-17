@@ -13,6 +13,14 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     JWT_EXPIRE_MIN: int = 60
 
+    # ---- SMTP ----
+    SMTP_HOST: str = ""
+    SMTP_PORT: int = 587
+    SMTP_USER: str = ""
+    SMTP_PASS: str = ""
+    FROM_EMAIL: str = ""
+    SMTP_USE_TLS: bool = True
+
     # ✅ No crashea si aparecen variables extra en .env (por ejemplo NEXT_PUBLIC_*)
     model_config = SettingsConfigDict(
         env_file=(".env", ".env.local"),

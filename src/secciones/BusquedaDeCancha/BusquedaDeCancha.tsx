@@ -11,23 +11,19 @@ const MapaComplejos = dynamic(() => import("./MapaComplejos"), { ssr: false }) a
 export type TipoCancha = "Fútbol 5" | "Fútbol 7" | "Fútbol 11";
 
 export type FiltrosBusqueda = {
-    zona: string;
+    departamento: string;
+    provincia: string;
+    distrito: string;
     tipo: TipoCancha | "Cualquiera";
-    pasto: "Sintético" | "Híbrido" | "Cualquiera";
     precioMax: number;
-    caracteristicas: {
-        techada: boolean;
-        iluminacion: boolean;
-        vestuarios: boolean;
-        estacionamiento: boolean;
-        cafeteria: boolean;
-    };
 };
 
 type CanchaApi = {
     id: number;
     nombre: string;
     distrito?: string | null;
+    provincia?: string | null;
+    departamento?: string | null;
     tipo: TipoCancha;
     pasto: "Sintético" | "Híbrido";
     precio_hora: number;
@@ -56,6 +52,9 @@ type CanchaCard = {
     id: number;
     nombre: string;
     zona: string;
+    distrito: string | null;
+    provincia: string | null;
+    departamento: string | null;
     tipo: TipoCancha;
     precioHora: number;
 
@@ -105,6 +104,10 @@ type ComplejoCard = {
 
 function clamp(n: number, min: number, max: number) {
     return Math.max(min, Math.min(max, n));
+}
+
+function normalizarTexto(v?: string | null) {
+    return (v || "").toLowerCase().trim();
 }
 
 function ratingFake(id: number) {
@@ -331,6 +334,9 @@ export default function BusquedaDeCancha({ filtros, mostrando }: { filtros: Filt
                         id: c.id,
                         nombre: c.nombre,
                         zona: c.distrito || "—",
+                        distrito: c.distrito ?? null,
+                        provincia: c.provincia ?? null,
+                        departamento: c.departamento ?? null,
                         tipo: c.tipo,
                         pasto: c.pasto,
                         precioHora: Number(c.precio_hora || 0),
@@ -374,23 +380,19 @@ export default function BusquedaDeCancha({ filtros, mostrando }: { filtros: Filt
         if (!mostrando) return base.sort((a, b) => b.rating - a.rating);
 
         const max = clamp(filtros.precioMax, 30, 250);
+        const depFiltro = normalizarTexto(filtros.departamento);
+        const provFiltro = normalizarTexto(filtros.provincia);
+        const distFiltro = normalizarTexto(filtros.distrito);
 
         return base
             .filter((c) => {
-                const cumpleZona = filtros.zona === "Cerca de mí" ? true : c.zona === filtros.zona;
+                const cumpleDepartamento = !depFiltro || normalizarTexto(c.departamento) === depFiltro;
+                const cumpleProvincia = !provFiltro || normalizarTexto(c.provincia) === provFiltro;
+                const cumpleDistrito = !distFiltro || normalizarTexto(c.distrito) === distFiltro;
                 const cumpleTipo = filtros.tipo === "Cualquiera" ? true : c.tipo === filtros.tipo;
-                const cumplePasto = filtros.pasto === "Cualquiera" ? true : c.pasto === filtros.pasto;
                 const cumplePrecio = c.precioHora <= max;
 
-                const ch = filtros.caracteristicas;
-                const cumpleChecks =
-                    (!ch.techada || c.techada) &&
-                    (!ch.iluminacion || c.iluminacion) &&
-                    (!ch.vestuarios || c.vestuarios) &&
-                    (!ch.estacionamiento || c.estacionamiento) &&
-                    (!ch.cafeteria || c.cafeteria);
-
-                return cumpleZona && cumpleTipo && cumplePasto && cumplePrecio && cumpleChecks;
+                return cumpleDepartamento && cumpleProvincia && cumpleDistrito && cumpleTipo && cumplePrecio;
             })
             .sort((a, b) => b.rating - a.rating);
     }, [canchasDb, filtros, mostrando]);
@@ -491,7 +493,9 @@ export default function BusquedaDeCancha({ filtros, mostrando }: { filtros: Filt
 
                     {mostrando && (
                         <div className={styles.resumen}>
-                            <span className={styles.tag}>Zona: {filtros.zona}</span>
+                            <span className={styles.tag}>Departamento: {filtros.departamento || "—"}</span>
+                            <span className={styles.tag}>Provincia: {filtros.provincia || "—"}</span>
+                            <span className={styles.tag}>Distrito: {filtros.distrito || "Todos"}</span>
                             <span className={styles.tag}>Tipo: {filtros.tipo}</span>
                             <span className={styles.tag}>Max: S/ {maxPrecio}</span>
                         </div>
@@ -501,7 +505,7 @@ export default function BusquedaDeCancha({ filtros, mostrando }: { filtros: Filt
                 {error && <div className={styles.placeholder}>{error}</div>}
 
                 {!cargando && total === 0 ? (
-                    <div className={styles.placeholder}>No hay resultados con esos filtros. Prueba subir el precio o quitar características.</div>
+                    <div className={styles.placeholder}>No hay resultados con esos filtros. Prueba subir el precio o ajustar los filtros.</div>
                 ) : (
                     <>
                         {/* ✅ MAPA: ahora SOLO COMPLEJOS */}

@@ -41,6 +41,24 @@ class TokenOut(BaseModel):
 
 
 # =========================
+# Auth OTP
+# =========================
+class OtpRequestIn(BaseModel):
+    email: EmailStr
+
+
+class OtpVerifyIn(BaseModel):
+    email: EmailStr
+    code: str
+
+
+class OtpVerifyOut(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    needs_profile: bool
+
+
+# =========================
 # Canchas / Imágenes
 # =========================
 class CanchaCrear(BaseModel):
@@ -87,6 +105,8 @@ class CanchaOut(BaseModel):
     id: int
     nombre: str
     distrito: Optional[str] = None
+    provincia: Optional[str] = None
+    departamento: Optional[str] = None
     tipo: str
     pasto: str
     precio_hora: float
@@ -278,3 +298,28 @@ class PlanActualOut(BaseModel):
     plan_nombre: str
     estado: str
     inicio: Optional[datetime] = None
+
+# =========================
+# Ubigeo (OUT)
+# =========================
+
+class UbigeoDepartmentOut(BaseModel):
+    id: str
+    name: str
+    class Config:
+        from_attributes = True
+
+class UbigeoProvinceOut(BaseModel):
+    id: str
+    name: str
+    department_id: str
+    class Config:
+        from_attributes = True
+
+class UbigeoDistrictOut(BaseModel):
+    id: str
+    name: str | None = None
+    province_id: str | None = None
+    department_id: str | None = None
+    class Config:
+        from_attributes = True

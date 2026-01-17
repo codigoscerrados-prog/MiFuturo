@@ -12,17 +12,11 @@ import SeccionBeneficios from "@/secciones/SeccionConfianza/SeccionConfianza";
 import SeccionLlamadoAccion from "@/secciones/SeccionLlamadoAccion/SeccionLlamadoAccion";
 
 const FILTROS_INICIALES: FiltrosBusqueda = {
-    zona: "Cerca de mí",
+    departamento: "Lima",
+    provincia: "Lima",
+    distrito: "",
     tipo: "Cualquiera",
-    pasto: "Cualquiera",
     precioMax: 120,
-    caracteristicas: {
-        techada: false,
-        iluminacion: true,
-        vestuarios: false,
-        estacionamiento: false,
-        cafeteria: false,
-    },
 };
 
 export default function Home() {

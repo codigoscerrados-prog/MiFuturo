@@ -10,7 +10,7 @@ from sqlalchemy import (
     ForeignKey,
     func,
 )
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 from app.modelos.base import Base
 
 
@@ -48,6 +48,20 @@ class User(Base):
     canchas = relationship("Cancha", back_populates="owner", foreign_keys="Cancha.owner_id")
 
     suscripciones = relationship("Suscripcion", back_populates="user", cascade="all, delete-orphan", passive_deletes=True)
+
+
+# =========================
+# Login OTP
+# =========================
+class LoginOtp(Base):
+    __tablename__ = "login_otps"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    email = Column(String(255), nullable=False, index=True)
+    code_hash = Column(String(255), nullable=False)
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+    attempts = Column(Integer, nullable=False, default=0)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
 
 # =========================
@@ -156,6 +170,14 @@ class Cancha(Base):
     @property
     def distrito(self):
         return self.complejo.distrito if self.complejo else None
+
+    @property
+    def provincia(self):
+        return self.complejo.provincia if self.complejo else None
+
+    @property
+    def departamento(self):
+        return self.complejo.departamento if self.complejo else None
 
     @property
     def techada(self):
@@ -314,3 +336,61 @@ class Suscripcion(Base):
 
     user = relationship("User", back_populates="suscripciones")
     plan = relationship("Plan")
+
+
+# =========================
+# Ubigeo
+# =========================
+class UbigeoDepartment(Base):
+    __tablename__ = "ubigeo_peru_departments"
+
+    id: Mapped[str] = mapped_column(String(2), primary_key=True)
+    name: Mapped[str] = mapped_column(String(45), nullable=False)
+
+    provinces: Mapped[list["UbigeoProvince"]] = relationship(back_populates="department")
+    districts: Mapped[list["UbigeoDistrict"]] = relationship(back_populates="department")
+
+
+class UbigeoProvince(Base):
+    __tablename__ = "ubigeo_peru_provinces"
+
+    id: Mapped[str] = mapped_column(String(4), primary_key=True)
+    name: Mapped[str] = mapped_column(String(45), nullable=False)
+
+    department_id: Mapped[str] = mapped_column(
+        String(2),
+        ForeignKey("ubigeo_peru_departments.id"),
+        nullable=False,
+        index=True,
+    )
+
+    department: Mapped["UbigeoDepartment"] = relationship(back_populates="provinces")
+    districts: Mapped[list["UbigeoDistrict"]] = relationship(back_populates="province")
+
+
+class UbigeoDistrict(Base):
+    __tablename__ = "ubigeo_peru_districts"
+
+    id: Mapped[str] = mapped_column(String(6), primary_key=True)
+
+    # En tu tabla: name DEFAULT NULL
+    name: Mapped[str | None] = mapped_column(String(45), nullable=True)
+
+    # En tu tabla: province_id DEFAULT NULL
+    province_id: Mapped[str | None] = mapped_column(
+        String(4),
+        ForeignKey("ubigeo_peru_provinces.id"),
+        nullable=True,
+        index=True,
+    )
+
+    # En tu tabla: department_id DEFAULT NULL
+    department_id: Mapped[str | None] = mapped_column(
+        String(2),
+        ForeignKey("ubigeo_peru_departments.id"),
+        nullable=True,
+        index=True,
+    )
+
+    province: Mapped["UbigeoProvince | None"] = relationship(back_populates="districts")
+    department: Mapped["UbigeoDepartment | None"] = relationship(back_populates="districts")

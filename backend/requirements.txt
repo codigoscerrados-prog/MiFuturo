@@ -1,0 +1,27 @@
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+
+SQLAlchemy==2.0.34
+
+# PostgreSQL (psycopg3) compatible con Python 3.13 sin compilar
+psycopg[binary]==3.3.2
+
+python-dotenv==1.0.1
+pydantic-settings==2.6.1
+
+# Para EmailStr en Pydantic (pydantic[email])
+pydantic[email]==2.12.5
+
+# Auth / JWT
+python-jose==3.3.0
+
+# Hash de passwords (passlib 1.7.4 + bcrypt <4 para evitar crash)
+passlib[bcrypt]==1.7.4
+bcrypt<4
+
+# UploadFile / FormData
+python-multipart==0.0.9
+
+# Exportar Excel / PDF
+openpyxl==3.1.5
+reportlab==4.4.7

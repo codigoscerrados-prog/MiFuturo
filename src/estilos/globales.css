@@ -1,0 +1,83 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap");
+@import "leaflet/dist/leaflet.css";
+@import "./tokens.css";
+@import "./base.css";
+@import "./utilidades.css";
+
+html{
+    overflow-y: scroll;
+    scrollbar-gutter: stable;
+}
+
+/* ===== Global (sin Tailwind) ===== */
+:root {
+    /* Fuente global */
+    --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+
+    /* Defaults por si algún token no existe (no rompe tu sistema) */
+    --_bg: var(--fondo, var(--blanco, #ffffff));
+    --_text: var(--texto, #0f172a);
+    --_muted: var(--muted, #64748b);
+    --_border: var(--borde, rgba(15, 23, 42, 0.12));
+}
+
+/* Mejoras de render */
+html {
+    text-rendering: optimizeLegibility;
+    -webkit-text-size-adjust: 100%;
+    font-family: var(--font-sans);
+}
+
+body {
+    margin: 0;
+    min-height: 100dvh;
+    background: var(--_bg);
+    color: var(--_text);
+    font-family: var(--font-sans);
+}
+
+/* Box sizing */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/* Imágenes y medios */
+img,
+svg,
+video,
+canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Links */
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: none;
+}
+
+/* Inputs */
+input,
+select,
+textarea,
+button {
+    font: inherit;
+}
+
+/* Focus accesible */
+:focus-visible {
+    outline: 3px solid rgba(15, 23, 42, 0.22);
+    outline-offset: 3px;
+    border-radius: 10px;
+}
+
+/* Selección */
+::selection {
+    background: rgba(15, 23, 42, 0.12);
+}

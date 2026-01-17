@@ -1,0 +1,22 @@
+# Next.js / Node
+node_modules/
+.next/
+out/
+dist/
+*.log
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Python
+backend/.venv/
+backend/__pycache__/
+*.pyc
+__pycache__/
+
+# Editor/OS
+.vscode/
+.idea/
+.DS_Store

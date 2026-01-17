@@ -1,0 +1,133 @@
+.seccion{
+    padding: 0;
+}
+
+.hero{
+    border: 1px solid var(--borde);
+    border-radius: var(--radio-xl);
+    background: linear-gradient(180deg, var(--blanco), var(--superficie));
+    box-shadow: var(--sombra-sm);
+    padding: 18px;
+}
+
+.heroTop{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+.kicker{
+    margin: 0;
+    font-size: 12px;
+    letter-spacing: .22px;
+    font-weight: 900;
+    color: var(--muted);
+    text-transform: uppercase;
+}
+
+.titulo{
+    margin: 6px 0 0;
+    font-size: clamp(24px, 2.6vw, 34px);
+    line-height: 1.12;
+    color: var(--azulMarino);
+}
+
+.subtitulo{
+    margin: 10px 0 0;
+    color: var(--muted);
+    max-width: 68ch;
+}
+
+.badge{
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(245, 158, 11, .35);
+    background: rgba(245, 158, 11, .10);
+    color: #92400e;
+    font-weight: 950;
+}
+
+.badgeDot{
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: #f59e0b;
+}
+
+.badgeText{
+    font-size: 12px;
+    letter-spacing: .18px;
+}
+
+.grid{
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.card{
+    border: 1px solid var(--borde);
+    border-radius: 18px;
+    background: rgba(255,255,255,.6);
+    box-shadow: var(--sombra-sm);
+    padding: 14px;
+}
+
+.cardTitle{
+    margin: 0;
+    font-weight: 950;
+    color: var(--azulMarino);
+    font-size: 15px;
+}
+
+.cardDesc{
+    margin: 8px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.ctaRow{
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 14px;
+}
+
+.btnPro{
+    box-shadow: 0 12px 30px rgba(245, 158, 11, .18);
+}
+
+.note{
+    margin-top: 14px;
+    border: 1px dashed rgba(245, 158, 11, .45);
+    background: rgba(245, 158, 11, .08);
+    border-radius: 18px;
+    padding: 12px 14px;
+}
+
+.noteTitle{
+    margin: 0;
+    font-weight: 950;
+    color: #92400e;
+}
+
+.noteText{
+    margin: 6px 0 0;
+    color: #7c4a12;
+    font-weight: 700;
+}
+
+@media (max-width: 980px){
+    .grid{
+        grid-template-columns: 1fr;
+    }
+}

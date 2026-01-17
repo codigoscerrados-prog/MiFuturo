@@ -1,0 +1,244 @@
+.seccion {
+    padding: 0;
+}
+
+.contenido {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.badge {
+    display: inline-flex;
+    padding: 10px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--borde);
+    background: var(--blanco);
+    color: rgba(11, 22, 48, .78);
+    font-weight: 800;
+    font-size: 13px;
+    box-shadow: var(--sombra-sm);
+    margin: 0 0 10px;
+}
+
+.titulo {
+    margin: 0 0 6px;
+    font-size: clamp(28px, 3.2vw, 40px);
+    font-weight: 900;
+    letter-spacing: -.6px;
+    color: var(--azulMarino);
+}
+
+.subtitulo {
+    margin: 0;
+    color: var(--muted);
+    font-weight: 650;
+    max-width: 70ch;
+}
+
+.botonDirecto {
+    height: 44px;
+    padding-inline: 16px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1.2fr .8fr;
+    gap: 12px;
+    align-items: start;
+}
+
+.panel {
+    border: 1px solid var(--borde);
+    background: linear-gradient(180deg, var(--blanco), var(--superficie));
+    border-radius: var(--radio-xl);
+    box-shadow: var(--sombra-sm);
+    padding: 16px;
+}
+
+.panelTop {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.panelTitulo {
+    margin: 0 0 4px;
+    font-size: 16px;
+    font-weight: 900;
+    color: var(--azulMarino);
+}
+
+.panelSub {
+    margin: 0;
+    color: var(--muted);
+    font-weight: 650;
+    font-size: 13px;
+}
+
+.sello {
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(37, 99, 235, .22);
+    background: rgba(37, 99, 235, .08);
+    color: var(--azulMarino);
+    font-weight: 900;
+    font-size: 12px;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.filas {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.campo {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.campoFull {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.label {
+    color: rgba(11, 22, 48, .72);
+    font-weight: 900;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .45px;
+}
+
+.input,
+.select {
+    height: 46px;
+    padding: 0 12px;
+    border-radius: 14px;
+    border: 1px solid var(--borde);
+    background: rgba(255, 255, 255, .95);
+    color: var(--texto);
+    outline: none;
+}
+
+.textarea {
+    min-height: 120px;
+    padding: 12px;
+    border-radius: 14px;
+    border: 1px solid var(--borde);
+    background: rgba(255, 255, 255, .95);
+    color: var(--texto);
+    outline: none;
+    resize: vertical;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+    border-color: rgba(37, 99, 235, .45);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, .10);
+}
+
+.acciones {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.btnPrincipal {
+    box-shadow: 0 18px 55px rgba(11, 22, 48, .18);
+}
+
+.btnSec {
+    border-color: var(--borde);
+    background: var(--blanco);
+}
+
+.aviso {
+    margin: 0;
+    color: var(--muted);
+    font-weight: 650;
+    font-size: 13px;
+}
+
+/* Info */
+.info {
+    border: 1px solid var(--borde);
+    background: var(--blanco);
+    border-radius: var(--radio-xl);
+    box-shadow: var(--sombra-sm);
+    padding: 16px;
+}
+
+.infoTitulo {
+    margin: 0 0 12px;
+    font-weight: 900;
+    color: var(--azulMarino);
+}
+
+.infoBloque {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.infoLabel {
+    font-weight: 900;
+    font-size: 12px;
+    color: rgba(11, 22, 48, .72);
+    text-transform: uppercase;
+    letter-spacing: .45px;
+}
+
+.infoValor {
+    font-weight: 850;
+    color: rgba(11, 22, 48, .90);
+}
+
+.infoHint {
+    color: var(--muted);
+    font-weight: 650;
+    font-size: 13px;
+}
+
+.infoBtn {
+    width: fit-content;
+    margin-top: 6px;
+}
+
+.linea {
+    height: 1px;
+    background: var(--borde);
+    margin: 14px 0;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .filas {
+        grid-template-columns: 1fr;
+    }
+}

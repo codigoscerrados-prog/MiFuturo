@@ -1,0 +1,39 @@
+:root{
+  /* Base SaaS elegante */
+  --blanco: #ffffff;
+
+  --gris-25: #fcfdff;
+  --gris-50: #f8fafc;
+  --gris-100: #f1f5f9;
+  --gris-200: #e2e8f0;
+  --gris-300: #cbd5e1;
+  --gris-600: #475569;
+
+  /* Azul marino (marca) */
+  --azulMarino: #0b1630;
+  --azulMarino2: #102a56;
+
+  /* Acento azul (sutil, para hovers y focus) */
+  --azulAcento: #2563eb;
+
+  /* Texto */
+  --texto: var(--azulMarino);
+  --muted: var(--gris-600);
+
+  /* Superficies y bordes */
+  --fondo: var(--blanco);
+  --superficie: var(--gris-50);
+  --superficie2: var(--gris-100);
+  --borde: var(--gris-200);
+  --bordeFuerte: var(--gris-300);
+
+  /* Radios / sombras */
+  --radio-md: 12px;
+  --radio-lg: 16px;
+  --radio-xl: 22px;
+
+  --sombra-sm: 0 8px 22px rgba(2, 6, 23, .06);
+  --sombra: 0 18px 55px rgba(2, 6, 23, .10);
+
+  --contenedor: 1160px;
+}

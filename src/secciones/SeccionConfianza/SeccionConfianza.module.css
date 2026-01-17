@@ -1,0 +1,136 @@
+.seccion{
+  padding: 0;
+}
+
+.contenido{
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cabecera{
+  display:flex;
+  align-items:flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.titulo{
+  margin: 0 0 6px;
+  font-size: 24px;
+  letter-spacing: -.2px;
+  font-weight: 900;
+  color: var(--azulMarino);
+}
+
+.subtitulo{
+  margin: 0;
+  color: var(--muted);
+  font-weight: 650;
+  max-width: 72ch;
+}
+
+.ctas{
+  display:flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.botonCta{
+  height: 44px;
+  padding-inline: 16px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 12px;
+}
+
+.card{
+  padding: 16px;
+  border-radius: var(--radio-xl);
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+
+.card:hover{
+  transform: translateY(-2px);
+  box-shadow: var(--sombra);
+  border-color: var(--bordeFuerte);
+}
+
+.iconoWrap{
+  width: 44px;
+  height: 44px;
+  border-radius: 16px;
+  border: 1px solid var(--borde);
+  background: linear-gradient(180deg, var(--blanco), var(--superficie));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow: var(--sombra-sm);
+  margin-bottom: 12px;
+}
+
+.icono{
+  width: 20px;
+  height: 20px;
+  stroke: rgba(11,22,48,.78);
+  stroke-width: 2.2;
+  fill: none;
+}
+
+.cardTitulo{
+  margin: 0 0 6px;
+  font-weight: 900;
+  color: rgba(11,22,48,.92);
+}
+
+.cardTexto{
+  margin: 0;
+  color: var(--muted);
+  font-weight: 650;
+  line-height: 1.55;
+}
+
+/* banda inferior tipo SaaS */
+.banda{
+  margin-top: 2px;
+  border: 1px solid var(--borde);
+  background: linear-gradient(180deg, var(--blanco), var(--superficie));
+  border-radius: var(--radio-xl);
+  box-shadow: var(--sombra-sm);
+  padding: 14px;
+
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.bandaItem{
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+}
+
+.bandaTitulo{
+  display:block;
+  font-weight: 900;
+  color: rgba(11,22,48,.90);
+  margin-bottom: 2px;
+}
+
+.bandaTexto{
+  display:block;
+  color: var(--muted);
+  font-weight: 650;
+  font-size: 13px;
+}
+
+@media (max-width: 900px){
+  .banda{
+    grid-template-columns: 1fr;
+  }
+}

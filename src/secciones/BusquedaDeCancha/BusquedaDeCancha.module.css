@@ -1,0 +1,688 @@
+.seccion {
+    padding: 0;
+}
+
+.cabecera {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+.titulo {
+    margin: 0 0 6px;
+    font-size: 24px;
+    letter-spacing: -.2px;
+    font-weight: 900;
+}
+
+.subtitulo {
+    margin: 0;
+    color: var(--muted);
+    font-weight: 650;
+}
+
+.resumen {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.tag {
+    padding: 8px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--borde);
+    background: var(--blanco);
+    color: rgba(11, 22, 48, .78);
+    font-weight: 800;
+    font-size: 12px;
+}
+
+.placeholder {
+    padding: 14px;
+    border-radius: 18px;
+    border: 1px dashed var(--bordeFuerte);
+    background: var(--blanco);
+    color: rgba(11, 22, 48, .78);
+    font-weight: 650;
+}
+
+/* ✅ 3 columnas (6 cards = 2 filas) */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+/* Tablet: 2 columnas */
+@media (max-width: 900px) {
+    .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* Móvil: 1 columna */
+@media (max-width: 520px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.card {
+    border: 1px solid var(--borde);
+    background: var(--blanco);
+    border-radius: var(--radio-xl);
+    box-shadow: var(--sombra-sm);
+    padding: 16px;
+    transition: transform .12s ease, box-shadow .12s ease;
+    overflow: hidden;
+    /* ✅ necesario para el zoom */
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--sombra);
+}
+
+.topCard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.disponible {
+    display: inline-flex;
+    padding: 8px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(37, 99, 235, .18);
+    background: rgba(37, 99, 235, .08);
+    color: var(--azulMarino);
+    font-weight: 900;
+    font-size: 12px;
+}
+
+.rating {
+    color: rgba(11, 22, 48, .72);
+    font-weight: 900;
+    font-size: 12px;
+}
+
+.nombre {
+    margin: 0 0 8px;
+    font-weight: 900;
+}
+
+.meta {
+    margin: 0 0 12px;
+    color: var(--muted);
+    font-weight: 650;
+    font-size: 13px;
+}
+
+.caracts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.chip {
+    padding: 8px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--borde);
+    background: var(--superficie);
+    font-weight: 800;
+    font-size: 12px;
+    color: rgba(11, 22, 48, .76);
+}
+
+.footerCard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.precio {
+    font-weight: 900;
+    font-size: 16px;
+}
+
+.botones {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* ✅ Imagen superior del card */
+.media {
+    position: relative;
+    height: 160px;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid var(--borde);
+    background: var(--superficie);
+    box-shadow: var(--sombra-sm);
+    margin-bottom: 12px;
+}
+
+/* ✅ Hover zoom pro */
+.mediaImg {
+    object-fit: cover;
+    transform: scale(1.02);
+    filter: saturate(1.02) contrast(1.03);
+    transition: transform .25s ease, filter .25s ease;
+    will-change: transform;
+}
+
+.card:hover .mediaImg {
+    transform: scale(1.10);
+    filter: saturate(1.06) contrast(1.06);
+}
+
+.mediaOverlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg,
+            rgba(2, 6, 23, .02) 0%,
+            rgba(2, 6, 23, .38) 100%);
+    transition: opacity .25s ease;
+}
+
+.card:hover .mediaOverlay {
+    opacity: .88;
+}
+
+.mediaChips {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.body {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Responsive: imagen más alta en pantallas grandes */
+@media (min-width: 900px) {
+    .media {
+        height: 170px;
+    }
+}
+
+/* ✅ Paginación */
+.paginacion {
+    margin-top: 14px;
+    border: 1px solid var(--borde);
+    background: linear-gradient(180deg, var(--blanco), var(--superficie));
+    border-radius: var(--radio-xl);
+    box-shadow: var(--sombra-sm);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.paginacionInfo {
+    color: var(--muted);
+    font-weight: 650;
+}
+
+.paginacionBotones {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.pagNumeros {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.pagBtn {
+    border-color: var(--borde);
+    background: var(--blanco);
+}
+
+.pagBtn:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+.pagNum {
+    width: 44px;
+    justify-content: center;
+    border-color: var(--borde);
+    background: var(--blanco);
+}
+
+.pagNumActivo {
+    border-color: rgba(37, 99, 235, .22);
+    background: rgba(37, 99, 235, .10);
+    color: var(--azulMarino);
+}
+
+/* Responsive paginación */
+@media (max-width: 520px) {
+    .paginacionBotones {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .pagNumeros {
+        justify-content: center;
+    }
+
+    .pagBtn {
+        width: 100%;
+    }
+}
+
+/* ---------- Modal Reserva WhatsApp (FIX lectura) ---------- */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(11, 22, 48, .55);
+    /* tono azul oscuro suave */
+    display: grid;
+    place-items: center;
+    padding: 18px;
+    z-index: 9999;
+}
+
+/* ✅ modal CLARO para que combine con tu UI */
+.modalCard {
+    width: min(640px, 100%);
+    background: var(--blanco);
+    color: rgba(11, 22, 48, .92);
+    border: 1px solid var(--borde);
+    border-radius: 18px;
+    padding: 16px;
+    box-shadow: 0 18px 60px rgba(0, 0, 0, .20);
+}
+
+/* ✅ textos visibles */
+.modalKicker,
+.modalSub,
+.modalTiny {
+    color: rgba(11, 22, 48, .72);
+}
+
+.modalHeader {
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.modalKicker {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: .2px;
+}
+
+.modalTitle {
+    margin: 4px 0 0;
+    font-size: 18px;
+    line-height: 1.2;
+    font-weight: 900;
+    color: rgba(11, 22, 48, .95);
+}
+
+.modalSub {
+    margin: 6px 0 0;
+    font-size: 13px;
+    font-weight: 650;
+}
+
+/* ✅ botón cerrar con estilo neon */
+.modalClose {
+    border: 1px solid rgba(159, 225, 6, .25);
+    background: rgba(159, 225, 6, .10);
+    color: rgba(11, 22, 48, .92);
+    border-radius: 12px;
+    padding: 8px 10px;
+    cursor: pointer;
+    font-weight: 900;
+}
+
+.modalClose:hover {
+    background: rgba(159, 225, 6, .16);
+}
+
+/* ✅ error legible */
+.modalError {
+    margin: 10px 0;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(255, 76, 76, .10);
+    border: 1px solid rgba(255, 76, 76, .25);
+    color: rgba(11, 22, 48, .92);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+/* ✅ inputs y labels legibles */
+.modalGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+@media (max-width: 560px) {
+    .modalGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.modalField {
+    display: grid;
+    gap: 6px;
+}
+
+.modalLabel {
+    font-size: 12px;
+    font-weight: 900;
+    color: rgba(11, 22, 48, .78);
+}
+
+/* ✅ fuerza estilo en inputs dentro del modal */
+.modalCard :global(.input) {
+    background: var(--blanco);
+    color: rgba(11, 22, 48, .92);
+    border: 1px solid var(--borde);
+}
+
+/* ✅ botones alineados */
+.modalBtns {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.modalTiny {
+    margin: 10px 0 0;
+    font-size: 12px;
+    font-weight: 650;
+}
+
+/* ---------- Modal Detalle (mismo estilo) ---------- */
+.detalleWrap {
+    display: grid;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.detalleMedia {
+    position: relative;
+    height: 220px;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid var(--borde);
+    background: var(--superficie);
+    box-shadow: var(--sombra-sm);
+}
+
+.detalleImg {
+    object-fit: cover;
+    transform: scale(1.02);
+    filter: saturate(1.02) contrast(1.03);
+}
+
+.detalleBadgeRow {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.detalleBadge {
+    padding: 8px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--borde);
+    background: rgba(255, 255, 255, .92);
+    font-weight: 900;
+    font-size: 12px;
+    color: rgba(11, 22, 48, .85);
+}
+
+.detalleBadgeStrong {
+    padding: 8px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(37, 99, 235, .22);
+    background: rgba(37, 99, 235, .10);
+    font-weight: 900;
+    font-size: 12px;
+    color: var(--azulMarino);
+}
+
+.detalleGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+@media (max-width: 740px) {
+    .detalleGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.detalleBox {
+    border: 1px solid var(--borde);
+    background: linear-gradient(180deg, var(--blanco), var(--superficie));
+    border-radius: 16px;
+    padding: 12px;
+    box-shadow: var(--sombra-sm);
+}
+
+.detalleLabel {
+    margin: 0 0 10px;
+    font-weight: 900;
+    font-size: 13px;
+    color: rgba(11, 22, 48, .85);
+}
+
+.detalleChips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.detalleMuted {
+    color: var(--muted);
+    font-weight: 650;
+    font-size: 13px;
+}
+
+.detalleList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 10px;
+}
+
+.detalleList li {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(11, 22, 48, .08);
+    background: rgba(255, 255, 255, .75);
+}
+
+.detalleList li span {
+    color: rgba(11, 22, 48, .68);
+    font-weight: 800;
+}
+
+.detalleList li strong {
+    color: rgba(11, 22, 48, .92);
+    font-weight: 900;
+}
+
+/* ---------- Mapa Complejos ---------- */
+.mapOnlyDesktop {
+    display: block;
+}
+
+.mapWrap {
+    margin: 14px 0;
+    border: 1px solid var(--borde);
+    background: linear-gradient(180deg, var(--blanco), var(--superficie));
+    border-radius: var(--radio-xl);
+    box-shadow: var(--sombra-sm);
+    padding: 12px;
+}
+
+.mapHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.mapTitle {
+    margin: 0 0 4px;
+    font-size: 16px;
+    font-weight: 900;
+    color: rgba(11, 22, 48, .95);
+}
+
+.mapSub {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 650;
+    color: var(--muted);
+}
+
+.mapBox {
+    height: 420px;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid var(--borde);
+    background: var(--superficie);
+}
+
+/* Leaflet dentro de CSS Modules */
+.mapBox :global(.leaflet-container) {
+    height: 100%;
+    width: 100%;
+}
+
+@media (max-width: 900px) {
+    .mapOnlyDesktop {
+        display: none;
+    }
+}
+
+/* Popup */
+.mapPopup {
+    display: grid;
+    gap: 8px;
+    min-width: 260px;
+}
+
+.mapPopupTitle {
+    font-weight: 900;
+    color: rgba(11, 22, 48, .92);
+}
+
+.mapPopupMeta {
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(11, 22, 48, .70);
+}
+
+.mapPopupList {
+    display: grid;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.mapItem {
+    border: 1px solid rgba(11, 22, 48, .10);
+    border-radius: 12px;
+    padding: 10px;
+    background: rgba(255, 255, 255, .85);
+}
+
+.mapItemTop {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.mapItemName {
+    font-weight: 900;
+    color: rgba(11, 22, 48, .92);
+}
+
+.mapItemBadges {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.mapItemMeta {
+    margin-top: 4px;
+    font-size: 12px;
+    font-weight: 650;
+    color: rgba(11, 22, 48, .70);
+}
+
+.mapPopupBadge {
+    padding: 6px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--borde);
+    background: rgba(255, 255, 255, .9);
+    font-weight: 900;
+    font-size: 12px;
+    color: rgba(11, 22, 48, .85);
+}
+
+.mapPopupBadgeStrong {
+    padding: 6px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(37, 99, 235, .22);
+    background: rgba(37, 99, 235, .10);
+    font-weight: 900;
+    font-size: 12px;
+    color: var(--azulMarino);
+}
+
+.mapPopupBtns {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}

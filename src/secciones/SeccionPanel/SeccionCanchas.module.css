@@ -1,0 +1,421 @@
+.shell {
+    padding: 0;
+    width: 100%;
+    max-width: 1320px;
+    margin: 0 auto;
+}
+
+/* ✅ evita overflow por padding/border */
+.shell,
+.shell * {
+    box-sizing: border-box;
+}
+
+/* Header */
+.header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.kicker {
+    margin: 0;
+    font-size: 12px;
+    letter-spacing: .22px;
+    font-weight: 900;
+    color: var(--muted);
+    text-transform: uppercase;
+}
+
+.titulo {
+    margin: 6px 0 0;
+    font-size: clamp(22px, 2.2vw, 30px);
+    line-height: 1.12;
+    color: var(--azulMarino);
+}
+
+.muted {
+    margin: 6px 0 0;
+    color: var(--muted);
+}
+
+.mutedSmall {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.headerBtns {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+/* Pills */
+.statPill {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--borde);
+    background: linear-gradient(180deg, var(--blanco), var(--superficie));
+    box-shadow: var(--sombra-sm);
+}
+
+.pillDot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(31, 190, 106, .9);
+}
+
+.pillText {
+    font-weight: 950;
+    color: var(--azulMarino);
+    font-size: 13px;
+}
+
+/* Alerts */
+.alertError {
+    border: 1px solid rgba(239, 68, 68, .35);
+    background: rgba(239, 68, 68, .08);
+    color: #7f1d1d;
+    border-radius: var(--radio-lg);
+    padding: 10px 12px;
+    margin: 10px 0 12px;
+    font-weight: 800;
+}
+
+.alertOk {
+    border: 1px solid rgba(34, 197, 94, .35);
+    background: rgba(34, 197, 94, .08);
+    color: #14532d;
+    border-radius: var(--radio-lg);
+    padding: 10px 12px;
+    margin: 10px 0 12px;
+    font-weight: 800;
+}
+
+/* Layout */
+.mainGrid {
+    display: grid;
+    grid-template-columns: minmax(360px, 440px) minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+}
+
+/* ✅ importantísimo en grid para que no desborde */
+.mainGrid>* {
+    min-width: 0;
+}
+
+@media (max-width: 980px) {
+    .mainGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Cards */
+.card {
+    border: 1px solid var(--borde);
+    border-radius: var(--radio-xl);
+    background: var(--blanco);
+    box-shadow: var(--sombra-sm);
+    padding: 16px;
+    min-width: 0;
+    /* ✅ evita overflow */
+}
+
+.cardTop {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.cardTitle {
+    margin: 0;
+    font-weight: 950;
+    color: var(--azulMarino);
+    font-size: 16px;
+}
+
+.cardSubtitle {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.strong {
+    color: var(--azulMarino);
+    font-weight: 950;
+}
+
+.divisor {
+    height: 1px;
+    background: var(--borde);
+    margin: 14px 0;
+}
+
+/* Form */
+.formGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.field {
+    display: grid;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+}
+
+.label {
+    font-size: 12px;
+    font-weight: 900;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .2px;
+}
+
+/* ✅ FIX: ancho real sin salirse del card */
+.input,
+.select {
+    width: 100%;
+    max-width: 100%;
+    display: block;
+    height: 42px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid var(--borde);
+    background: linear-gradient(180deg, var(--blanco), var(--superficie));
+    color: var(--texto);
+    outline: none;
+}
+
+.input:focus,
+.select:focus {
+    border-color: rgba(15, 23, 42, .35);
+    box-shadow: 0 0 0 4px rgba(15, 23, 42, .06);
+}
+
+/* opcional: que el select se vea más pro */
+.select {
+    appearance: none;
+    background-image:
+        linear-gradient(45deg, transparent 50%, rgba(15, 23, 42, .55) 50%),
+        linear-gradient(135deg, rgba(15, 23, 42, .55) 50%, transparent 50%);
+    background-position:
+        calc(100% - 18px) 18px,
+        calc(100% - 12px) 18px;
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+    padding-right: 34px;
+}
+
+.actionsBar {
+    margin-top: 12px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.help {
+    margin: 10px 0 0;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+/* Buttons */
+.btnPrimary,
+.btnGhost,
+.btnDanger {
+    height: 42px;
+    padding: 0 14px;
+    border-radius: 999px;
+    font-weight: 950;
+    cursor: pointer;
+    border: 1px solid var(--borde);
+    background: linear-gradient(180deg, var(--blanco), var(--superficie));
+    color: var(--azulMarino);
+    box-shadow: var(--sombra-sm);
+}
+
+.btnPrimary {
+    border-color: rgba(15, 23, 42, .25);
+}
+
+.btnDanger {
+    border-color: rgba(239, 68, 68, .30);
+    color: #7f1d1d;
+    background: rgba(239, 68, 68, .06);
+}
+
+.btnPrimary:disabled,
+.btnGhost:disabled,
+.btnDanger:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+.btnPrimary:hover,
+.btnGhost:hover {
+    filter: brightness(.985);
+}
+
+.btnDanger:hover {
+    filter: brightness(.98);
+}
+
+/* Counter */
+.counter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    height: 34px;
+    padding: 0 10px;
+    border-radius: 999px;
+    border: 1px solid var(--borde);
+    background: linear-gradient(180deg, var(--blanco), var(--superficie));
+    font-weight: 950;
+    color: var(--azulMarino);
+}
+
+/* Table */
+.tableWrap {
+    overflow: auto;
+    border: 1px solid var(--borde);
+    border-radius: var(--radio-xl);
+    min-width: 0;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 860px;
+    background: var(--blanco);
+}
+
+.table thead th {
+    text-align: left;
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .22px;
+    padding: 12px;
+    border-bottom: 1px solid var(--borde);
+    background: var(--superficie);
+}
+
+.table tbody td {
+    padding: 12px;
+    border-bottom: 1px solid var(--borde);
+    vertical-align: top;
+    color: var(--texto);
+}
+
+.thRight,
+.tdRight {
+    text-align: right;
+}
+
+.cellStrong {
+    font-weight: 900;
+    color: var(--azulMarino);
+}
+
+.cellMuted {
+    color: var(--muted);
+}
+
+.tableInput {
+    width: 100%;
+    max-width: 180px;
+    height: 38px;
+    padding: 8px 10px;
+    border-radius: 12px;
+    border: 1px solid var(--borde);
+    background: linear-gradient(180deg, var(--blanco), var(--superficie));
+    outline: none;
+}
+
+.tableInput:focus {
+    border-color: rgba(15, 23, 42, .35);
+    box-shadow: 0 0 0 4px rgba(15, 23, 42, .06);
+}
+
+.rowActions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+/* Badges */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 950;
+    border: 1px solid rgba(15, 23, 42, .12);
+}
+
+.badgeOk {
+    border-color: rgba(34, 197, 94, .35);
+    background: rgba(34, 197, 94, .10);
+    color: #14532d;
+}
+
+.badgeOff {
+    border-color: rgba(139, 139, 139, .35);
+    background: rgba(139, 139, 139, .10);
+    color: #3f3f46;
+}
+
+/* Empty */
+.emptyBox {
+    border: 1px dashed var(--bordeFuerte);
+    background: linear-gradient(180deg, var(--blanco), var(--superficie));
+    border-radius: var(--radio-xl);
+    padding: 16px;
+    margin-top: 12px;
+}
+
+.emptyTitle {
+    margin: 0;
+    font-weight: 950;
+    color: var(--azulMarino);
+}
+
+/* Skeleton */
+.skeleton {
+    height: 240px;
+    border-radius: var(--radio-xl);
+    border: 1px solid var(--borde);
+    background: linear-gradient(90deg, var(--superficie), var(--blanco), var(--superficie));
+    background-size: 220% 100%;
+    animation: shimmer 1.2s infinite linear;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 0% 0;
+    }
+
+    100% {
+        background-position: 220% 0;
+    }
+}

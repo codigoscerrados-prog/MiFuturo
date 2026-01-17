@@ -1,0 +1,97 @@
+/* Contenedor */
+.contenedor{
+  width: min(var(--contenedor), calc(100% - 40px));
+  margin-inline: auto;
+}
+
+/* Secciones (alternando blancos/grises para diferencia visual) */
+.fondoSeccion{
+  border-top: 1px solid var(--borde);
+  border-bottom: 1px solid var(--borde);
+}
+
+.fondoA{ background: var(--blanco); }
+.fondoB{ background: var(--superficie); }
+.fondoC{ background: var(--superficie2); }
+
+.espaciadoSeccion{
+  padding: clamp(28px, 4vw, 56px) 0;
+}
+
+/* Tarjeta */
+.tarjeta{
+  border: 1px solid var(--borde);
+  background: var(--blanco);
+  border-radius: var(--radio-xl);
+  box-shadow: var(--sombra-sm);
+}
+
+/* Botones globales */
+.boton{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+
+  border: 1px solid var(--borde);
+  background: var(--blanco);
+  color: var(--azulMarino);
+
+  font-weight: 800;
+  letter-spacing: .2px;
+  cursor: pointer;
+
+  box-shadow: var(--sombra-sm);
+  transition: transform .12s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease;
+}
+
+.boton:hover{
+  transform: translateY(-1px);
+  box-shadow: var(--sombra);
+  border-color: var(--bordeFuerte);
+}
+
+.boton:active{ transform: translateY(0); }
+
+.botonPrimario{
+  background: var(--azulMarino);
+  border-color: var(--azulMarino);
+  color: var(--blanco);
+  box-shadow: 0 18px 55px rgba(11, 22, 48, .22);
+}
+.botonPrimario:hover{
+  background: var(--azulMarino2);
+  border-color: var(--azulMarino2);
+}
+
+/* Alias por compatibilidad con lo que ya venías usando */
+.botonNeon{ /* ahora es “outline premium” */
+  background: transparent;
+  border-color: var(--borde);
+  box-shadow: none;
+}
+.botonNeon:hover{
+  background: var(--superficie);
+  border-color: var(--bordeFuerte);
+}
+
+/* Inputs globales por si los reutilizas */
+.input, .select{
+  height: 46px;
+  width: 100%;
+  padding: 0 12px;
+  border-radius: 14px;
+  border: 1px solid var(--borde);
+  background: var(--blanco);
+  color: var(--texto);
+  outline: none;
+  transition: border-color .12s ease, box-shadow .12s ease;
+}
+.input:focus, .select:focus{
+  border-color: rgba(37, 99, 235, .45);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, .10);
+}

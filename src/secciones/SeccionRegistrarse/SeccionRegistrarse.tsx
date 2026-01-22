@@ -113,7 +113,12 @@ export default function SeccionRegistrarse({
             setToken(login.access_token);
 
             const r = getRoleFromToken(login.access_token);
-            router.push(rutaPorRole(r));
+            // ✅ Si es propietario, mostramos planes primero
+            if (r === "propietario") {
+                router.push("/panel/planes");
+            } else {
+                router.push(rutaPorRole(r));
+            }
         } catch (err: any) {
             setError(err?.message || "No se pudo registrar");
         } finally {
@@ -129,8 +134,8 @@ export default function SeccionRegistrarse({
         (mostrarSelector
             ? "Crea tu cuenta como usuario o propietario. Luego te redirigimos al panel correcto."
             : role === "propietario"
-            ? "Registra tu complejo y empieza a recibir reservas desde tu panel."
-            : "Crea tu cuenta para reservar canchas en minutos.");
+                ? "Registra tu complejo y empieza a recibir reservas desde tu panel."
+                : "Crea tu cuenta para reservar canchas en minutos.");
 
     function oauthUrl(path: string) {
         const origin = (process.env.NEXT_PUBLIC_API_ORIGIN || "").replace(/\/$/, "");

@@ -1,0 +1,193 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+
+import styles from "./SeccionPlanesPropietario.module.css";
+import { getToken } from "@/lib/auth";
+import { apiFetch } from "@/lib/api";
+
+type PlanActual = {
+    plan_id: number;
+    plan_codigo?: string | null;
+    plan_nombre?: string | null;
+    estado?: string | null;
+    inicio?: string | null;
+    fin?: string | null;
+    dias_restantes?: number | null;
+};
+
+type Cell = boolean | string;
+
+const SOPORTE_WA = "51999999999";
+const SOPORTE_WA_TEXT = "Hola CanchasPro, quiero el plan empresarial";
+
+function waUrl() {
+    return `https://wa.me/${SOPORTE_WA}?text=${encodeURIComponent(SOPORTE_WA_TEXT)}`;
+}
+
+const FILAS: { label: string; free: Cell; pro: Cell; emp: Cell }[] = [
+    { label: "Publicación del complejo (sin canchas)", free: true, pro: true, emp: true },
+    { label: "Aparición en búsquedas", free: "Básico", pro: "Prioridad", emp: "Máxima" },
+    { label: "Perfil profesional", free: true, pro: true, emp: true },
+    { label: "Perfil público (con tu enlace)", free: true, pro: true, emp: true },
+    { label: "Gestión de reservas", free: false, pro: true, emp: true },
+    { label: "Soporte prioritario", free: false, pro: true, emp: true },
+    { label: "Creación de canchas", free: "0", pro: "Hasta 3", emp: "Ilimitadas" },
+    { label: "Reportes / estadísticas", free: false, pro: "Básico", emp: "Avanzado" },
+    { label: "Multi-sede / Multi-complejo", free: false, pro: false, emp: true },
+    { label: "Roles y permisos (staff)", free: false, pro: false, emp: true },
+    { label: "Integraciones (pagos, WhatsApp, API)", free: false, pro: false, emp: true },
+    { label: "Onboarding + soporte VIP", free: false, pro: false, emp: true },
+];
+
+function icono(valor: Cell) {
+    if (typeof valor === "string") return <span className={styles.cellText}>{valor}</span>;
+    const clase = valor ? "bi bi-check-circle-fill" : "bi bi-dash-lg";
+    return <i className={`${clase} ${styles.icon} ${valor ? styles.iconOk : styles.iconNo}`} aria-hidden="true" />;
+}
+
+export default function SeccionPlanesPropietario() {
+    const router = useRouter();
+    const [token, setToken] = useState<string | null>(null);
+    const [plan, setPlan] = useState<PlanActual | null>(null);
+    const [cargando, setCargando] = useState(true);
+    const [activando, setActivando] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [ok, setOk] = useState<string | null>(null);
+
+    useEffect(() => setToken(getToken()), []);
+
+    useEffect(() => {
+        (async () => {
+            if (!token) {
+                setCargando(false);
+                return;
+            }
+            try {
+                setError(null);
+                setCargando(true);
+                const data = await apiFetch<PlanActual>("/perfil/plan", { token });
+                setPlan(data || null);
+            } catch (e: any) {
+                setError(e?.message || "No se pudo cargar tu plan.");
+            } finally {
+                setCargando(false);
+            }
+        })();
+    }, [token]);
+
+    const isPro = useMemo(() => {
+        const codigo = (plan?.plan_codigo || "").toLowerCase();
+        return plan?.plan_id === 2 || codigo.includes("pro");
+    }, [plan]);
+
+    async function activarProTrial() {
+        if (!token) return router.push("/iniciar-sesion");
+        try {
+            setError(null);
+            setOk(null);
+            setActivando(true);
+            await apiFetch("/perfil/plan/activar-pro-trial", { token, method: "POST" });
+            setOk("Listo ✅ Activaste tu prueba PRO.");
+            router.push("/panel");
+        } catch (e: any) {
+            setError(e?.message || "No se pudo activar la prueba PRO.");
+        } finally {
+            setActivando(false);
+        }
+    }
+
+    return (
+        <section className={styles.seccion}>
+            <div className="container-fluid px-3 px-lg-5">
+                <div className={styles.head}>
+                    <p className={styles.kicker}>Planes para propietarios</p>
+                    <h1 className={styles.titulo}>Elige cómo quieres empezar</h1>
+                    <p className={styles.subtitulo}>
+                        Puedes continuar en <strong>FREE</strong> o activar tu prueba <strong>PRO</strong> sin pagar hoy.
+                    </p>
+
+                    <div className={styles.metaRow}>
+                        <div className={styles.metaPill}>
+                            <i className={`bi bi-shield-check ${styles.metaIcon}`} aria-hidden="true"></i>
+                            <span className={styles.metaText}>
+                                {cargando ? "Cargando plan…" : isPro ? "Plan actual: PRO" : "Plan actual: FREE"}
+                                {isPro && plan?.dias_restantes != null ? ` • ${plan.dias_restantes} días restantes` : ""}
+                            </span>
+                        </div>
+                        <Link className={styles.metaLink} href="/panel">Ir al panel</Link>
+                    </div>
+                </div>
+
+                {error ? <div className={styles.alertError}>{error}</div> : null}
+                {ok ? <div className={styles.alertOk}>{ok}</div> : null}
+
+                <div className={`d-none d-lg-block ${styles.tableWrap}`}>
+                    <div className={`card rounded-4 ${styles.tableCard}`}>
+                        <div className="table-responsive">
+                            <table className={`table align-middle ${styles.table}`}>
+                                <thead>
+                                    <tr>
+                                        <th className={styles.headCol}>Características</th>
+                                        <th className={styles.headCol}>
+                                            <div className={styles.colHead}>
+                                                <span className={styles.planName}>Free</span>
+                                                <span className={styles.planPrice}>S/ 0</span>
+                                                <button className={`btn btn-outline-primary btn-sm ${styles.ctaInline}`} onClick={() => router.push("/panel")}>
+                                                    Continuar
+                                                </button>
+                                            </div>
+                                        </th>
+
+                                        <th className={`${styles.headCol} ${styles.proHead}`}>
+                                            <div className={styles.colHead}>
+                                                <span className={styles.planName}>
+                                                    <i className={`bi bi-stars ${styles.planIcon}`} aria-hidden="true"></i>Pro
+                                                </span>
+                                                <span className={styles.planPrice}>S/ 0.0y0 <span className={styles.smallMuted}>• 30 días gratis</span></span>
+                                                <span className={styles.smallMuted}>Luego S/ 69.90 / mes</span>
+                                                <button className={`btn btn-primary btn-sm ${styles.ctaInline}`} onClick={activarProTrial} disabled={activando || isPro}>
+                                                    {isPro ? "Ya activo" : activando ? "Activando…" : "Obtener PRO"}
+                                                </button>
+                                            </div>
+                                        </th>
+
+                                        <th className={`${styles.headCol} ${styles.empHead}`}>
+                                            <div className={styles.colHead}>
+                                                <span className={styles.planName}>Empresarial</span>
+                                                <span className={styles.planPrice}>A medida</span>
+                                                <a className={`btn btn-outline-dark btn-sm ${styles.ctaInline}`} href={waUrl()} target="_blank" rel="noreferrer">
+                                                    Cotizar
+                                                </a>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    {FILAS.map((fila) => (
+                                        <tr key={fila.label}>
+                                            <th className={styles.rowLabel}>{fila.label}</th>
+                                            <td className={styles.cell}>{icono(fila.free)}</td>
+                                            <td className={`${styles.cell} ${styles.proCell}`}>{icono(fila.pro)}</td>
+                                            <td className={`${styles.cell} ${styles.empCell}`}>{icono(fila.emp)}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div className={styles.note}>
+                            <p className={styles.noteTitle}>Tip</p>
+                            <p className={styles.noteText}>
+                                En <strong>FREE</strong> puedes publicar tu complejo. Para habilitar <strong>Mis Canchas</strong> y <strong>Reservas</strong>, activa <strong>PRO</strong>.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+}

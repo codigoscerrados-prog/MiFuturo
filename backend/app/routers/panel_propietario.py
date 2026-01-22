@@ -87,8 +87,8 @@ def owner_filter_reservas(q, u):
         return q
     return (
         q.join(Cancha, Reserva.cancha_id == Cancha.id)
-         .join(Complejo, Cancha.complejo_id == Complejo.id)
-         .filter(Complejo.owner_id == u.id)
+        .join(Complejo, Cancha.complejo_id == Complejo.id)
+        .filter(Complejo.owner_id == u.id)
     )
 
 

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./SeccionRegistrarse.module.css";
 import Link from "next/link";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, apiUrl } from "@/lib/api";
 import { getRoleFromToken, rutaPorRole, setToken } from "@/lib/auth";
 
 type RegisterBody = {

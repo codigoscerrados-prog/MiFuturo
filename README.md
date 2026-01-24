@@ -22,6 +22,7 @@ ProyectoCanchas: plataforma web para buscar, visualizar en mapa y contactar canc
 - `npm run dev`
 - Usa `frontend/.env` o `.env.local` para ajustar `API_ORIGIN`, `GOOGLE_CLIENT_ID` y otras variables locales; en desarrollo puedes seguir apuntando a `http://127.0.0.1:8000`.
 - La UI siempre llama a `/api/...` gracias a `src/lib/api.ts`, el middleware de Next y la reescritura definida en `next.config.mjs` (mira la constante `API_HOSTPORT` para la ejecución en Render).
+- En Render el frontend debe recibir solo `API_ORIGIN=https://miffuturo-backend.onrender.com`; evitar definir `NEXT_PUBLIC_API_ORIGIN`/`NEXT_PUBLIC_API_URL` en producción para que no se hagan peticiones cruzadas (la UI ya usa `/api` y el rewrite apunta a `API_ORIGIN`).
 
 ## Deploying to Render
 
@@ -42,11 +43,13 @@ https://miffuturo.onrender.com
 - `DATABASE_URL` – Usa la conexión interna de Render (p. ej. `postgresql://...@.../db_marconi_lateralverde`); no lo subas al repositorio.
 - `JWT_SECRET_KEY` – Genera un valor seguro (Render lo puede crear automáticamente).
 - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
-- `GOOGLE_REDIRECT_URI` – debe ser `https://miffuturo.onrender.com/api/auth/callback/google`.
+- `GOOGLE_REDIRECT_URI` – debe ser `https://miffuturo-backend.onrender.com/auth/google/callback`.
 - `FRONTEND_ORIGIN` – fija en `https://miffuturo.onrender.com`.
 - `CORS_ORIGINS` – `https://miffuturo.onrender.com,http://localhost:3000` para permitir la UI y el entorno local.
 - `SMTP_*` (HOST, PORT, USER, PASS) según tu proveedor si necesitas enviar correos.
 - La opción adicional `DATABASE_URL`, `JWT_SECRET_KEY` y `GOOGLE_*` no deben guardarse en el código.
+ - El Blueprint ejecuta `python -m app.scripts.bootstrap_db` antes del deploy, y `init_db()` lo relanza en el arranque para garantizar que las tablas `ubigeo_peru_*` existan y tengan datos (lee `backend/data/Lista_Ubigeos_INEI.csv` cuando está presente o descarga `https://raw.githubusercontent.com/pe-datos/ubigeo/master/ubigeo.csv`).<br>
+   Si necesitas recargar manualmente el catálogo, usa `POST /admin/ubigeo/import` con un JSON/CSV y `replace=true`.
 
 #### Frontend (`miffuturo`)
 - `API_HOSTPORT` – Render la llena automáticamente con el `hostport` del backend (ej. `miffuturo-backend:10000`).

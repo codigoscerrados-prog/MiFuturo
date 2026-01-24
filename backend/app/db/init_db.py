@@ -1,11 +1,20 @@
+import logging
+
 from app.db.conexion import SessionLocal, engine
 from app.modelos.base import Base
 import app.modelos.modelos  # noqa: F401
 from app.modelos.modelos import Plan
+from app.scripts.bootstrap_db import bootstrap_ubigeo
+
+logger = logging.getLogger(__name__)
 
 
 def init_db() -> None:
     Base.metadata.create_all(bind=engine)
+    try:
+        bootstrap_ubigeo()
+    except Exception as exc:
+        logger.warning("Bootstrap ubigeo failed: %s", exc)
 
     with SessionLocal() as db:
         existing = db.query(Plan).filter(Plan.codigo == "free").first()

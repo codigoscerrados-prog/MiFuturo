@@ -3,8 +3,10 @@ services:
     type: web
     env: python
     region: virginia
+    plan: free
     rootDir: backend
     buildCommand: pip install -r requirements.txt
+    preDeployCommand: python -m app.scripts.bootstrap_db
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /healthz
     envVars:
@@ -16,10 +18,15 @@ services:
         value: https://miffuturo.onrender.com,http://localhost:3000
       - key: FRONTEND_ORIGIN
         value: https://miffuturo.onrender.com
+      - key: GOOGLE_CLIENT_ID
+      - key: GOOGLE_CLIENT_SECRET
+      - key: GOOGLE_REDIRECT_URI
+        value: https://miffuturo-backend.onrender.com/auth/google/callback
   - name: miffuturo
     type: web
     env: node
     region: virginia
+    plan: free
     rootDir: frontend
     buildCommand: npm ci && npm run build
     startCommand: npm run start

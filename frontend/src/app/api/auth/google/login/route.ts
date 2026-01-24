@@ -10,6 +10,7 @@ export async function GET(request: Request) {
         process.env.NEXTAUTH_URL || process.env.SITE_URL || process.env.FRONTEND_ORIGIN || "http://localhost:3000";
     const redirectUri = `${siteUrl.replace(/\/$/, "")}/api/auth/callback/google`;
 
+    const url = new URL(request.url);
     const statePayload: Record<string, string> = {};
     const role = url.searchParams.get("role");
     if (role) statePayload.role = role;

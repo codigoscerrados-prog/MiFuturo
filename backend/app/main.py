@@ -57,6 +57,6 @@ app.include_router(perfil_router)
 app.include_router(panel_router)
 app.include_router(ubigeo_router)
 
-@app.get("/health")
+@app.get("/healthz")
 def health():
     return {"ok": True}

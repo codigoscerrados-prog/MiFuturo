@@ -17,6 +17,7 @@ services:
     type: web
     env: node
     plan: free
+    root: frontend
     buildCommand: npm install && npm run build
     startCommand: npm run start
     autoDeploy: true

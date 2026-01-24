@@ -1,23 +1,43 @@
 # MifFuturo
-ProyectoCanchas: plataforma web para buscar, visualizar en mapa y contactar canchas sintéticas, con panel de gestión para propietarios. Frontend en Next.js y backend en FastAPI + PostgreSQL.
+ProyectoCanchas: plataforma web para buscar, visualizar en mapa y contactar canchas sinteticas, con panel de gestion para propietarios. Frontend en Next.js y backend en FastAPI + PostgreSQL.
+
+## Repo layout
+
+- `backend/` - FastAPI + SQL models, el servicio Python, y la carpeta de uploads. Ahi van las dependencias y el `.env` del backend.
+- `frontend/` - aplicacion Next.js (codigo, `src/`, `public/`, `package.json`, configuraciones y variables de entorno propias).
+- `render.yaml` - describe ambos servicios en modo monorepo para Render.
+
+## Local development
+
+### Backend
+
+- Copia `backend/.env.example` a `backend/.env` y ajusta las variables necesarias.
+- Instala dependencias (`pip install -r backend/requirements.txt`) y arranca la API (por ejemplo `uvicorn app.main:app --reload` desde `backend/`).
+
+### Frontend
+
+- `cd frontend`
+- `npm install`
+- `npm run dev`
+- Usa `frontend/.env` o `.env.local` para apuntar a `NEXT_PUBLIC_API_ORIGIN`, `API_ORIGIN`, y otros secretos segun el entorno.
 
 ## Deploying to Render
 
-The repository ships with `render.yaml`, which describes two services for Render's monorepo mode:
+El repositorio carga `render.yaml`, que describe dos servicios en modo monorepo:
 
-1. **`proyectocanchas-api`** – a Python web service rooted in `backend/`; it installs the FastAPI dependencies, serves `/health`, mounts the `uploads/` folder, and respects `CORS_ORIGINS`, `FRONTEND_ORIGIN` and other secrets provided at build time.
-2. **`proyectocanchas-web`** – a Node service that runs `npm run build` and `npm run start`; it rewrites `/api/*` calls to the backend via `API_ORIGIN`/`NEXT_PUBLIC_API_ORIGIN`.
+1. **`proyectocanchas-api`** - servicio Python basado en FastAPI ubicado en `backend/`; instala `requirements.txt`, expone `/health`, monta `uploads/` y respeta variables como `CORS_ORIGINS`, `FRONTEND_ORIGIN` y las credenciales necesarias.
+2. **`proyectocanchas-web`** - servicio Node anidado en `frontend/` que ejecuta `npm run build` y `npm run start`; reescribe `/api/*` hacia el backend usando `API_ORIGIN`/`NEXT_PUBLIC_API_ORIGIN`.
 
-Render will import the two services automatically when you link the repo and should expose `https://proyectocanchas-api.onrender.com` for the backend and `https://proyectocanchas-web.onrender.com` for the frontend.
+Render importara ambas automaticamente y deberia exponer `https://proyectocanchas-api.onrender.com` y `https://proyectocanchas-web.onrender.com`.
 
 ### Environment variables
 
-- Use `.env.example` as a baseline when running locally or when defining Render secrets. It lists every variable the backend and frontend currently read (database credentials, JWT secrets, SMTP/Gmail, and client IDs).  
-- The backend expects `DATABASE_URL`, `JWT_SECRET_KEY`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI` and `SMTP_*` values. Keep them in Render secrets, not committed files.
-- `CORS_ORIGINS` and `FRONTEND_ORIGIN` should include the frontend service URL so FastAPI only accepts requests from the deployed UI.
-- The frontend relies on `API_ORIGIN`, `NEXT_PUBLIC_API_ORIGIN`, `NEXT_PUBLIC_API_URL` (defaulted to the backend service in `render.yaml`) plus `NEXT_PUBLIC_API_PREFIX` when overriding the `/api` proxy.
+- Usa `backend/.env.example` y `frontend/.env.example` como punto de partida a la hora de definir secretos localmente o en Render; cada uno lista las variables que necesita cada servicio.
+- El backend requiere `DATABASE_URL`, `JWT_SECRET_KEY`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI` y los `SMTP_*` (mantenlas en secretos, no en el repo).
+- `CORS_ORIGINS` y `FRONTEND_ORIGIN` deben incluir la URL del frontend desplegado para que FastAPI solo acepte esas peticiones.
+- El frontend espera `API_ORIGIN`, `NEXT_PUBLIC_API_ORIGIN`, `NEXT_PUBLIC_API_URL` (por defecto apunta al backend en `render.yaml`) y `NEXT_PUBLIC_API_PREFIX` si se sobreescribe el proxy `/api`.
 
 ### Postgres & uploads
 
-- Provision a Render PostgreSQL database and inject its connection string into `DATABASE_URL`. Run your migrations locally or via Render shell before using the app.
-- Uploaded files are stored under `backend/uploads`; this path is ephemeral on Render, so consider copying them to external storage (S3, etc.) when persistence is required.
+- Provisiona una base de datos PostgreSQL en Render e inyecta su string en `DATABASE_URL`; ejecuta las migraciones localmente o via shell de Render antes de usar la app.
+- Los archivos subidos se guardan en `backend/uploads`, una carpeta efimera en Render, asi que mira opciones externas (S3, etc.) si necesitas persistencia a largo plazo.

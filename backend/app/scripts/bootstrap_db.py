@@ -1,6 +1,7 @@
 import csv
 import logging
 import urllib.request
+import urllib.error
 from io import StringIO
 from pathlib import Path
 from typing import Iterable, Mapping
@@ -58,8 +59,15 @@ def _maybe_load_source_text() -> str:
         return LOCAL_DATA_PATH.read_text(encoding="utf-8", errors="ignore")
 
     logger.info("Downloading ubigeo data from %s", REMOTE_URL)
-    with urllib.request.urlopen(REMOTE_URL, timeout=60) as resp:
-        return resp.read().decode("utf-8", errors="ignore")
+    try:
+        with urllib.request.urlopen(REMOTE_URL, timeout=60) as resp:
+            return resp.read().decode("utf-8", errors="ignore")
+    except urllib.error.HTTPError as exc:
+        logger.warning("Failed to download ubigeo data (%s). Will skip import.", exc)
+        return ""
+    except urllib.error.URLError as exc:
+        logger.warning("Failed to download ubigeo data (%s). Will skip import.", exc)
+        return ""
 
 
 def _extract_code(row: Mapping[str, str]) -> str | None:

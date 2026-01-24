@@ -13,6 +13,7 @@ from app.routers.reclamos import router as reclamos_router
 from app.routers.admin_complejos import router as admin_complejos_router
 from app.db.init_db import init_db
 from app.routers import admin_cancha_imagenes
+from app.routers.admin_ubigeo import router as admin_ubigeo_router
 from app.routers.perfil import router as perfil_router
 from app.routers.panel_propietario import router as panel_router
 from app.routers.ubigeo import router as ubigeo_router
@@ -58,6 +59,7 @@ app.include_router(admin_canchas_router)
 app.include_router(reclamos_router)
 app.include_router(admin_complejos_router)
 app.include_router(admin_cancha_imagenes.router)
+app.include_router(admin_ubigeo_router)
 app.include_router(perfil_router)
 app.include_router(panel_router)
 app.include_router(ubigeo_router)

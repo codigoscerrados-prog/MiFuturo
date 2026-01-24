@@ -58,6 +58,7 @@ type ApiFetchOpts = {
     headers?: Record<string, string>;
     body?: BodyInit | null;
     cache?: RequestCache;
+    signal?: AbortSignal | null;
 };
 
 export async function apiFetch<T>(path: string, opts: ApiFetchOpts = {}): Promise<T> {
@@ -79,6 +80,7 @@ export async function apiFetch<T>(path: string, opts: ApiFetchOpts = {}): Promis
         headers: finalHeaders,
         body,
         cache,
+        signal: signal ?? undefined,
     });
 
 

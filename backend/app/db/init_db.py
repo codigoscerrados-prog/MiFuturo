@@ -1,5 +1,6 @@
 from app.db.conexion import SessionLocal, engine
 from app.modelos.base import Base
+import app.modelos.modelos  # noqa: F401
 from app.modelos.modelos import Plan
 
 

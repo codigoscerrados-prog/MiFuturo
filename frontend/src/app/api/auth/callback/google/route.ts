@@ -23,7 +23,8 @@ export async function GET(request: Request) {
     if (state) {
         exchangeParams.set("state", state);
     }
-    const exchangeUrl = new URL("/api/auth/google/callback", request.url);
+    const backendOrigin = (process.env.API_ORIGIN || process.env.NEXT_PUBLIC_API_ORIGIN || "http://127.0.0.1:8000").replace(/\/$/, "");
+    const exchangeUrl = new URL("/auth/google/callback", backendOrigin);
     exchangeUrl.search = exchangeParams.toString();
 
     const res = await fetch(exchangeUrl, { cache: "no-store" });

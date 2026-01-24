@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import styles from "./BusquedaDeCancha.module.css";
 import dynamic from "next/dynamic";
-import { mediaUrl } from "@/lib/api";
+import { apiFetch, mediaUrl } from "@/lib/api";
 
 // ✅ Mapa (SSR off)
 const MapaComplejos = dynamic(() => import("./MapaComplejos"), { ssr: false }) as any;
@@ -370,7 +370,6 @@ export default function BusquedaDeCancha({
     const PRECIO_MAX_VISIBLE = 300;
 
     const esPagina = modo === "pagina";
-    const esPagina = modo === "pagina";
 
     const [complejosDb, setComplejosDb] = useState<ComplejoCard[]>([]);
     const [cargando, setCargando] = useState(false);
@@ -426,14 +425,12 @@ export default function BusquedaDeCancha({
             setCargando(true);
             setError("");
             try {
-            const res = await fetch("/api/complejos", {
-                signal: ac.signal,
-                cache: "no-store",
-            });
-            if (!res.ok) throw new Error(`Error ${res.status} al cargar complejos`);
-            const data: ComplejoApi[] = await res.json();
-            setComplejosDb(mapComplejosFromApi(data, FALLBACK_IMG));
-        } catch (e: any) {
+                const data = await apiFetch<ComplejoApi[]>("/complejos", {
+                    signal: ac.signal,
+                    cache: "no-store",
+                });
+                setComplejosDb(mapComplejosFromApi(data, FALLBACK_IMG));
+            } catch (e: any) {
                 if (e?.name === "AbortError") return;
                 setError(e?.message || "Error al cargar complejos");
             } finally {

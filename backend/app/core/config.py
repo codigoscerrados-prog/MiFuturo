@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     # ---- Base ----
-    CORS_ORIGINS: str = "http://localhost:3000"
+    CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000"
 
     # ---- DB ----
     DATABASE_URL: str = "postgresql+psycopg://postgres:12345@localhost:5432/db_marconi"

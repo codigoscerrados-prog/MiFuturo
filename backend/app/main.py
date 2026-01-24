@@ -27,14 +27,17 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 # ✅ ALIAS para compatibilidad: /static/... (si DB guardó /static/perfiles/...)
 app.mount("/static", StaticFiles(directory="uploads"), name="static")
 
-from fastapi.middleware.cors import CORSMiddleware
+def _parse_origins(value: str) -> list[str]:
+    return [origin.strip() for origin in value.split(",") if origin.strip()]
+
+allowed_origins = _parse_origins(settings.CORS_ORIGINS) or [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-    ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

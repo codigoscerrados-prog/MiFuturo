@@ -1,0 +1,29 @@
+services:
+  - name: proyectocanchas-api
+    type: web
+    env: python
+    plan: free
+    root: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: CORS_ORIGINS
+        value: https://proyectocanchas-web.onrender.com
+      - key: FRONTEND_ORIGIN
+        value: https://proyectocanchas-web.onrender.com
+  - name: proyectocanchas-web
+    type: web
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    autoDeploy: true
+    envVars:
+      - key: API_ORIGIN
+        value: https://proyectocanchas-api.onrender.com
+      - key: NEXT_PUBLIC_API_ORIGIN
+        value: https://proyectocanchas-api.onrender.com
+      - key: NEXT_PUBLIC_API_URL
+        value: https://proyectocanchas-api.onrender.com

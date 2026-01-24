@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import styles from "./SeccionComplejos.module.css";
-import { apiFetch, apiUrl } from "@/lib/api";
+import { apiFetch, mediaUrl } from "@/lib/api";
 
 /**
  * ✅ Objetivo:
@@ -110,35 +110,18 @@ function resolveLimiteComplejos(plan: PlanActualOut | null) {
   return 1;
 }
 
-/** ✅ Detecta base del API para armar URLs públicas de imágenes */
-function fileBaseFromApiUrl(): string | null {
-  try {
-    const u = new URL(apiUrl("/"));
-    u.pathname = u.pathname.replace(/\/api\/?$/, "");
-    u.search = "";
-    u.hash = "";
-    return u.toString().replace(/\/$/, "");
-  } catch {
-    return null;
-  }
-}
-
 /** ✅ Convierte una ruta relativa (ej: /uploads/...) en URL pública completa */
 function publicImgUrl(url?: string | null) {
   if (!url) return null;
   if (/^https?:\/\//i.test(url)) return url;
+  if (url.startsWith("//")) return `https:${url}`;
 
-  const envOrigin = (process.env.NEXT_PUBLIC_API_ORIGIN || "").replace(/\/$/, "");
-  if (envOrigin) return `${envOrigin}${url.startsWith("/") ? "" : "/"}${url}`;
-
-  const base = fileBaseFromApiUrl();
-  if (base) return `${base}${url.startsWith("/") ? "" : "/"}${url}`;
-
-  try {
-    return apiUrl(url);
-  } catch {
-    return url;
+  const normalized = url.startsWith("/") ? url : `/${url}`;
+  const isBackendPath = normalized.startsWith("/uploads/") || normalized.startsWith("/static/");
+  if (isBackendPath) {
+    return mediaUrl(normalized, normalized, { forceProxy: true }) || normalized;
   }
+  return normalized;
 }
 
 /**

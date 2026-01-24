@@ -35,9 +35,10 @@ Render importara ambas automaticamente y deberia exponer `https://proyectocancha
 - Usa `backend/.env.example` y `frontend/.env.example` como punto de partida a la hora de definir secretos localmente o en Render; cada uno lista las variables que necesita cada servicio.
 - El backend requiere `DATABASE_URL`, `JWT_SECRET_KEY`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI` y los `SMTP_*` (mantenlas en secretos, no en el repo).
 - `CORS_ORIGINS` y `FRONTEND_ORIGIN` deben incluir la URL del frontend desplegado para que FastAPI solo acepte esas peticiones.
-- El frontend espera `API_ORIGIN`, `NEXT_PUBLIC_API_ORIGIN`, `NEXT_PUBLIC_API_URL` (por defecto apunta al backend en `render.yaml`) y `NEXT_PUBLIC_API_PREFIX` si se sobreescribe el proxy `/api`.
+- El frontend espera `API_HOSTPORT` (Render proporciona `miffuturo-backend:<port>`) y `API_ORIGIN` para calcular proxies `/api` sin CORS; `NEXT_PUBLIC_API_*` existen para desarrollos locales, el proxy predeterminado es `/api`.
 
 ### Postgres & uploads
 
 - Provisiona una base de datos PostgreSQL en Render e inyecta su string en `DATABASE_URL`; ejecuta las migraciones localmente o via shell de Render antes de usar la app.
 - Los archivos subidos se guardan en `backend/uploads`, una carpeta efimera en Render, asi que mira opciones externas (S3, etc.) si necesitas persistencia a largo plazo.
+  - Usa el connection string interno de Render (`DATABASE_URL`) que te brinda la base de datos administrada; este valor no debe compartirse en el repositorio.

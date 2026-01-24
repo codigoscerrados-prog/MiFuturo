@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import styles from "./BusquedaDeCancha.module.css";
 import dynamic from "next/dynamic";
+import { mediaUrl } from "@/lib/api";
 
 // ✅ Mapa (SSR off)
 const MapaComplejos = dynamic(() => import("./MapaComplejos"), { ssr: false }) as any;
@@ -127,6 +128,8 @@ type ComplejoCard = {
     propietarioPhone: string | null;
     canchas: CanchaCard[];
 };
+
+const FALLBACK_IMG = "/canchas/sintetico-marconi.avif";
 
 function normalizarTexto(v?: string | null) {
     return (v || "").toLowerCase().trim();
@@ -256,114 +259,98 @@ function moneyPE(n: number) {
     }
 }
 
-// Si API_BASE termina en /api, lo quitamos: http://127.0.0.1:8000/api -> http://127.0.0.1:8000
-function baseSinApi(apiBase: string) {
-    return apiBase.replace(/\/api\/?$/, "");
-}
+function mapComplejosFromApi(complejos: ComplejoApi[], fallbackImg: string): ComplejoCard[] {
+    return (complejos || [])
+        .map((cx) => {
+            const distrito = (cx.distrito || "").trim();
+            const provincia = (cx.provincia || "").trim();
+            const departamento = (cx.departamento || "").trim();
+            const zona = [distrito, provincia].filter(Boolean).join(", ") || "—";
 
-function imgFrom(apiBase: string, url: string) {
-    const norm = url.startsWith("/") ? url : `/${url}`;
-    const b = baseSinApi(apiBase);
-    return `${b}${norm}`;
-}
+        const foto = mediaUrl(cx.foto_url, fallbackImg, { forceProxy: true }) ?? fallbackImg;
 
-function mapComplejosFromApi(
-    complejos: ComplejoApi[],
-    apiBase: string,
-    fallbackImg: string
-): ComplejoCard[] {
-    return (complejos || []).map((cx) => {
-        const distrito = (cx.distrito || "").trim();
-        const provincia = (cx.provincia || "").trim();
-        const departamento = (cx.departamento || "").trim();
-        const zona = [distrito, provincia].filter(Boolean).join(", ") || "—";
+            let precioMin = 0;
+            let precioMax = 0;
+            let tienePrecio = false;
 
-        const fotoRaw = (cx.foto_url || "").trim();
-        const foto = fotoRaw ? imgFrom(apiBase, fotoRaw) : fallbackImg;
+            const canchas: CanchaCard[] = (cx.canchas || []).map((c) => {
+                const precio = typeof c.precio_hora === "number" ? c.precio_hora : 0;
+                if (typeof c.precio_hora === "number") {
+                    precioMin = tienePrecio ? Math.min(precioMin, precio) : precio;
+                    precioMax = tienePrecio ? Math.max(precioMax, precio) : precio;
+                    tienePrecio = true;
+                }
 
-        let precioMin = 0;
-        let precioMax = 0;
-        let tienePrecio = false;
+                const imagen = mediaUrl(c.imagen_principal, fallbackImg, { forceProxy: true }) ?? fallbackImg;
+                const complejoFoto = mediaUrl(c.complejo_foto_url, null, { forceProxy: true });
 
-        const canchas: CanchaCard[] = (cx.canchas || []).map((c) => {
-            const precio = typeof c.precio_hora === "number" ? c.precio_hora : 0;
-            if (typeof c.precio_hora === "number") {
-                precioMin = tienePrecio ? Math.min(precioMin, precio) : precio;
-                precioMax = tienePrecio ? Math.max(precioMax, precio) : precio;
-                tienePrecio = true;
+                const dist = (c.distrito || cx.distrito || "").trim();
+                const prov = (c.provincia || cx.provincia || "").trim();
+                const dep = (c.departamento || cx.departamento || "").trim();
+
+                return {
+                    id: c.id,
+                    nombre: c.nombre,
+                    zona: cx.nombre,
+                    distrito: dist || null,
+                    provincia: prov || null,
+                    departamento: dep || null,
+                    tipo: c.tipo,
+                    precioHora: precio,
+                    techada: !!c.techada,
+                    iluminacion: !!c.iluminacion,
+                    vestuarios: !!c.vestuarios,
+                    estacionamiento: !!c.estacionamiento,
+                    cafeteria: !!c.cafeteria,
+                    pasto: c.pasto,
+                    rating: typeof c.rating === "number" ? c.rating : ratingFake(c.id),
+                    imagen,
+                    propietarioPhone: c.propietario_phone ?? cx.owner_phone ?? null,
+                    latitud: typeof cx.latitud === "number" ? cx.latitud : null,
+                    longitud: typeof cx.longitud === "number" ? cx.longitud : null,
+                    complejoId: cx.id,
+                    complejoNombre: cx.nombre,
+                    complejoFotoUrl: complejoFoto,
+                    isActive: !!c.is_active,
+                };
+            });
+
+            if (!tienePrecio) {
+                precioMin = 0;
+                precioMax = 0;
             }
 
-            const imgRaw = (c.imagen_principal || "").trim();
-            const imagen = imgRaw ? imgFrom(apiBase, imgRaw) : fallbackImg;
-            const complejoFotoRaw = (c.complejo_foto_url || "").trim();
-            const complejoFoto = complejoFotoRaw ? imgFrom(apiBase, complejoFotoRaw) : null;
-
-            const dist = (c.distrito || cx.distrito || "").trim();
-            const prov = (c.provincia || cx.provincia || "").trim();
-            const dep = (c.departamento || cx.departamento || "").trim();
+            const verificado = canchas.some((c) => c.isActive);
 
             return {
-                id: c.id,
-                nombre: c.nombre,
-                zona: cx.nombre,
-                distrito: dist || null,
-                provincia: prov || null,
-                departamento: dep || null,
-                tipo: c.tipo,
-                precioHora: precio,
-                techada: !!c.techada,
-                iluminacion: !!c.iluminacion,
-                vestuarios: !!c.vestuarios,
-                estacionamiento: !!c.estacionamiento,
-                cafeteria: !!c.cafeteria,
-                pasto: c.pasto,
-                rating: typeof c.rating === "number" ? c.rating : ratingFake(c.id),
-                imagen,
-                propietarioPhone: c.propietario_phone ?? cx.owner_phone ?? null,
-                latitud: typeof cx.latitud === "number" ? cx.latitud : null,
-                longitud: typeof cx.longitud === "number" ? cx.longitud : null,
-                complejoId: cx.id,
-                complejoNombre: cx.nombre,
-                complejoFotoUrl: complejoFoto,
-                isActive: !!c.is_active,
+                id: cx.id,
+                nombre: cx.nombre,
+                slug: cx.slug || "",
+                zona,
+                distrito: distrito || null,
+                provincia: provincia || null,
+                departamento: departamento || null,
+                latitud: numOrNull(cx.latitud),
+                longitud: numOrNull(cx.longitud),
+                techada: !!cx.techada,
+                iluminacion: !!cx.iluminacion,
+                vestuarios: !!cx.vestuarios,
+                estacionamiento: !!cx.estacionamiento,
+                cafeteria: !!cx.cafeteria,
+                foto,
+                precioMin,
+                precioMax,
+                canchasCount: canchas.length,
+                verificado,
+                propietarioPhone: cx.owner_phone ?? null,
+                canchas,
             };
+        })
+        .sort((a, b) => {
+            const aVal = a.canchasCount ? a.precioMin : Number.MAX_SAFE_INTEGER;
+            const bVal = b.canchasCount ? b.precioMin : Number.MAX_SAFE_INTEGER;
+            return aVal - bVal;
         });
-
-        if (!tienePrecio) {
-            precioMin = 0;
-            precioMax = 0;
-        }
-
-        const verificado = canchas.some((c) => c.isActive);
-
-        return {
-            id: cx.id,
-            nombre: cx.nombre,
-            slug: cx.slug || "",
-            zona,
-            distrito: distrito || null,
-            provincia: provincia || null,
-            departamento: departamento || null,
-            latitud: numOrNull(cx.latitud),
-            longitud: numOrNull(cx.longitud),
-            techada: !!cx.techada,
-            iluminacion: !!cx.iluminacion,
-            vestuarios: !!cx.vestuarios,
-            estacionamiento: !!cx.estacionamiento,
-            cafeteria: !!cx.cafeteria,
-            foto,
-            precioMin,
-            precioMax,
-            canchasCount: canchas.length,
-            verificado,
-            propietarioPhone: cx.owner_phone ?? null,
-            canchas,
-        };
-    }).sort((a, b) => {
-        const aVal = a.canchasCount ? a.precioMin : Number.MAX_SAFE_INTEGER;
-        const bVal = b.canchasCount ? b.precioMin : Number.MAX_SAFE_INTEGER;
-        return aVal - bVal;
-    });
 }
 
 export default function BusquedaDeCancha({
@@ -382,8 +369,7 @@ export default function BusquedaDeCancha({
     const POR_PAGINA = 9;
     const PRECIO_MAX_VISIBLE = 300;
 
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
-    const FALLBACK_IMG = "/canchas/sintetico-marconi.avif";
+    const esPagina = modo === "pagina";
     const esPagina = modo === "pagina";
 
     const [complejosDb, setComplejosDb] = useState<ComplejoCard[]>([]);
@@ -440,14 +426,14 @@ export default function BusquedaDeCancha({
             setCargando(true);
             setError("");
             try {
-                const res = await fetch(`${baseSinApi(API_BASE)}/complejos`, {
-                    signal: ac.signal,
-                    cache: "no-store",
-                });
-                if (!res.ok) throw new Error(`Error ${res.status} al cargar complejos`);
-                const data: ComplejoApi[] = await res.json();
-                setComplejosDb(mapComplejosFromApi(data, API_BASE, FALLBACK_IMG));
-            } catch (e: any) {
+            const res = await fetch("/api/complejos", {
+                signal: ac.signal,
+                cache: "no-store",
+            });
+            if (!res.ok) throw new Error(`Error ${res.status} al cargar complejos`);
+            const data: ComplejoApi[] = await res.json();
+            setComplejosDb(mapComplejosFromApi(data, FALLBACK_IMG));
+        } catch (e: any) {
                 if (e?.name === "AbortError") return;
                 setError(e?.message || "Error al cargar complejos");
             } finally {
@@ -457,7 +443,7 @@ export default function BusquedaDeCancha({
 
         load();
         return () => ac.abort();
-    }, [API_BASE]);
+    }, []);
 
     // ✅ filtros (por complejo)
     const resultados = useMemo(() => {

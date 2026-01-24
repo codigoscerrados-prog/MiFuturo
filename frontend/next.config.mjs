@@ -1,11 +1,13 @@
 /** @type {import('next').NextConfig} */
 
-const API_ORIGIN =
+const API_HOSTPORT = process.env.API_HOSTPORT;
+const PUBLIC_API_ORIGIN =
     process.env.API_ORIGIN ||
     process.env.NEXT_PUBLIC_API_ORIGIN ||
     "http://127.0.0.1:8000";
+const API_ORIGIN = API_HOSTPORT ? `http://${API_HOSTPORT}` : PUBLIC_API_ORIGIN;
 
-const u = new URL(API_ORIGIN);
+const u = new URL(PUBLIC_API_ORIGIN);
 const proto = u.protocol.replace(":", "");
 
 function backendPattern(pathname) {

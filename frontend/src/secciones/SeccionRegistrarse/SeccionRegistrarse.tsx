@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./SeccionRegistrarse.module.css";
 import Link from "next/link";
-import { apiFetch, apiUrl } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
 import { getRoleFromToken, rutaPorRole, setToken } from "@/lib/auth";
 
 type RegisterBody = {
@@ -137,22 +137,14 @@ export default function SeccionRegistrarse({
                 ? "Registra tu complejo y empieza a recibir reservas desde tu panel."
                 : "Crea tu cuenta para reservar canchas en minutos.");
 
+    function buildApiPath(path: string) {
+        const normalized = path.startsWith("/") ? path : `/${path}`;
+        return `/api${normalized.replace(/^\/api\/?/, "/")}`;
+    }
+
     function oauthUrl(path: string, params?: Record<string, string | undefined>) {
-        const origin = (process.env.NEXT_PUBLIC_API_ORIGIN || "").replace(/\/$/, "");
-        let target: string;
-        if (origin) {
-            target = `${origin}${path}`;
-        } else {
-            try {
-                const u = new URL(apiUrl("/"));
-                u.pathname = u.pathname.replace(/\/api\/?$/, "");
-                u.search = "";
-                u.hash = "";
-                target = `${u.toString().replace(/\/$/, "")}${path}`;
-            } catch {
-                target = path;
-            }
-        }
+        const origin = typeof window === "undefined" ? "http://localhost:3000" : window.location.origin;
+        const url = new URL(buildApiPath(path), origin);
 
         if (params) {
             const query = new URLSearchParams();
@@ -163,11 +155,11 @@ export default function SeccionRegistrarse({
             });
 
             if (query.toString()) {
-                target = `${target}${target.includes("?") ? "&" : "?"}${query.toString()}`;
+                url.search = query.toString();
             }
         }
 
-        return target;
+        return url.toString();
     }
 
     const googleNextPath = role === "propietario" ? "/panel/planes" : rutaPorRole(role);
@@ -242,10 +234,13 @@ export default function SeccionRegistrarse({
                                 <button
                                     type="button"
                                     className={`${styles.rolBtn} ${role === "propietario" ? styles.rolOn : ""}`}
-                                    onClick={() => {
-                                        const next = role === "propietario" ? "/panel/planes" : "/panel";
-                                        window.location.href = `/api/auth/google/login?role=${role}&next=${encodeURIComponent(next)}`;
-                                    }}
+                                onClick={() => {
+                                    const next = role === "propietario" ? "/panel/planes" : "/panel";
+                                    window.location.href = oauthUrl("/auth/google/login", {
+                                        role,
+                                        next,
+                                    });
+                                }}
 
                                     aria-pressed={role === "propietario"}
                                 >

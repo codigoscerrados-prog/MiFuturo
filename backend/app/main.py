@@ -11,6 +11,7 @@ from app.routers.complejos_publicos import router as complejos_publicos_router
 from app.routers.admin_canchas import router as admin_canchas_router
 from app.routers.reclamos import router as reclamos_router
 from app.routers.admin_complejos import router as admin_complejos_router
+from app.db.init_db import init_db
 from app.routers import admin_cancha_imagenes
 from app.routers.perfil import router as perfil_router
 from app.routers.panel_propietario import router as panel_router
@@ -30,11 +31,14 @@ app.mount("/static", StaticFiles(directory="uploads"), name="static")
 def _parse_origins(value: str) -> list[str]:
     return [origin.strip() for origin in value.split(",") if origin.strip()]
 
-allowed_origins = _parse_origins(settings.CORS_ORIGINS) or [
+DEFAULT_CORS_ORIGINS = [
     "https://miffuturo.onrender.com",
-    "https://miffuturo-frontend.onrender.com",  # por si usas el otro
+    "https://miffuturo-backend.onrender.com",
     "http://localhost:3000",
+    "http://127.0.0.1:3000",
 ]
+
+allowed_origins = _parse_origins(settings.CORS_ORIGINS) or DEFAULT_CORS_ORIGINS
 
 app.add_middleware(
     CORSMiddleware,
@@ -61,3 +65,8 @@ app.include_router(ubigeo_router)
 @app.get("/healthz")
 def health():
     return {"ok": True}
+
+
+@app.on_event("startup")
+def on_startup():
+    init_db()

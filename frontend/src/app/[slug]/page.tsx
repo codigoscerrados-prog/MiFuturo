@@ -5,7 +5,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import styles from "./page.module.css";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, mediaUrl } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 
 const MapaComplejos = dynamic(() => import("@/secciones/BusquedaDeCancha/MapaComplejos"), { ssr: false }) as any;
@@ -60,11 +60,13 @@ type LikeResp = {
 function publicImgUrl(url?: string | null) {
     if (!url) return "";
     if (/^https?:\/\//i.test(url)) return url;
-    if (url.startsWith("/uploads/") || url.startsWith("/static/")) {
-        const origin = (process.env.NEXT_PUBLIC_API_ORIGIN || "").replace(/\/$/, "");
-        if (origin) return `${origin}${url}`;
+    if (url.startsWith("//")) return `https:${url}`;
+    const normalized = url.startsWith("/") ? url : `/${url}`;
+    const isBackendPath = normalized.startsWith("/uploads/") || normalized.startsWith("/static/");
+    if (isBackendPath) {
+        return mediaUrl(normalized, normalized, { forceProxy: true }) || normalized;
     }
-    return url;
+    return normalized;
 }
 
 function normalizarTelefono(raw: string | null | undefined) {

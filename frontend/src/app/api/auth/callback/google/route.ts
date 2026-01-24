@@ -16,7 +16,6 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: "Codigo faltante" }, { status: 400 });
     }
 
-    const backendOrigin = (process.env.NEXT_PUBLIC_API_ORIGIN || "http://127.0.0.1:8000").replace(/\/$/, "");
     const exchangeParams = new URLSearchParams({
         code,
         mode: "json",
@@ -24,7 +23,8 @@ export async function GET(request: Request) {
     if (state) {
         exchangeParams.set("state", state);
     }
-    const exchangeUrl = `${backendOrigin}/auth/google/callback?${exchangeParams.toString()}`;
+    const exchangeUrl = new URL("/api/auth/google/callback", request.url);
+    exchangeUrl.search = exchangeParams.toString();
 
     const res = await fetch(exchangeUrl, { cache: "no-store" });
     if (!res.ok) {

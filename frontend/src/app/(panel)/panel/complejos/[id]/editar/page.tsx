@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./page.module.css";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, mediaUrl } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 
 type ComplejoForm = {
@@ -40,9 +40,13 @@ type ComplejoPerfil = {
 function publicImgUrl(url?: string | null) {
     if (!url) return "";
     if (/^https?:\/\//i.test(url)) return url;
-    const origin = (process.env.NEXT_PUBLIC_API_ORIGIN || "").replace(/\/$/, "");
-    if (origin) return `${origin}${url.startsWith("/") ? "" : "/"}${url}`;
-    return url;
+    if (url.startsWith("//")) return `https:${url}`;
+    const normalized = url.startsWith("/") ? url : `/${url}`;
+    const isBackendPath = normalized.startsWith("/uploads/") || normalized.startsWith("/static/");
+    if (isBackendPath) {
+        return mediaUrl(normalized, normalized, { forceProxy: true }) || normalized;
+    }
+    return normalized;
 }
 
 export default function EditarComplejoPage() {

@@ -27,6 +27,31 @@ export function apiUrl(path: string) {
     return `${origin}${finalPath}`;
 }
 
+function normalizeMediaPath(path: string) {
+    let normalized = path.startsWith("/") ? path : `/${path}`;
+    normalized = normalized.replace(/^\/api\/?/, "/");
+    normalized = normalized.replace(/^\/+/, "/");
+    return `/api${normalized}`;
+}
+
+type MediaUrlOptions = {
+    forceProxy?: boolean;
+};
+
+export function mediaUrl(value?: string | null, fallback?: string | null, options?: MediaUrlOptions): string | null {
+    const trimmed = (value || "").trim();
+    if (!trimmed) return fallback ?? null;
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    if (trimmed.startsWith("//")) return `https:${trimmed}`;
+    const shouldProxy =
+        options?.forceProxy ??
+        /^(\/uploads\/|uploads\/|\/static\/|static\/|\/media\/|media\/|\/files\/|files\/)/i.test(trimmed);
+    if (!shouldProxy) {
+        return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+    }
+    return normalizeMediaPath(trimmed);
+}
+
 type ApiFetchOpts = {
     token?: string;
     method?: string;

@@ -1,30 +1,33 @@
 services:
-  - name: proyectocanchas-api
+  - name: miffuturo-backend
     type: web
     env: python
-    plan: free
-    root: backend
+    region: virginia
+    rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
-    healthCheckPath: /health
-    autoDeploy: true
+    healthCheckPath: /healthz
     envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET_KEY
+        generateValue: true
       - key: CORS_ORIGINS
-        value: https://proyectocanchas-web.onrender.com
+        value: https://miffuturo.onrender.com,http://localhost:3000
       - key: FRONTEND_ORIGIN
-        value: https://proyectocanchas-web.onrender.com
-  - name: proyectocanchas-web
+        value: https://miffuturo.onrender.com
+  - name: miffuturo
     type: web
     env: node
-    plan: free
-    root: frontend
-    buildCommand: npm install && npm run build
+    region: virginia
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
     startCommand: npm run start
-    autoDeploy: true
     envVars:
+      - key: API_HOSTPORT
+        fromService:
+          type: web
+          name: miffuturo-backend
+          property: hostport
       - key: API_ORIGIN
-        value: https://proyectocanchas-api.onrender.com
-      - key: NEXT_PUBLIC_API_ORIGIN
-        value: https://proyectocanchas-api.onrender.com
-      - key: NEXT_PUBLIC_API_URL
-        value: https://proyectocanchas-api.onrender.com
+        value: https://miffuturo-backend.onrender.com

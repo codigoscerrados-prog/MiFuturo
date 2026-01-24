@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./SeccionLoNuevo.module.css";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, mediaUrl } from "@/lib/api";
 
 type ComplejoFeatures = {
     techada?: boolean;
@@ -93,8 +93,6 @@ const FEATURES: Array<{ key: keyof ComplejoFeatures; label: string }> = [
     { key: "estacionamiento", label: "Estacionamiento" },
     { key: "cafeteria", label: "Cafeteria" },
 ];
-
-const API_ORIGIN = (process.env.NEXT_PUBLIC_API_ORIGIN || "").replace(/\/$/, "");
 
 function formatPrecio(c: Complejo) {
     const minRaw = c.precioMin;
@@ -251,14 +249,16 @@ function resolveUrl(path?: string | null) {
     if (!cleaned) return "";
     if (/^https?:\/\//i.test(cleaned) || cleaned.startsWith("data:")) return cleaned;
     if (cleaned.startsWith("//")) return `https:${cleaned}`;
+
     const isBackendPath =
         cleaned.startsWith("/uploads/") ||
         cleaned.startsWith("uploads/") ||
         cleaned.startsWith("/static/") ||
         cleaned.startsWith("static/");
-    if (API_ORIGIN && isBackendPath) {
-        return `${API_ORIGIN}${cleaned.startsWith("/") ? "" : "/"}${cleaned}`;
+    if (isBackendPath) {
+        return mediaUrl(cleaned, cleaned, { forceProxy: true }) || cleaned;
     }
+
     return cleaned.startsWith("/") ? cleaned : `/${cleaned}`;
 }
 

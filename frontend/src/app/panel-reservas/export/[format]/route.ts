@@ -1,10 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const API_ORIGIN =
-    process.env.API_ORIGIN ||
-    process.env.NEXT_PUBLIC_API_ORIGIN ||
-    "http://127.0.0.1:8000";
-
 const ALLOWED_FORMATS: Record<string, string> = {
     xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     pdf: "application/pdf",
@@ -18,7 +13,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ format:
     }
 
     const token = req.cookies.get("token")?.value || req.headers.get("authorization") || "";
-    const url = new URL(`/panel/reservas/export.${format}`, API_ORIGIN);
+    const url = new URL(`/api/panel/reservas/export.${format}`, req.nextUrl.origin);
     url.search = req.nextUrl.search;
 
     const headers: Record<string, string> = {};

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import styles from "./SeccionAdminCanchas.module.css";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, apiUrl } from "@/lib/api";
 import { getRoleFromToken, getToken } from "@/lib/auth";
 
 type Complejo = {
@@ -66,8 +66,6 @@ type CanchaCrear = {
     owner_id?: number | null;
     complejo_id: number | null; // ✅ se elige en UI
 };
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 const DEPARTAMENTOS = ["Lima", "Callao"] as const;
 
@@ -222,7 +220,8 @@ export default function SeccionAdminCanchas() {
                 const fd = new FormData();
                 fd.append("archivo", file);
 
-                const res = await fetch(`${API_BASE}/admin/canchas/${canchaId}/imagenes/upload`, {
+                const uploadUrl = apiUrl(`/admin/canchas/${canchaId}/imagenes/upload`);
+                const res = await fetch(uploadUrl, {
                     method: "POST",
                     headers: {
                         Authorization: `Bearer ${token}`,

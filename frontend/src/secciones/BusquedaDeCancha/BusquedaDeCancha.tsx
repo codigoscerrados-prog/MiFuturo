@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import styles from "./BusquedaDeCancha.module.css";
 import dynamic from "next/dynamic";
 import { apiFetch, mediaUrl } from "@/lib/api";
+import { useGeolocation } from "@/utils/hooks/useGeolocation";
 
 // ✅ Mapa (SSR off)
 const MapaComplejos = dynamic(() => import("./MapaComplejos"), { ssr: false }) as any;
@@ -420,6 +421,7 @@ export default function BusquedaDeCancha({
     const [complejosDb, setComplejosDb] = useState<ComplejoCard[]>([]);
     const [cargando, setCargando] = useState(false);
     const [error, setError] = useState("");
+    const { position } = useGeolocation();
 
     // ✅ Modal reserva (por complejo, eligiendo cancha)
     const [reservaOpen, setReservaOpen] = useState(false);
@@ -648,24 +650,22 @@ export default function BusquedaDeCancha({
 
     // ✅ mostrar mapa solo en desktop y si hay coords
     const mostrarMapa = useMemo(() => {
-        const hasCoords = complejosFiltrados.some((c) => typeof c.latitud === "number" && typeof c.longitud === "number");
-        if (!hasCoords) return false;
-        if (typeof window === "undefined") return false;
-        return window.innerWidth >= 1024;
+        return complejosFiltrados.some((c) => typeof c.latitud === "number" && typeof c.longitud === "number");
     }, [complejosFiltrados]);
 
     const mapaNode = mostrarMapa ? (
         <div className={styles.mapOnlyDesktop}>
-            <div className={`card border-0 shadow-sm rounded-4 overflow-hidden ${styles.mapWrap}`}>
-                <div className="p-2 p-md-3">
-                    <MapaComplejos
-                        complejos={complejosFiltrados}
-                        onDetalles={(c: ComplejoCard) => abrirModalDetalleComplejo(c)}
-                        onReservar={(c: ComplejoCard) => abrirModalReservaComplejo(c)}
-                    />
+                <div className={`card border-0 shadow-sm rounded-4 overflow-hidden ${styles.mapWrap}`}>
+                    <div className="p-2 p-md-3">
+                        <MapaComplejos
+                            complejos={complejosFiltrados}
+                            onDetalles={(c: ComplejoCard) => abrirModalDetalleComplejo(c)}
+                            onReservar={(c: ComplejoCard) => abrirModalReservaComplejo(c)}
+                            userPosition={position}
+                        />
+                    </div>
                 </div>
             </div>
-        </div>
     ) : null;
 
     const listadoNode = (

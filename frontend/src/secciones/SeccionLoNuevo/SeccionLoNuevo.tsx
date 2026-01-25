@@ -102,6 +102,9 @@ const FEATURES: Array<{ key: keyof ComplejoFeatures; label: string }> = [
     { key: "cafeteria", label: "Cafeteria" },
 ];
 
+const ADMINISTRAR_WHATSAPP_PHONE = "999999999";
+const ADMINISTRAR_WHATSAPP_MESSAGE = "quiero reclamar mi cancha y administrarla";
+
 function formatPrecio(c: Complejo) {
     const minRaw = c.precioMin;
     const maxRaw = c.precioMax;
@@ -665,7 +668,12 @@ export default function SeccionLoNuevo() {
                         const tieneOwner = Boolean(card.owner_id);
                         const esEstandar = !card.verificado;
                         const mostrarReservar = tieneOwner && !esEstandar;
-                        const reservaMensaje = tieneOwner ? "Administración no verificada" : "Disponible pronto";
+                        const mostrarMensajeVerificado = tieneOwner && !mostrarReservar;
+                        const adminWhatsappUrl = buildWhatsAppUrl(
+                            ADMINISTRAR_WHATSAPP_PHONE,
+                            ADMINISTRAR_WHATSAPP_MESSAGE
+                        );
+                        const esSinOwner = !tieneOwner;
 
                         return (
                         <article key={card.id} className={`card ${styles.card}`}>
@@ -723,9 +731,19 @@ export default function SeccionLoNuevo() {
                                                             <i className="bi bi-whatsapp me-2" aria-hidden="true"></i>
                                                             Reservar
                                                         </button>
-                                                    ) : (
-                                                        <span className={styles.reservaInfo}>{reservaMensaje}</span>
-                                                    )}
+                                                    ) : esSinOwner ? (
+                                                        <a
+                                                            href={adminWhatsappUrl}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            className={`btn btn-outline-primary btn-sm rounded-pill px-3 ${styles.btnReservar}`}
+                                                        >
+                                                            <i className="bi bi-emoji-smile me-2" aria-hidden="true"></i>
+                                                            Administrar cancha
+                                                        </a>
+                                                    ) : mostrarMensajeVerificado ? (
+                                                        <span className={styles.reservaInfo}>Administración no verificada</span>
+                                                    ) : null}
                                                 </div>
 
                                                 {precio && <div className={styles.precio}>{precio}</div>}

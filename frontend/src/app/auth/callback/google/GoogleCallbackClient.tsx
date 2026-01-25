@@ -23,20 +23,6 @@ export default function GoogleCallbackClient() {
 
             setToken(token);
 
-            if (needsProfile === "1") {
-                const role = getRoleFromToken(token);
-                if (role === "propietario") {
-                    try {
-                        await apiFetch("/perfil/plan/activar-pro-trial", {
-                            token,
-                            method: "POST",
-                        });
-                    } catch (err) {
-                        console.error("No se pudo activar el trial PRO", err);
-                    }
-                }
-            }
-
             const role = getRoleFromToken(token);
             const target = next || rutaPorRole(role);
             router.replace(target);

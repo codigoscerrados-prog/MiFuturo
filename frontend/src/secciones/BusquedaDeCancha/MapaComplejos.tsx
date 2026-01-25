@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { useEffect, useMemo, useState } from "react";
+import { MapContainer, TileLayer, Marker, Popup, CircleMarker } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { LatLng } from "@/utils/hooks/useGeolocation";
 
 // ✅ Fix: marcador visible en Next (Leaflet no resuelve rutas de iconos solo)
 const ICON = new L.Icon({
@@ -47,10 +48,12 @@ export default function MapaComplejos({
     complejos,
     onDetalles,
     onReservar,
+    userPosition,
 }: {
     complejos: ComplejoCard[];
     onDetalles: (c: ComplejoCard) => void;
     onReservar: (c: ComplejoCard) => void;
+    userPosition?: LatLng | null;
 }) {
     // ✅ solo los complejos con coordenadas válidas
     const puntos = useMemo(() => {
@@ -59,12 +62,20 @@ export default function MapaComplejos({
 
     // ✅ centro: primer complejo con coords o Lima por defecto
     const center = useMemo<[number, number]>(() => {
+        if (userPosition) return [userPosition.lat, userPosition.lng];
         const first = puntos[0];
         const lat = numOrNull(first?.latitud);
         const lng = numOrNull(first?.longitud);
         if (lat != null && lng != null) return [lat, lng];
         return [-12.0464, -77.0428]; // Lima centro
-    }, [puntos]);
+    }, [puntos, userPosition]);
+
+    const [map, setMap] = useState<L.Map | null>(null);
+
+    useEffect(() => {
+        if (!map) return;
+        map.setView(center, map.getZoom());
+    }, [center, map]);
 
     if (!puntos.length) return null;
 
@@ -85,8 +96,19 @@ export default function MapaComplejos({
                 style={{ height: "100%", width: "100%", zIndex: 0 }}
                 scrollWheelZoom={true}
                 zoomControl={true}
+                whenCreated={setMap}
             >
                 <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+
+                {userPosition ? (
+                    <CircleMarker
+                        center={[userPosition.lat, userPosition.lng]}
+                        pathOptions={{ color: "#0EA5E9", fillColor: "#0EA5E9" }}
+                        radius={8}
+                    >
+                        <Popup>Tú estás aquí</Popup>
+                    </CircleMarker>
+                ) : null}
 
                 {puntos.map((cx) => {
                     const lat = numOrNull(cx.latitud);

@@ -149,7 +149,7 @@ export default function SeccionPlanesPropietario() {
                                                 <span className={styles.planPrice}>S/ 0.00 <span className={styles.smallMuted}>• 30 días gratis</span></span>
                                                 <span className={styles.smallMuted}>Luego S/ 69.90 / mes</span>
                                                 <button className={`btn btn-primary btn-sm ${styles.ctaInline}`} onClick={activarProTrial} disabled={activando || isPro}>
-                                                    {isPro ? "Ya activo" : activando ? "Activando…" : "Obtener PRO"}
+                                                    {isPro ? "Ya activo" : activando ? "Activando…" : "30 días gratis"}
                                                 </button>
                                             </div>
                                         </th>

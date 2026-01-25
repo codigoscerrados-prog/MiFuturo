@@ -178,15 +178,9 @@
 
 /* ---------- Map ---------- */
 .mapOnlyDesktop {
-    display: none;
+    display: block;
     margin-bottom: 12px;
     position: static;
-}
-
-@media (min-width: 1024px) {
-    .mapOnlyDesktop {
-        display: block;
-    }
 }
 
 .mapWrap {
@@ -226,6 +220,15 @@
 @media (max-width: 1023px) {
     .layout {
         grid-template-columns: 1fr;
+    }
+
+    .colMapa {
+        order: -1;
+        margin-bottom: 14px;
+    }
+
+    .mapWrap {
+        border-color: rgba(15, 23, 42, 0.12);
     }
 }
 

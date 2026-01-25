@@ -532,6 +532,17 @@
     gap: 6px;
 }
 
+.horariosGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    justify-content: flex-start;
+}
+
+.horariosGrid button {
+    min-width: 95px;
+}
+
 .modalLabel {
     font-size: 12px;
     font-weight: 800;

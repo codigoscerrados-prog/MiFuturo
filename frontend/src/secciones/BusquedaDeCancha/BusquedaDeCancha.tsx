@@ -207,12 +207,32 @@ function formatoFechaHumana(fechaISO: string) {
     }
 }
 
+function parseHora(hora: string) {
+    const [h, m] = hora.split(":").map((p) => Number(p));
+    if (Number.isFinite(h) && Number.isFinite(m)) return { h, m };
+    return { h: 0, m: 0 };
+}
+
+function sumarHoras(hora: string, delta: number) {
+    const parsed = parseHora(hora);
+    const totalMinutes = parsed.h * 60 + parsed.m + delta * 60;
+    const newHour = Math.floor(totalMinutes / 60) % 24;
+    return `${String(newHour).padStart(2, "0")}:${String(totalMinutes % 60).padStart(2, "0")}`;
+}
+
 function formatDuracion(duracionHoras: number) {
     if (!duracionHoras || duracionHoras <= 0) return "";
     return duracionHoras === 1 ? "1 hora" : `${duracionHoras} horas`;
 }
 
-function construirMensajeWhatsApp(c: CanchaCard, fechaISO: string, hora: string, duracionHoras: number) {
+function formatRango(horaInicio: string, duracionHoras: number) {
+    if (!horaInicio) return "—";
+    if (duracionHoras <= 1) return horaInicio;
+    const horaFinal = sumarHoras(horaInicio, duracionHoras);
+    return `${horaInicio} - ${horaFinal}`;
+}
+
+function construirMensajeWhatsApp(c: CanchaCard, fechaISO: string, horaInicio: string, duracionHoras: number) {
     const wave = "\uD83D\uDC4B";
     const sparkles = "\u2728";
     const soccer = "\u26BD";
@@ -229,13 +249,14 @@ function construirMensajeWhatsApp(c: CanchaCard, fechaISO: string, hora: string,
     const fechaHumana = formatoFechaHumana(fechaISO);
     const duracionTxt = formatDuracion(duracionHoras);
 
+    const rango = formatRango(horaInicio, duracionHoras);
     return (
         `${wave} Hola! Quisiera reservar una cancha.\n\n` +
         `${stadium} Complejo: *${c.zona}*\n` +
         `${soccer} Cancha: *${c.nombre}* (${c.tipo}, ${c.pasto})\n` +
         `${pin} Ubicación: *${lugar || "—"}*\n` +
         `${target} Fecha: *${fechaHumana}*\n` +
-        `${target} Hora: *${hora}*\n` +
+        `${target} Hora: *${rango}*\n` +
         (duracionTxt ? `${target} Duracion: *${duracionTxt}*\n` : "") +
         `${money} Precio: *S/ ${c.precioHora.toFixed(0)} /h*\n\n` +
         `${check} ¿Está disponible? ${sparkles}\n\n` +
@@ -262,13 +283,14 @@ function construirMensajeWhatsAppEstandar(complejo: ComplejoCard, fechaISO: stri
         ? `S/ ${complejo.precioMin.toFixed(0)} - ${complejo.precioMax.toFixed(0)} /h`
         : "";
 
+    const rango = formatRango(hora, duracionHoras);
     return (
         `${wave} Hola! Quisiera reservar.\n\n` +
         `${stadium} Complejo: *${complejo.nombre}*\n` +
         `${pin} Ubicación: *${lugar || "-"}*\n` +
         (precio ? `${money} Precio: *${precio}*\n\n` : "\n") +
         `${target} Fecha: *${fechaHumana}*\n` +
-        `${target} Hora: *${hora}*\n` +
+        `${target} Hora: *${rango}*\n` +
         (duracionTxt ? `${target} Duracion: *${duracionTxt}*\n\n` : "\n") +
         `${check} ¿Está disponible? ${sparkles}\n\n` +
         `${fire} Gracias! ${thanks}`
@@ -404,9 +426,8 @@ export default function BusquedaDeCancha({
     const [reservaComplejo, setReservaComplejo] = useState<ComplejoCard | null>(null);
     const [reservaCanchaId, setReservaCanchaId] = useState<number | null>(null);
     const [reservaFecha, setReservaFecha] = useState("");
-    const [reservaHora, setReservaHora] = useState("");
-    const [reservaDuracion, setReservaDuracion] = useState(1);
     const [reservaError, setReservaError] = useState<string | null>(null);
+    const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
     const [horariosSlots, setHorariosSlots] = useState<HorarioSlot[]>(() =>
         DEFAULT_HORARIOS.map((hora) => ({ hora, ocupado: false }))
     );
@@ -446,27 +467,23 @@ export default function BusquedaDeCancha({
                         ocupado: Boolean(slot.ocupado),
                     }));
                     setHorariosSlots(normalized);
-
-                    const seleccionActual = normalized.find((slot) => slot.hora === reservaHora);
-                    if (!seleccionActual || seleccionActual.ocupado) {
-                        const primeraLibre = normalized.find((slot) => !slot.ocupado);
-                        if (primeraLibre) {
-                            setReservaHora(primeraLibre.hora);
-                        }
-                    }
+                    const free = normalized.find((slot) => !slot.ocupado);
+                    setSelectedSlots(free ? [free.hora] : normalized.map((slot) => slot.hora).slice(0, 1));
                 } else {
                     setHorariosSlots(DEFAULT_HORARIOS.map((hora) => ({ hora, ocupado: false })));
+                    setSelectedSlots(DEFAULT_HORARIOS.slice(0, 1));
                 }
             })
             .catch((err) => {
                 if (err?.name === "AbortError") return;
                 setHorariosSlots(DEFAULT_HORARIOS.map((hora) => ({ hora, ocupado: false })));
+                setSelectedSlots(DEFAULT_HORARIOS.slice(0, 1));
                 setHorariosError("No se pudieron cargar los horarios, usa los valores sugeridos.");
             })
             .finally(() => setHorariosLoading(false));
 
         return () => ac.abort();
-    }, [canchaSeleccionada, reservaFecha, reservaHora]);
+    }, [canchaSeleccionada, reservaFecha]);
 
     // ✅ bloquear scroll + cerrar con ESC
     useEffect(() => {
@@ -779,8 +796,7 @@ export default function BusquedaDeCancha({
         const today = new Date();
         const iso = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
         setReservaFecha(iso);
-        setReservaHora("19:00");
-        setReservaDuracion(1);
+        setSelectedSlots([]);
     }
     function cerrarModalReserva() {
         setReservaOpen(false);
@@ -806,8 +822,8 @@ export default function BusquedaDeCancha({
             setReservaError("Selecciona una fecha.");
             return;
         }
-        if (!reservaHora) {
-            setReservaError("Selecciona una hora.");
+        if (!selectedSlots.length) {
+            setReservaError("Selecciona al menos una hora.");
             return;
         }
 
@@ -817,9 +833,12 @@ export default function BusquedaDeCancha({
             return;
         }
 
+        const slotsSorted = [...selectedSlots].sort();
+        const horaInicio = slotsSorted[0];
+        const duracion = slotsSorted.length;
         const msg = esEstandar
-            ? construirMensajeWhatsAppEstandar(reservaComplejo, reservaFecha, reservaHora, reservaDuracion)
-            : construirMensajeWhatsApp(cancha as CanchaCard, reservaFecha, reservaHora, reservaDuracion);
+            ? construirMensajeWhatsAppEstandar(reservaComplejo, reservaFecha, horaInicio, duracion)
+            : construirMensajeWhatsApp(cancha as CanchaCard, reservaFecha, horaInicio, duracion);
         const url = buildWhatsAppUrl(phone, msg);
         window.open(url, "_blank", "noopener,noreferrer");
         cerrarModalReserva();
@@ -1003,6 +1022,7 @@ export default function BusquedaDeCancha({
             {reservaOpen && reservaComplejo && (
                 <div
                     className={styles.modalOverlay}
+                    style={{ zIndex: 110000 }}
                     role="dialog"
                     aria-modal="true"
                     aria-label="Reservar por WhatsApp"
@@ -1068,35 +1088,6 @@ export default function BusquedaDeCancha({
                                 />
                             </label>
 
-                            <label className={styles.modalField}>
-                                <span className={styles.modalLabel}>
-                                    <i className="bi bi-clock me-2" aria-hidden="true"></i>
-                                    Hora
-                                </span>
-                                <input
-                                    className="form-control form-control-sm rounded-3"
-                                    type="time"
-                                    value={reservaHora}
-                                    onChange={(e) => setReservaHora(e.target.value)}
-                                />
-                            </label>
-
-                            <label className={styles.modalField}>
-                                <span className={styles.modalLabel}>
-                                    <i className="bi bi-hourglass-split me-2" aria-hidden="true"></i>
-                                    Duracion
-                                </span>
-                                <select
-                                    className="form-select form-select-sm rounded-3"
-                                    value={reservaDuracion}
-                                    onChange={(e) => setReservaDuracion(Number(e.target.value))}
-                                >
-                                    <option value="1">1 hora</option>
-                                    <option value="2">2 horas</option>
-                                    <option value="3">3 horas</option>
-                                    <option value="4">4 horas</option>
-                                </select>
-                            </label>
                             <div className={styles.modalField}>
                                 <span className={styles.modalLabel}>Horarios disponibles</span>
                                 {horariosLoading ? (
@@ -1105,28 +1096,36 @@ export default function BusquedaDeCancha({
                                         Cargando horario…
                                     </div>
                                 ) : (
-                                    <div className="d-flex flex-wrap gap-2">
-                                        {horariosSlots.map((slot) => (
+                                <div className={`${styles.horariosGrid}`}>
+                                    {horariosSlots.map((slot) => {
+                                        const isSelected = selectedSlots.includes(slot.hora);
+                                        return (
                                             <button
                                                 key={slot.hora}
                                                 type="button"
                                                 className={`btn btn-sm rounded-pill ${
-                                                    reservaHora === slot.hora
+                                                    isSelected
                                                         ? "btn-success"
                                                         : slot.ocupado
                                                         ? "btn-outline-danger"
                                                         : "btn-outline-secondary"
                                                 }`}
                                                 onClick={() => {
-                                                    if (!slot.ocupado) setReservaHora(slot.hora);
+                                                    if (slot.ocupado) return;
+                                                    setSelectedSlots((prev) =>
+                                                        prev.includes(slot.hora)
+                                                            ? prev.filter((h) => h !== slot.hora)
+                                                            : [...prev, slot.hora]
+                                                    );
                                                 }}
                                                 disabled={slot.ocupado}
                                             >
                                                 {slot.hora}
                                                 {slot.ocupado ? " • ocupado" : ""}
                                             </button>
-                                        ))}
-                                    </div>
+                                        );
+                                    })}
+                                </div>
                                 )}
                                 {horariosError ? <p className={styles.modalTiny}>{horariosError}</p> : null}
                             </div>

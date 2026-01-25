@@ -50,7 +50,7 @@ def _get_json(url: str, headers: dict | None = None) -> dict:
 
 
 @router.post("/register", response_model=UsuarioOut)
- def register(payload: UsuarioCrear, db: Session = Depends(get_db), background_tasks: BackgroundTasks):
+def register(payload: UsuarioCrear, db: Session = Depends(get_db), background_tasks: BackgroundTasks):
     if db.query(User).filter(User.email == payload.email).first():
         raise HTTPException(status_code=400, detail="Email ya registrado")
 

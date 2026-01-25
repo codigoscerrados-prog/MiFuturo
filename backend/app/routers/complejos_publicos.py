@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from datetime import date, datetime, timedelta
+
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session, joinedload
 from pathlib import Path
@@ -8,7 +10,7 @@ from app.core.deps import get_db, get_usuario_actual, require_role
 from app.core.images import resize_square_image
 from app.core.seguridad import decodificar_token
 from app.core.slug import slugify
-from app.modelos.modelos import Complejo, ComplejoImagen, ComplejoLike, Cancha, User
+from app.modelos.modelos import Complejo, ComplejoImagen, ComplejoLike, Cancha, Reserva, User
 from app.esquemas.esquemas import ComplejoPerfilOut, ComplejoActualizar, ComplejoImagenOut
 
 router = APIRouter(prefix="", tags=["public-complejos"])
@@ -329,3 +331,35 @@ def actualizar_complejo_publico(
         "liked_by_me": False,
         "is_owner": check_owner(u, c.owner_id),
     }
+
+
+@router.get("/public/canchas/{cancha_id}/horarios")
+def horarios_cancha_publica(
+    cancha_id: int,
+    fecha: str | None = Query(None, description="YYYY-MM-DD; default hoy"),
+    db: Session = Depends(get_db),
+):
+    if fecha:
+        try:
+            target_date = date.fromisoformat(fecha)
+        except ValueError:
+            raise HTTPException(400, "Fecha inválida")
+    else:
+        target_date = date.today()
+
+    slots: list[dict[str, str | bool]] = []
+    for hour in range(6, 22):
+        slot_start = datetime(target_date.year, target_date.month, target_date.day, hour)
+        slot_end = slot_start + timedelta(hours=1)
+        ocupado = (
+            db.query(Reserva)
+            .filter(Reserva.cancha_id == cancha_id)
+            .filter(Reserva.payment_status != "cancelada")
+            .filter(Reserva.start_at < slot_end)
+            .filter(Reserva.end_at > slot_start)
+            .count()
+            > 0
+        )
+        slots.append({"hora": f"{hour:02d}:00", "ocupado": ocupado})
+
+    return {"cancha_id": cancha_id, "fecha": target_date.isoformat(), "slots": slots}

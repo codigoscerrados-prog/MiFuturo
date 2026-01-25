@@ -130,6 +130,11 @@ type ComplejoCard = {
     canchas: CanchaCard[];
 };
 
+type HorarioSlot = {
+    hora: string;
+    ocupado: boolean;
+};
+
 const FALLBACK_IMG = "/canchas/sintetico-marconi.avif";
 const DEFAULT_HORARIOS = [
     "06:00",
@@ -403,12 +408,66 @@ export default function BusquedaDeCancha({
     const [reservaHora, setReservaHora] = useState("");
     const [reservaDuracion, setReservaDuracion] = useState(1);
     const [reservaError, setReservaError] = useState<string | null>(null);
+    const [horariosSlots, setHorariosSlots] = useState<HorarioSlot[]>(() =>
+        DEFAULT_HORARIOS.map((hora) => ({ hora, ocupado: false }))
+    );
+    const [horariosLoading, setHorariosLoading] = useState(false);
+    const [horariosError, setHorariosError] = useState("");
 
     // ✅ Modal detalle (COMPLEJO)
     const [detalleOpen, setDetalleOpen] = useState(false);
     const [detalleComplejo, setDetalleComplejo] = useState<ComplejoCard | null>(null);
 
     const modalAbierto = reservaOpen || detalleOpen;
+
+    const canchaSeleccionada = useMemo(() => {
+        if (!reservaComplejo || !reservaComplejo.verificado) return null;
+        if (reservaCanchaId) {
+            const match = reservaComplejo.canchas.find((c) => c.id === reservaCanchaId);
+            if (match) return match;
+        }
+        return reservaComplejo.canchas[0] || null;
+    }, [reservaComplejo, reservaCanchaId]);
+
+    useEffect(() => {
+        if (!canchaSeleccionada) return;
+        const fechaParam = reservaFecha || new Date().toISOString().slice(0, 10);
+        const ac = new AbortController();
+        setHorariosLoading(true);
+        setHorariosError("");
+
+        apiFetch<{ slots: HorarioSlot[] }>(`/public/canchas/${canchaSeleccionada.id}/horarios?fecha=${fechaParam}`, {
+            signal: ac.signal,
+            cache: "no-store",
+        })
+            .then((data) => {
+                if (data?.slots?.length) {
+                    const normalized = data.slots.map((slot) => ({
+                        hora: slot.hora,
+                        ocupado: Boolean(slot.ocupado),
+                    }));
+                    setHorariosSlots(normalized);
+
+                    const seleccionActual = normalized.find((slot) => slot.hora === reservaHora);
+                    if (!seleccionActual || seleccionActual.ocupado) {
+                        const primeraLibre = normalized.find((slot) => !slot.ocupado);
+                        if (primeraLibre) {
+                            setReservaHora(primeraLibre.hora);
+                        }
+                    }
+                } else {
+                    setHorariosSlots(DEFAULT_HORARIOS.map((hora) => ({ hora, ocupado: false })));
+                }
+            })
+            .catch((err) => {
+                if (err?.name === "AbortError") return;
+                setHorariosSlots(DEFAULT_HORARIOS.map((hora) => ({ hora, ocupado: false })));
+                setHorariosError("No se pudieron cargar los horarios, usa los valores sugeridos.");
+            })
+            .finally(() => setHorariosLoading(false));
+
+        return () => ac.abort();
+    }, [canchaSeleccionada, reservaFecha, reservaHora]);
 
     const canchaSeleccionada = useMemo(() => {
         if (!reservaComplejo) return null;
@@ -419,12 +478,6 @@ export default function BusquedaDeCancha({
         }
         return reservaComplejo.canchas[0] || null;
     }, [reservaComplejo, reservaCanchaId]);
-
-    const horariosDisponiblesModal = useMemo(() => {
-        return canchaSeleccionada?.horariosDisponibles?.length
-            ? canchaSeleccionada.horariosDisponibles
-            : DEFAULT_HORARIOS;
-    }, [canchaSeleccionada]);
 
     // ✅ bloquear scroll + cerrar con ESC
     useEffect(() => {
@@ -1055,25 +1108,39 @@ export default function BusquedaDeCancha({
                                     <option value="4">4 horas</option>
                                 </select>
                             </label>
-                            {horariosDisponiblesModal.length > 0 && (
-                                <div className={styles.modalField}>
-                                    <span className={styles.modalLabel}>Horarios disponibles</span>
+                            <div className={styles.modalField}>
+                                <span className={styles.modalLabel}>Horarios disponibles</span>
+                                {horariosLoading ? (
+                                    <div className="d-flex align-items-center gap-2">
+                                        <span className="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                                        Cargando horario…
+                                    </div>
+                                ) : (
                                     <div className="d-flex flex-wrap gap-2">
-                                        {horariosDisponiblesModal.map((hora) => (
+                                        {horariosSlots.map((slot) => (
                                             <button
-                                                key={hora}
+                                                key={slot.hora}
                                                 type="button"
                                                 className={`btn btn-sm rounded-pill ${
-                                                    reservaHora === hora ? "btn-success" : "btn-outline-secondary"
+                                                    reservaHora === slot.hora
+                                                        ? "btn-success"
+                                                        : slot.ocupado
+                                                        ? "btn-outline-danger"
+                                                        : "btn-outline-secondary"
                                                 }`}
-                                                onClick={() => setReservaHora(hora)}
+                                                onClick={() => {
+                                                    if (!slot.ocupado) setReservaHora(slot.hora);
+                                                }}
+                                                disabled={slot.ocupado}
                                             >
-                                                {hora}
+                                                {slot.hora}
+                                                {slot.ocupado ? " • ocupado" : ""}
                                             </button>
                                         ))}
                                     </div>
-                                </div>
-                            )}
+                                )}
+                                {horariosError ? <p className={styles.modalTiny}>{horariosError}</p> : null}
+                            </div>
                         </div>
 
                         <div className={`d-flex justify-content-end gap-2 flex-wrap ${styles.modalBtns}`}>

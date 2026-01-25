@@ -378,6 +378,10 @@
     font-size: 13px;
 }
 
+.metaSeparator {
+    margin: 0 6px;
+}
+
 .caracts {
     display: flex;
     flex-wrap: wrap;

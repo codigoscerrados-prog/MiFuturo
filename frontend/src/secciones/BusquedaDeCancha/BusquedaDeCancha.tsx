@@ -709,7 +709,9 @@ export default function BusquedaDeCancha({
                                     <h3 className={`h5 mb-1 ${styles.nombre}`}>{cx.nombre}</h3>
                                     <p className={`mb-2 ${styles.meta}`}>
                                         <i className="bi bi-geo me-1" aria-hidden="true"></i>
-                                        {cx.zona} ? {cx.canchasCount} cancha(s)
+                                        <span>{cx.zona || "Ubicación no disponible"}</span>
+                                        <span className={styles.metaSeparator}>-</span>
+                                        <span>{cx.canchasCount} cancha(s)</span>
                                     </p>
 
                                     <div className={styles.caracts}>

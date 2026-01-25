@@ -736,10 +736,10 @@ export default function SeccionLoNuevo() {
                                                             href={adminWhatsappUrl}
                                                             target="_blank"
                                                             rel="noreferrer"
-                                                            className={`btn btn-outline-primary btn-sm rounded-pill px-3 ${styles.btnReservar}`}
+                                                            className={`btn btn-success btn-sm rounded-pill px-3 ${styles.btnReservar}`}
                                                         >
                                                             <i className="bi bi-emoji-smile me-2" aria-hidden="true"></i>
-                                                            Administrar cancha
+                                                            Reclamar perfil
                                                         </a>
                                                     ) : mostrarMensajeVerificado ? (
                                                         <span className={styles.reservaInfo}>Administración no verificada</span>

@@ -382,6 +382,11 @@
     margin: 0 6px;
 }
 
+.claimBtn {
+    min-width: 170px;
+    text-align: center;
+}
+
 .caracts {
     display: flex;
     flex-wrap: wrap;

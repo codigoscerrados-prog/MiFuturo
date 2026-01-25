@@ -70,6 +70,14 @@ type ComplejoApi = {
     canchas: CanchaApi[];
 };
 
+const ADMINISTRAR_WHATSAPP_PHONE = "999999999";
+const ADMINISTRAR_WHATSAPP_MESSAGE = "quiero reclamar mi cancha y administrarla";
+
+function buildClaimUrl() {
+    const encoded = encodeURIComponent(ADMINISTRAR_WHATSAPP_MESSAGE);
+    return `https://wa.me/${ADMINISTRAR_WHATSAPP_PHONE}?text=${encoded}`;
+}
+
 type CanchaCard = {
     id: number;
     nombre: string;
@@ -725,15 +733,27 @@ export default function BusquedaDeCancha({
                                     <div className={`mt-auto d-flex align-items-center justify-content-between flex-wrap gap-2 ${styles.footerCard}`}>
                                         {cx.verificado && <div className={styles.precio}>{precioRango} /h</div>}
                                         <div className={`d-flex gap-2 flex-wrap ${styles.botones}`}>
-                                            <button
-                                                className="btn btn-success btn-sm rounded-pill px-3"
-                                                type="button"
-                                                onClick={() => abrirModalReservaComplejo(cx)}
-                                                disabled={cx.verificado && cx.canchasCount == 0}
-                                            >
-                                                <i className="bi bi-whatsapp me-2" aria-hidden="true"></i>
-                                                Reservar por WhatsApp
-                                            </button>
+                    {!cx.propietarioPhone ? (
+                        <a
+                            href={buildClaimUrl()}
+                            target="_blank"
+                            rel="noreferrer"
+                            className={`btn btn-success btn-sm rounded-pill px-3 ${styles.claimBtn}`}
+                        >
+                            <i className="bi bi-whatsapp me-2" aria-hidden="true"></i>
+                            Reclamar perfil
+                        </a>
+                    ) : (
+                        <button
+                            className="btn btn-success btn-sm rounded-pill px-3"
+                            type="button"
+                            onClick={() => abrirModalReservaComplejo(cx)}
+                            disabled={cx.verificado && cx.canchasCount == 0}
+                        >
+                            <i className="bi bi-whatsapp me-2" aria-hidden="true"></i>
+                            Reservar por WhatsApp
+                        </button>
+                    )}
                                             <button
                                                 className="btn btn-outline-secondary btn-sm rounded-pill px-3"
                                                 type="button"

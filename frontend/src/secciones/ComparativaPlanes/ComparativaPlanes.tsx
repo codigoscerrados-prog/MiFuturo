@@ -45,13 +45,13 @@ export default function ComparativaPlanes() {
                                                 <div className={styles.premiumTitleRow}>
                                                     <span className={styles.premiumTitle}>
                                                         <i className={`bi bi-stars ${styles.premiumIcon}`} aria-hidden="true"></i>
-                                                        Premium
+                                                        Pro
                                                     </span>
                                                     <Link className={`btn btn-primary btn-sm ${styles.ctaInline}`} href={RUTA_CTA}>
                                                         COMPRAR
                                                     </Link>
                                                 </div>
-                                                <span className={`badge rounded-pill ${styles.badgeRec}`}>Recomendado</span>
+                                                <span className={`badge rounded-pill ${styles.badgeRec}`}>Recomendado primeros 30 días gratis</span>
                                             </div>
                                         </th>
                                     </tr>

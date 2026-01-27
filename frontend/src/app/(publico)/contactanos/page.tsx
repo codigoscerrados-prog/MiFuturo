@@ -1,9 +1,15 @@
 import SeccionContactanos from "@/secciones/SeccionContactanos/SeccionContactanos";
 
-export default function PageContactanos() {
+interface PageProps {
+    searchParams?: {
+        motivo?: "ayuda" | "contacto" | "problema";
+    };
+}
+
+export default function PageContactanos({ searchParams }: PageProps) {
     return (
         <main className="fondoSeccion fondoA espaciadoSeccion">
-            <SeccionContactanos />
+            <SeccionContactanos motivoQuery={searchParams?.motivo} />
         </main>
     );
 }

@@ -6,6 +6,8 @@
     align-items: stretch;
     --navH: 76px;
     animation: fadeUp 0.5s ease both;
+    margin-top: calc(var(--navH, 76px) * -1);
+    position: relative;
 }
 
 /* Banner */
@@ -22,6 +24,7 @@
     display: flex;
     align-items: center;
     transition: box-shadow var(--transicion-base), border-color var(--transicion-fast), transform var(--transicion-base);
+    z-index: 0;
 }
 
 .banner:hover {

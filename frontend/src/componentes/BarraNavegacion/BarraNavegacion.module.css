@@ -102,6 +102,30 @@
   box-shadow: none;
 }
 
+@media (max-width: 768px) {
+  .contenido {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 10px;
+  }
+
+  .logo {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .logoIcon {
+    width: min(220px, 70vw);
+    height: auto;
+  }
+
+  .acciones {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
+
 .logoImage {
   width: 100%;
   height: auto;

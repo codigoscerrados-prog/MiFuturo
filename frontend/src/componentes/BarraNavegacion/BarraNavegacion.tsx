@@ -142,12 +142,12 @@ export default function BarraNavegacion() {
                     className={`${styles.logo} navbar-brand d-inline-flex align-items-center text-decoration-none`}
                     aria-label="Ir al inicio"
                 >
-                    <span className={styles.logoIcon}>
+                    <span className={styles.logoIcon} aria-hidden="true">
                         <Image
                             src="/logo_principal.svg"
                             alt="Lateralverde"
-                            width={40}
-                            height={40}
+                            width={140}
+                            height={56}
                             className={styles.logoImage}
                             priority
                         />
@@ -252,22 +252,25 @@ export default function BarraNavegacion() {
                     <div className={styles.movilAcciones}>
                         {!token ? (
                             <>
-                                <Link className={`boton ${styles.botonFull} ${styles.btnGhost} d-inline-flex align-items-center gap-2`} href="/registrarse/propietario">
-                                    Publica tu cancha
+                                <Link className={`boton ${styles.botonFull} ${styles.btnGhost}`} href="/registrarse/usuario">
+                                    Crear tu perfil de jugador
                                 </Link>
-                                <Link className={`boton ${styles.botonFull} ${styles.btnAction} d-inline-flex align-items-center gap-2`} href="/registrarse/usuario">
-                                    Crea tu perfil jugador
+                                <Link className={`boton ${styles.botonFull} ${styles.btnGhost}`} href="/registrarse/propietario">
+                                    Registra tu complejo
+                                </Link>
+                                <Link className={`boton ${styles.botonFull} ${styles.btnAction}`} href="/iniciar-sesion">
+                                    Iniciar sesión
                                 </Link>
                             </>
                         ) : (
                             <>
-                                <Link className={`boton ${styles.botonFull} ${styles.btnGhost} d-inline-flex align-items-center gap-2`} href={rutaPanel}>
+                                <Link className={`boton ${styles.botonFull} ${styles.btnGhost}`} href={rutaPanel}>
                                     <i className={`bi bi-speedometer2 ${styles.btnIcon}`} aria-hidden="true"></i>
                                     Ir a mi panel
                                 </Link>
                                 <button
                                     type="button"
-                                    className={`boton ${styles.botonFull} ${styles.btnDanger} d-inline-flex align-items-center gap-2`}
+                                    className={`boton ${styles.botonFull} ${styles.btnDanger}`}
                                     onClick={cerrarSesion}
                                 >
                                     <i className={`bi bi-box-arrow-right ${styles.btnIcon}`} aria-hidden="true"></i>
@@ -275,6 +278,21 @@ export default function BarraNavegacion() {
                                 </button>
                             </>
                         )}
+                    </div>
+
+                    <div className={styles.movilNav}>
+                        <Link className={styles.movilLink} href="/buscar">
+                            <i className="bi bi-search" aria-hidden="true"></i>
+                            Buscar canchas
+                        </Link>
+                        <Link className={styles.movilLink} href="/contactanos">
+                            <i className="bi bi-chat-dots" aria-hidden="true"></i>
+                            Contacto
+                        </Link>
+                        <Link className={styles.movilLink} href="/terminos">
+                            <i className="bi bi-file-text" aria-hidden="true"></i>
+                            Términos & privacidad
+                        </Link>
                     </div>
                 </div>
             </div>

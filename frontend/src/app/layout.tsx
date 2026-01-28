@@ -16,6 +16,10 @@ const space = Space_Grotesk({
 export const metadata: Metadata = {
     title: "Lateralverde | Reserva canchas y gestiona espacios",
     description: "Lateralverde ayuda a encontrar canchas, gestionar reservas y conectar con complejos deportivos.",
+    icons: {
+        icon: "/logo_principal.svg",
+        shortcut: "/logo_principal.svg",
+    },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

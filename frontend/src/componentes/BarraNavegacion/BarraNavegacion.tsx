@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -13,18 +14,6 @@ type PerfilMe = {
     last_name?: string | null;
     username?: string | null;
 };
-
-function IconoCancha({ className = "" }: { className?: string }) {
-    return (
-        <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M4 6h16v12H4z" />
-            <path d="M12 6v12" />
-            <path d="M4 12h16" />
-            <path d="M8 9a4 4 0 0 0 0 6" />
-            <path d="M16 9a4 4 0 0 1 0 6" />
-        </svg>
-    );
-}
 
 function IconoCerrar({ className = "" }: { className?: string }) {
     return (
@@ -154,11 +143,17 @@ export default function BarraNavegacion() {
                     aria-label="Ir al inicio"
                 >
                     <span className={styles.logoIcon} aria-hidden="true">
-                        <IconoCancha className={`${styles.logoSvg} ${styles.iconoLegacy}`} />
-                        <i className={`bi bi-card-list ${styles.logoBi}`} aria-hidden="true"></i>
+                        <Image
+                            src="/logo_principal.svg"
+                            alt="Lateralverde"
+                            width={40}
+                            height={40}
+                            className={styles.logoImage}
+                            priority
+                        />
                     </span>
                     <span className={styles.logoText}>
-                        Canchas<span className={styles.logoTextAccent}>Pro</span>
+                        Lateral<span className={styles.logoTextAccent}>verde</span>
                     </span>
                 </Link>
 
@@ -237,11 +232,17 @@ export default function BarraNavegacion() {
                 <div className={styles.movilHeader}>
                     <div className={styles.movilBrand}>
                         <span className={styles.logoIcon} aria-hidden="true">
-                            <IconoCancha className={`${styles.logoSvg} ${styles.iconoLegacy}`} />
-                            <i className={`bi bi-card-list ${styles.logoBi}`} aria-hidden="true"></i>
+                            <Image
+                                src="/logo_principal.svg"
+                                alt="Lateralverde"
+                                width={40}
+                                height={40}
+                                className={styles.logoImage}
+                                priority
+                            />
                         </span>
                         <span className={styles.logoText}>
-                            Canchas<span className={styles.logoTextAccent}>Pro</span>
+                            Lateral<span className={styles.logoTextAccent}>verde</span>
                         </span>
                     </div>
 

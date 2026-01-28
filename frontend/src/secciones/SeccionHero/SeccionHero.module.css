@@ -57,7 +57,7 @@
     padding: clamp(22px, 4vw, 48px);
     padding-top: calc(clamp(22px, 4vw, 48px) + var(--navH));
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: clamp(16px, 3vw, 32px);
     align-items: center;
     width: min(100%, var(--contenedor));
@@ -103,6 +103,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    grid-column: 1 / span 2;
 }
 
 .ctaGroup {
@@ -212,17 +213,17 @@
     }
 
     .texto {
-        grid-column: 1;
+        grid-column: 1 / span 2;
     }
 
     .ctaGroup {
-        grid-column: 1;
+        grid-column: 1 / span 2;
         margin-top: 16px;
         justify-content: flex-start;
     }
 
     .buscadorWrap {
-        grid-column: 2;
+        grid-column: 3;
         justify-self: end;
         width: 100%;
     }

@@ -107,7 +107,7 @@
 
 .range {
     width: 100%;
-    accent-color: var(--azulAcento);
+    accent-color: #0f172a;
     cursor: pointer;
     margin-top: 6px;
     background: linear-gradient(90deg, rgba(37, 99, 235, 0.35) var(--progreso, 0%), rgba(226, 232, 240, 0.8) var(--progreso, 0%));

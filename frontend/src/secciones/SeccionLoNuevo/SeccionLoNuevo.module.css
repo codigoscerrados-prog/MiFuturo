@@ -302,7 +302,7 @@
   align-items: center;
   justify-content: flex-start;
   gap: 8px;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   position: relative;
   z-index: 1;
 }
@@ -346,9 +346,9 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  max-width: 150px;
-  white-space: normal;
   gap: 6px;
+  max-width: 100%;
+  white-space: nowrap;
 }
 
 .cardPlaceholder {

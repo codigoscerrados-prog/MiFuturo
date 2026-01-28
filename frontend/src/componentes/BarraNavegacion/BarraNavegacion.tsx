@@ -1,11 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import styles from "./BarraNavegacion.module.css";
 
+import BrandLogo from "@/components/BrandLogo";
 import { AUTH_CHANGED_EVENT, clearToken, getRoleFromToken, getToken, rutaPorRole } from "@/lib/auth";
 import { apiFetch } from "@/lib/api";
 
@@ -137,23 +137,7 @@ export default function BarraNavegacion() {
             data-scrolled={scrolled ? "true" : "false"}
         >
             <div className={`contenedor container-xl px-3 ${styles.contenido}`}>
-                <Link
-                    href="/"
-                    className={`${styles.logo} navbar-brand d-inline-flex align-items-center text-decoration-none`}
-                    aria-label="Ir al inicio"
-                >
-                    <span className={styles.logoIcon} aria-hidden="true">
-                        <Image
-                            src="/logo_principal.svg"
-                            alt="Lateralverde"
-                            width={340}
-                            height={136}
-                            className={styles.logoImage}
-                            priority
-                        />
-                    </span>
-                    <span className={styles.srOnly}>Lateralverde</span>
-                </Link>
+                <BrandLogo variant="compact" size="sm" href="/" className={`navbar-brand ${styles.brand}`} />
 
                 
                 {/* Acciones */}
@@ -229,17 +213,7 @@ export default function BarraNavegacion() {
             <div className={`${styles.movil} ${menuOpen ? styles.movilOn : ""} shadow-lg`} role="dialog" aria-modal="true">
                 <div className={styles.movilHeader}>
                     <div className={styles.movilBrand}>
-                        <span className={styles.logoIcon}>
-                            <Image
-                                src="/logo_principal.svg"
-                                alt="Lateralverde"
-                                width={40}
-                                height={40}
-                                className={styles.logoImage}
-                                priority
-                            />
-                        </span>
-                        <span className={styles.srOnly}>Lateralverde</span>
+                        <BrandLogo variant="compact" size="sm" href="/" />
                     </div>
 
                     <button type="button" className={styles.movilClose} onClick={() => setMenuOpen(false)} aria-label="Cerrar menú">

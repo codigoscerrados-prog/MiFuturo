@@ -1,0 +1,18 @@
+export default function Icon() {
+  return (
+    <svg width="100" height="100" viewBox="0 0 100 100" role="presentation" xmlns="http://www.w3.org/2000/svg">
+      <rect x="10" y="15" width="80" height="70" fill="#7dd87d" stroke="#ffffff" strokeWidth="2.5" />
+      <line x1="50" y1="15" x2="50" y2="85" stroke="#ffffff" strokeWidth="2" />
+      <circle cx="50" cy="50" r="12" fill="none" stroke="#ffffff" strokeWidth="2" />
+      <circle cx="50" cy="50" r="2" fill="#ffffff" />
+      <rect x="10" y="32" width="18" height="36" fill="none" stroke="#ffffff" strokeWidth="2" />
+      <rect x="10" y="40" width="10" height="20" fill="none" stroke="#ffffff" strokeWidth="1.5" />
+      <rect x="72" y="32" width="18" height="36" fill="none" stroke="#ffffff" strokeWidth="2" />
+      <rect x="80" y="40" width="10" height="20" fill="none" stroke="#ffffff" strokeWidth="1.5" />
+      <circle cx="10" cy="15" r="3" fill="none" stroke="#ffffff" strokeWidth="1.5" />
+      <circle cx="90" cy="15" r="3" fill="none" stroke="#ffffff" strokeWidth="1.5" />
+      <circle cx="10" cy="85" r="3" fill="none" stroke="#ffffff" strokeWidth="1.5" />
+      <circle cx="90" cy="85" r="3" fill="none" stroke="#ffffff" strokeWidth="1.5" />
+    </svg>
+  );
+}

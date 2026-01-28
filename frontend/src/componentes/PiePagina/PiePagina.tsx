@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import BrandLogo from "@/components/BrandLogo";
 import styles from "./PiePagina.module.css";
 
 const LINKS = {
@@ -40,8 +41,7 @@ export default function PiePagina() {
           <div className="col-12 col-md-6 col-lg-3">
             <div className={styles.block}>
               <div className={styles.logo}>
-                <span className={styles.punto} aria-hidden="true"></span>
-                <span className={styles.marca}>Lateralverde</span>
+                <BrandLogo variant="full" size="sm" href="/" />
               </div>
               <p className={styles.texto}>Reserva canchas, gestiona horarios y conecta con clubes en un solo lugar.</p>
               <p className={styles.soporte}>Soporte: Lun-Dom | 8am-10pm</p>

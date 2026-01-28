@@ -92,6 +92,12 @@
   align-self: center;
 }
 
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .logoIcon {
   width: 340px;
   height: 136px;

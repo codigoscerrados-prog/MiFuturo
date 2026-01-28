@@ -342,7 +342,7 @@ function mapComplejosFromApi(complejos: ComplejoApi[]) {
         };
     });
 
-    return items.slice(0, 15);
+    return items.slice(0, 9);
 }
 
 type ComplejoConCoordenadas = Complejo & {
@@ -466,13 +466,13 @@ export default function SeccionLoNuevo() {
 
     const cards = useMemo<ComplejoCard[]>(() => {
         if (cargando || vacio) {
-            return Array.from({ length: 15 }, (_, i) => ({ id: `s-${i}`, placeholder: true }));
+            return Array.from({ length: 9 }, (_, i) => ({ id: `s-${i}`, placeholder: true }));
         }
         const base: ComplejoCard[] = [...itemsOrdenados];
-        while (base.length < 15) {
+        while (base.length < 9) {
             base.push({ id: `p-${base.length}`, placeholder: true });
         }
-        return base.slice(0, 15);
+        return base.slice(0, 9);
     }, [cargando, itemsOrdenados, vacio]);
 
     const showGeoStatus = ubicacionCargando || Boolean(geoError);

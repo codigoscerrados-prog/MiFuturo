@@ -6,7 +6,7 @@
     align-items: stretch;
     --navH: 76px;
     animation: fadeUp 0.5s ease both;
-    margin-top: calc(var(--navH, 76px) * -1);
+    margin-top: calc(var(--navH, 76px) * -1.25);
     position: relative;
 }
 

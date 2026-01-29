@@ -35,6 +35,7 @@
 .companyName {
   text-transform: uppercase;
   letter-spacing: 0.18em;
+  color: #fff;
 }
 
 .textShadow {

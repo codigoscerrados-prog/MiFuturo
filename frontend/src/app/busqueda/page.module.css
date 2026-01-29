@@ -3,4 +3,6 @@
     flex-direction: column;
     gap: 18px;
     padding: clamp(18px, 3vw, 32px) 0 24px;
+    background: #0b1220;
+    color: #f8fafc;
 }

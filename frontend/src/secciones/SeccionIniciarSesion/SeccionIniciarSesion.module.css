@@ -9,6 +9,10 @@
   background: #0b1220;
 }
 
+:global(body.lv-auth-page) main {
+  padding: 0;
+}
+
 .brandHero {
   display: flex;
   justify-content: center;
@@ -38,6 +42,7 @@
   position: relative;
   overflow: hidden;
   color: #f8fafc;
+  padding: 0;
 }
 
 .seccion::before {

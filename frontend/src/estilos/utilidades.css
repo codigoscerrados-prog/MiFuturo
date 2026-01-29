@@ -37,6 +37,12 @@
   z-index: 1;
 }
 
+.paginaBannerRegistro .fondoSeccion {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
 
 /* Tarjeta */
 .tarjeta{

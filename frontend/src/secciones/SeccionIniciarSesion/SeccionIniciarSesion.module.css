@@ -15,11 +15,7 @@
     align-items: center;
     justify-content: center;
 
-    background:
-        radial-gradient(900px 600px at 18% 10%, rgba(37, 99, 235, 0.12), transparent 60%),
-        radial-gradient(800px 520px at 85% 20%, rgba(168, 85, 247, 0.11), transparent 55%),
-        radial-gradient(900px 620px at 55% 92%, rgba(34, 197, 94, 0.08), transparent 55%),
-        linear-gradient(180deg, rgba(248, 250, 252, 1) 0%, rgba(241, 245, 249, 1) 55%, rgba(255, 255, 255, 1) 100%);
+    background: transparent;
 }
 
 .seccion::before {
@@ -27,10 +23,10 @@
     position: absolute;
     inset: -2px;
     pointer-events: none;
-    opacity: 0.25;
+    opacity: 0.12;
     background-image:
-        linear-gradient(to right, rgba(15, 23, 42, 0.08) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(15, 23, 42, 0.08) 1px, transparent 1px);
+        linear-gradient(to right, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
     background-size: 48px 48px;
     mask-image: radial-gradient(closest-side, black, transparent 72%);
 }
@@ -40,9 +36,9 @@
     position: absolute;
     inset: -40% -10%;
     pointer-events: none;
-    background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.10), transparent);
+    background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.18), transparent);
     transform: rotate(14deg);
-    opacity: 0.28;
+    opacity: 0.2;
     animation: scan 7.5s ease-in-out infinite;
 }
 
@@ -69,13 +65,13 @@
     margin: 12px;
     padding: 0;
 
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(248, 250, 252, 0.85));
-    border: 1px solid rgba(15, 23, 42, 0.10);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.05));
+    border: 1px solid rgba(255, 255, 255, 0.35);
     box-shadow:
-        0 25px 80px rgba(15, 23, 42, 0.12),
-        0 8px 32px rgba(15, 23, 42, 0.08);
-    backdrop-filter: blur(20px) saturate(140%);
-    -webkit-backdrop-filter: blur(20px) saturate(140%);
+        0 40px 120px rgba(0, 0, 0, 0.55),
+        0 12px 42px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
     overflow: hidden;
     z-index: 1;
 
@@ -99,8 +95,8 @@
     position: absolute;
     inset: -1px;
     pointer-events: none;
-    background: radial-gradient(560px 220px at 35% 0%, rgba(37, 99, 235, 0.15), transparent 60%);
-    opacity: 0.85;
+    background: radial-gradient(560px 220px at 35% 0%, rgba(255, 255, 255, 0.35), transparent 60%);
+    opacity: 0.65;
 }
 
 .cardGrid {
@@ -111,7 +107,7 @@
 .cardSide {
     padding: 18px 18px;
     border-right: 0;
-    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.35);
     position: relative;
     z-index: 1;
     text-align: center;
@@ -132,15 +128,15 @@
     gap: 8px;
     padding: 6px 12px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(15, 23, 42, 0.08);
-    color: rgba(11, 22, 48, 0.85);
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: #fff;
     font-weight: 900;
     font-size: 11px;
     letter-spacing: 0.5px;
     box-shadow:
-        0 12px 30px rgba(15, 23, 42, 0.06),
-        0 1px 0 rgba(255, 255, 255, 0.70) inset;
+        0 12px 30px rgba(0, 0, 0, 0.35),
+        0 1px 0 rgba(255, 255, 255, 0.45) inset;
 }
 
 .floatingIcon {
@@ -164,13 +160,13 @@
     font-size: 28px;
     font-weight: 950;
     letter-spacing: -0.8px;
-    color: var(--azulMarino);
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+    color: #fff;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
 }
 
 .subtitulo {
     margin: 0 0 10px;
-    color: var(--muted);
+    color: rgba(255, 255, 255, 0.8);
     font-weight: 600;
     font-size: 13.5px;
 }

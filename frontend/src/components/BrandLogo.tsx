@@ -30,6 +30,7 @@ type BrandLogoProps = {
   size?: SizeVariant;
   className?: string;
   href?: string;
+  textColor?: string;
 };
 
 export default function BrandLogo({
@@ -102,7 +103,7 @@ export default function BrandLogo({
   const sharedProps = {
     className: wrapperClasses,
     "aria-label": "Lateral Verde",
-    style: { gap: `${gapValue}rem` },
+    style: { gap: `${gapValue}rem`, color: textColor },
   } as const;
 
   if (href) {

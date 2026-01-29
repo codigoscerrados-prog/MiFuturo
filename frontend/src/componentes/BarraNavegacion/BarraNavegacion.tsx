@@ -137,7 +137,13 @@ export default function BarraNavegacion() {
             data-scrolled={scrolled ? "true" : "false"}
         >
             <div className={`contenedor container-xl px-3 ${styles.contenido}`}>
-                <BrandLogo variant="compact" size="sm" href="/" className={`navbar-brand ${styles.brand}`} />
+                <BrandLogo
+                    variant="compact"
+                    size="sm"
+                    href="/"
+                    textColor="#02330e"
+                    className={`navbar-brand ${styles.brand}`}
+                />
 
                 
                 {/* Acciones */}
@@ -213,7 +219,7 @@ export default function BarraNavegacion() {
             <div className={`${styles.movil} ${menuOpen ? styles.movilOn : ""} shadow-lg`} role="dialog" aria-modal="true">
                 <div className={styles.movilHeader}>
                     <div className={styles.movilBrand}>
-                        <BrandLogo variant="compact" size="sm" href="/" />
+                        <BrandLogo variant="compact" size="sm" href="/" textColor="#02330e" />
                     </div>
 
                     <button type="button" className={styles.movilClose} onClick={() => setMenuOpen(false)} aria-label="Cerrar menú">

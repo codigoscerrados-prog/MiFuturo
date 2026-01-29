@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import BusquedaPageClient from "./BusquedaPageClient";
 import { buildPageMetadata, SEO_DOMAIN } from "@/lib/seo";
+import styles from "./page.module.css";
 
 const breadcrumbSchema = JSON.stringify({
     "@context": "https://schema.org",
@@ -28,7 +29,7 @@ export const metadata = buildPageMetadata({
 });
 
 const fallback = (
-    <main style={{ marginTop: "65px" }}>
+    <main className={styles.page}>
         <div className="contenedor">
             <p>Cargando búsqueda...</p>
         </div>

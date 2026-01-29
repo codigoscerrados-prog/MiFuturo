@@ -130,6 +130,8 @@
 
   .brand {
     justify-self: start;
+    transform: scale(0.9);
+    transform-origin: left;
   }
 
   .botonMenu {

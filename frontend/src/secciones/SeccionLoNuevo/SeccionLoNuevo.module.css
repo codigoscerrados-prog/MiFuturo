@@ -219,6 +219,33 @@
   min-height: 48px;
 }
 
+.locationMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.locationItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.locationLabel {
+  font-size: 11px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #fff;
+}
+
+.locationValue {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+}
+
 .cardTitulo {
   margin: 0;
   font-size: 19px;

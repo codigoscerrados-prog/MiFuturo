@@ -1,5 +1,4 @@
 ﻿import type { Metadata } from "next";
-import { Space_Grotesk } from "next/font/google";
 import "@/estilos/globales.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -7,11 +6,6 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import BarraNavegacion from "@/componentes/BarraNavegacion/BarraNavegacion";
 import PiePagina from "@/componentes/PiePagina/PiePagina";
 import CookieConsent from "@/componentes/CookieConsent/CookieConsent";
-
-const space = Space_Grotesk({
-    subsets: ["latin"],
-    display: "swap",
-});
 
 const DOMAIN = "https://lateralverde.pe";
 const OG_IMAGE = "/og-default.png";
@@ -89,7 +83,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
         <html lang="es">
-            <body className={space.className}>
+            <body>
                 <BarraNavegacion />
                 {children}
                 <PiePagina />

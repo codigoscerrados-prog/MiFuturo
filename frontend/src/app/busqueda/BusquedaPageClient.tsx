@@ -57,7 +57,7 @@ export default function BusquedaPageClient() {
     }, [filtrosDesdeQuery]);
 
     return (
-        <main className={styles.page} style={{ marginTop: "65px" }}>
+        <main className={styles.page}>
             <div className="contenedor">
                 <BuscadorCanchas
                     filtros={filtros}

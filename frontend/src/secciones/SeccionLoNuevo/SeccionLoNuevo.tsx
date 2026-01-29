@@ -342,7 +342,7 @@ function mapComplejosFromApi(complejos: ComplejoApi[]) {
         };
     });
 
-    return items.slice(0, 9);
+    return items.slice(0, 15);
 }
 
 type ComplejoConCoordenadas = Complejo & {
@@ -469,10 +469,10 @@ export default function SeccionLoNuevo() {
             return Array.from({ length: 9 }, (_, i) => ({ id: `s-${i}`, placeholder: true }));
         }
         const base: ComplejoCard[] = [...itemsOrdenados];
-        while (base.length < 9) {
+        while (base.length < 15) {
             base.push({ id: `p-${base.length}`, placeholder: true });
         }
-        return base.slice(0, 9);
+        return base.slice(0, 15);
     }, [cargando, itemsOrdenados, vacio]);
 
     const showGeoStatus = ubicacionCargando || Boolean(geoError);
@@ -616,7 +616,30 @@ export default function SeccionLoNuevo() {
                         <h2 className={styles.titulo}>Lo nuevo en tu zona</h2>
                         <p className={styles.subtitulo}>Descubre complejos recien publicados y reserva en minutos.</p>
                     </div>
-                    <div className={styles.controles} aria-hidden="true" />
+                    <div className={styles.controles} aria-label="Control del carrusel">
+                        <button
+                            type="button"
+                            className={`btn btn-sm btn-light ${styles.ctrlBtn}`}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                scrollByDir("prev");
+                            }}
+                            aria-label="Mostrar complejos anteriores"
+                        >
+                            <i className="bi bi-chevron-left" aria-hidden="true"></i>
+                        </button>
+                        <button
+                            type="button"
+                            className={`btn btn-sm btn-light ${styles.ctrlBtn}`}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                scrollByDir("next");
+                            }}
+                            aria-label="Mostrar siguientes complejos"
+                        >
+                            <i className="bi bi-chevron-right" aria-hidden="true"></i>
+                        </button>
+                    </div>
                 </div>
 
                 {showGeoStatus && (
@@ -701,6 +724,22 @@ export default function SeccionLoNuevo() {
                                             <div className={styles.cardTop}>
                                                 <h3 className={styles.cardTitulo}>{card.nombre}</h3>
                                                 {card.zona && <span className={styles.zona}>{card.zona}</span>}
+                                                {(card.departamento || card.distrito) && (
+                                                    <div className={styles.locationMeta}>
+                                                        {card.departamento && (
+                                                            <span className={styles.locationItem}>
+                                                                <span className={styles.locationLabel}>Departamento</span>
+                                                                <span className={styles.locationValue}>{card.departamento}</span>
+                                                            </span>
+                                                        )}
+                                                        {card.distrito && (
+                                                            <span className={styles.locationItem}>
+                                                                <span className={styles.locationLabel}>Distrito</span>
+                                                                <span className={styles.locationValue}>{card.distrito}</span>
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                )}
                                             </div>
 
                                             {chips.length > 0 && (

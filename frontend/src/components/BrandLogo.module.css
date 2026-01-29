@@ -4,6 +4,7 @@
   gap: 0.75rem;
   line-height: 1;
   text-decoration: none;
+  color: var(--brand-logo-color, #fff);
 }
 
 .full {

@@ -134,14 +134,19 @@
     position: absolute;
     inset: -1px;
     pointer-events: none;
-    background: radial-gradient(520px 200px at 35% 0%, rgba(255, 255, 255, 0.25), transparent 60%);
-    opacity: 0.7;
+    background: radial-gradient(520px 200px at 35% 0%, rgba(255, 255, 255, 0.35), transparent 60%);
+    opacity: 0.75;
 }
 
 .form {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    background: rgba(15, 23, 42, 0.75);
+    padding: 18px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45);
 }
 
 .form input,
@@ -180,6 +185,11 @@
 .form button:hover {
     transform: translateY(-2px);
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+.form label {
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 700;
 }
 
 .oauthStack {

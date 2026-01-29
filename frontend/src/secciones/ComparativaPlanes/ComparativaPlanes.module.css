@@ -4,6 +4,7 @@
   isolation: isolate;
   background: #0b1220;
   color: #fff;
+  font-family: "Montserrat", "Inter", var(--font-sans);
 }
 
 .seccion > .container-fluid {
@@ -76,8 +77,8 @@
 .premiumHead {
   background: rgba(255, 255, 255, 0.04);
   position: relative;
-  border-left: 1px solid rgba(255, 255, 255, 0.4);
-  border-right: 1px solid rgba(255, 255, 255, 0.4);
+  border-left: 1px solid rgba(255, 255, 255, 0.45);
+  border-right: 1px solid rgba(255, 255, 255, 0.45);
 }
 
 .premiumHeadInner {
@@ -120,14 +121,21 @@
 }
 
 .ctaInline {
-  border-radius: 16px;
-  padding: 8px 18px;
+  border-radius: 20px;
+  padding: 10px 26px;
   font-weight: 700;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
-  background: linear-gradient(135deg, #20c75f, #10b981);
+  background: linear-gradient(135deg, #22c67c, #0fc47f);
   color: #0b1220;
-  box-shadow: 0 20px 45px rgba(16, 185, 129, 0.45);
+  box-shadow: 0 25px 60px rgba(16, 185, 129, 0.55);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.ctaInline:hover,
+.ctaInline:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 30px 70px rgba(16, 185, 129, 0.5);
 }
 
 .ctaInline:focus-visible {
@@ -138,7 +146,8 @@
 .table tbody th,
 .table tbody td {
   padding: 14px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .table tbody tr:last-child th,
@@ -154,6 +163,10 @@
 
 .cell {
   text-align: center;
+}
+
+.table tbody td {
+  font-weight: 600;
 }
 
 .premiumCell {
@@ -218,7 +231,7 @@
   justify-content: space-between;
   gap: 12px;
   padding-bottom: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .listItem:last-child {

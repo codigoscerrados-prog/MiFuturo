@@ -11,7 +11,7 @@
   background-image: url("/fondo_lonuevo.jpg");
   background-size: cover;
   background-position: center;
-  transition: transform var(--transicion-base), box-shadow var(--transicion-base), border-color var(--transicion-fast);
+  transition: box-shadow var(--transicion-base), border-color var(--transicion-fast);
   width: 100%;
 }
 
@@ -36,7 +36,6 @@
 .banner:hover {
   border-color: var(--bordeHover);
   box-shadow: var(--sombra-lg);
-  transform: translateY(-2px);
 }
 
 .contenido {

@@ -1,5 +1,5 @@
 .seccion {
-  padding: 0;
+  padding: clamp(48px, 5vw, 72px) 0;
   position: relative;
   isolation: isolate;
   background: #0b1220;

@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+import BrandLogo from "@/components/BrandLogo";
 import styles from "./SeccionIniciarSesion.module.css";
 import { apiFetch, apiUrl } from "@/lib/api";
 import { getRoleFromToken, rutaPorRole, setToken } from "@/lib/auth";
@@ -250,6 +251,10 @@ export default function SeccionIniciarSesion() {
                 <div className={styles.cardGrid}>
                     {/* LADO IZQUIERDO */}
                     <aside className={styles.cardSide}>
+                        <div className={styles.brandRow}>
+                            <BrandLogo href="/" variant="compact" size="sm" />
+                        </div>
+
                         <div className={styles.badge}>
                             <svg className={styles.floatingIcon} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                                 <path d="M12 2L2 7l10 5 10-5-10-5z" />

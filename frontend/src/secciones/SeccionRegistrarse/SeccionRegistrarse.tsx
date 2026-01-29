@@ -2,8 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import styles from "./SeccionRegistrarse.module.css";
 import Link from "next/link";
+import BrandLogo from "@/components/BrandLogo";
+
+import styles from "./SeccionRegistrarse.module.css";
 import { apiFetch, apiUrl } from "@/lib/api";
 import { getRoleFromToken, rutaPorRole, setToken } from "@/lib/auth";
 
@@ -169,6 +171,9 @@ export default function SeccionRegistrarse({
         <section className={seccionClass}>
             <div className={`contenedor ${styles.grid}`}>
                 <header className={styles.cabecera}>
+                    <div className={styles.brandRow}>
+                        <BrandLogo href="/" variant="compact" size={compact ? "xs" : "sm"} />
+                    </div>
                     <p className={styles.badge}>{headerBadge}</p>
                     <h1 className={styles.titulo}>{headerTitulo}</h1>
                     <p className={styles.subtitulo}>{headerSubtitulo}</p>

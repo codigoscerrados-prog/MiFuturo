@@ -80,8 +80,8 @@ body {
 
 :is(body, #__next) > main,
 main {
-    padding-top: calc(var(--navH, 76px) + 1.25rem);
-    min-height: calc(100vh - var(--navH, 76px));
+    padding-top: calc(var(--navH, 20px) + 1.25rem);
+    min-height: calc(100vh - var(--navH, 20px));
 }
 
 /* ===== Box Sizing Universal ===== */

@@ -234,13 +234,13 @@ export default function SeccionIniciarSesion() {
 
     return (
         <section className={styles.seccion}>
+            <div className={styles.brandHero}>
+                <BrandLogo href="/" variant="compact" size="lg" className={styles.brandHeroLogo} />
+            </div>
             <div className={styles.loginCard} data-loading={cargando ? "true" : "false"} data-error={error ? "true" : "false"}>
                 <div className={styles.cardGrid}>
                     {/* LADO IZQUIERDO */}
                     <aside className={styles.cardSide}>
-                        <div className={styles.brandRow}>
-                            <BrandLogo href="/" variant="compact" size="sm" />
-                        </div>
 
                         <div className={styles.badge}>
                             <svg className={styles.floatingIcon} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">

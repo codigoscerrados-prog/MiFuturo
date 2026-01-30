@@ -73,7 +73,6 @@
 }
 
 .tableWrap {
-  width: 100%;
 }
 
 .tableCard {
@@ -94,18 +93,27 @@
 
 .table {
   margin: 0;
+  width: 100%;
   --bs-table-bg: transparent;
   border-collapse: separate;
   border-spacing: 0;
-  table-layout: fixed;
-  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  table-layout: auto;
+}
+
+.table th:nth-child(1),
+.table td:nth-child(1) {
+  text-align: left;
+  max-width: 360px;
+  white-space: normal;
 }
 
 .table th:nth-child(2),
 .table td:nth-child(2),
 .table th:nth-child(3),
 .table td:nth-child(3) {
-  width: 220px;
+  width: 200px;
+  text-align: center;
 }
 
 .table thead th {

@@ -1,5 +1,5 @@
 .seccion {
-  padding: clamp(32px, 5vw, 48px) 0 0;
+  padding: 0;
   display: flex;
   justify-content: center;
   align-items: stretch;

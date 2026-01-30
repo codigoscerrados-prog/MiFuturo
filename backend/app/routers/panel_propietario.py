@@ -753,7 +753,10 @@ def _month_range(year: int, month: int):
         end = datetime(year, month + 1, 1)
     return start, end
 
-@router.get("/reservas/mes")
+@router.get(
+    "/reservas/mes",
+    dependencies=[Depends(require_role("propietario", "admin"))],
+)
 def reservas_mes(
     year: int = Query(..., ge=2000, le=2100),
     month: int = Query(..., ge=1, le=12),

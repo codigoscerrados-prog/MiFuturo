@@ -7,7 +7,7 @@ from pathlib import Path
 import uuid
 
 from app.core.deps import get_db, get_usuario_actual, require_role
-from app.core.images import resize_square_image
+from app.core.images import resize_square_image, safe_unlink_upload
 from app.core.seguridad import decodificar_token
 from app.core.slug import slugify
 from app.modelos.modelos import Complejo, ComplejoImagen, ComplejoLike, Cancha, Reserva, User
@@ -184,7 +184,7 @@ async def subir_imagenes_complejo(
 
     existentes = db.query(ComplejoImagen).filter(ComplejoImagen.complejo_id == complejo_id).count()
     if existentes + len(archivos) > 10:
-            raise HTTPException(400, "Maximo 10 imagenes por complejo")
+        raise HTTPException(400, "Maximo 10 imagenes por complejo")
 
     ultimo = (
         db.query(ComplejoImagen)
@@ -251,8 +251,11 @@ def eliminar_imagen_complejo(
     if not img:
         raise HTTPException(404, "Imagen no encontrada")
 
+    url = img.url
     db.delete(img)
     db.commit()
+    if url:
+        safe_unlink_upload(url)
     return {"ok": True}
 
 

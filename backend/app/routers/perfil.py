@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, Request
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from sqlalchemy.orm import Session
 from pathlib import Path
 import uuid
@@ -6,6 +6,7 @@ from datetime import datetime, timedelta, timezone
 import math
 
 from app.core.deps import get_db, get_usuario_actual
+from app.core.images import safe_unlink_upload
 from app.modelos.modelos import User, Suscripcion, Plan
 from app.esquemas.panel import PerfilOut, PerfilUpdate, PlanActualOut
 
@@ -43,7 +44,6 @@ def actualizar(payload: PerfilUpdate, db: Session = Depends(get_db), u: User = D
 
 @router.post("/me/avatar")
 async def subir_avatar(
-    request: Request,
     archivo: UploadFile = File(...),
     db: Session = Depends(get_db),
     u: User = Depends(get_usuario_actual),
@@ -62,9 +62,10 @@ async def subir_avatar(
     folder.mkdir(parents=True, exist_ok=True)
     (folder / name).write_bytes(data)
 
-    base = str(request.base_url).rstrip("/")
-    url = f"{base}/static/perfiles/{u.id}/{name}"
+    url = f"/uploads/perfiles/{u.id}/{name}"
 
+    if u.avatar_url:
+        safe_unlink_upload(u.avatar_url)
     u.avatar_url = url
     db.add(u)
     db.commit()

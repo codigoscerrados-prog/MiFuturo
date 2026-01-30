@@ -7,6 +7,14 @@ type CallbackResponse = {
     next?: string;
 };
 
+function sanitizeNext(value: string | null | undefined): string | null {
+    if (!value) return null;
+    const trimmed = value.trim();
+    if (!trimmed.startsWith("/") || trimmed.startsWith("//")) return null;
+    if (trimmed.includes("://")) return null;
+    return trimmed;
+}
+
 export async function GET(request: Request) {
     const url = new URL(request.url);
     const code = url.searchParams.get("code");
@@ -44,8 +52,9 @@ export async function GET(request: Request) {
     const redirectUrl = new URL("/auth/callback/google", redirectBase);
     redirectUrl.searchParams.set("token", data.access_token);
     redirectUrl.searchParams.set("needs_profile", data.needs_profile ? "1" : "0");
-    if (data.next) {
-        redirectUrl.searchParams.set("next", data.next);
+    const safeNext = sanitizeNext(data.next);
+    if (safeNext) {
+        redirectUrl.searchParams.set("next", safeNext);
     }
 
     return NextResponse.redirect(redirectUrl);

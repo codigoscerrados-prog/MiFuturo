@@ -1,5 +1,19 @@
 import { NextResponse } from "next/server";
 
+function sanitizeNext(value: string | null): string | null {
+    if (!value) return null;
+    const trimmed = value.trim();
+    if (!trimmed.startsWith("/") || trimmed.startsWith("//")) return null;
+    if (trimmed.includes("://")) return null;
+    return trimmed;
+}
+
+function normalizeRole(value: string | null): string | null {
+    if (!value) return null;
+    const trimmed = value.trim().toLowerCase();
+    return trimmed === "usuario" || trimmed === "propietario" ? trimmed : null;
+}
+
 export async function GET(request: Request) {
     const clientId = process.env.GOOGLE_CLIENT_ID || "";
     if (!clientId) {
@@ -17,9 +31,9 @@ export async function GET(request: Request) {
     const redirectUri = `${normalizedSiteUrl}/api/auth/callback/google`;
 
     const statePayload: Record<string, string> = {};
-    const role = url.searchParams.get("role");
+    const role = normalizeRole(url.searchParams.get("role"));
     if (role) statePayload.role = role;
-    const next = url.searchParams.get("next");
+    const next = sanitizeNext(url.searchParams.get("next"));
     if (next) statePayload.next = next;
 
     const params = new URLSearchParams({

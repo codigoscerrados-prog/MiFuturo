@@ -13,14 +13,11 @@ def _get_from_email() -> Optional[str]:
 
 
 def _is_configured() -> bool:
-    return all(
-        (
-            settings.SMTP_HOST,
-            settings.SMTP_USER,
-            settings.SMTP_PASS,
-            _get_from_email(),
-        )
-    )
+    if not settings.SMTP_HOST or not _get_from_email():
+        return False
+    if settings.SMTP_USER and not settings.SMTP_PASS:
+        return False
+    return True
 
 
 def send_email(to_email: str, subject: str, text: str, html: str | None = None) -> None:

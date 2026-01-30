@@ -22,9 +22,7 @@ function getRoleFromJwt(token: string): string | null {
     }
 }
 
-// ✅ Antes: export function middleware(req: NextRequest)
-// ✅ Ahora:
-export function proxy(req: NextRequest) {
+export function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
     const token = req.cookies.get("token")?.value;
 

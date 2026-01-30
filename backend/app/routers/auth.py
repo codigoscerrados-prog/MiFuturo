@@ -12,7 +12,6 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.core.deps import get_db, get_usuario_actual
 from app.core.config import settings
 from app.core.seguridad import hash_password, verify_password, crear_token
-from app.core.email import send_email_code
 from app.modelos.modelos import User, Plan, Suscripcion, LoginOtp
 from app.utils.mailer import send_email
 from app.esquemas.esquemas import (
@@ -29,6 +28,21 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 class PasswordVerifyIn(BaseModel):
     password: str
+
+
+def _sanitize_next(value: str | None) -> str | None:
+    if not value:
+        return None
+    trimmed = value.strip()
+    if not trimmed or len(trimmed) > 500:
+        return None
+    if "://" in trimmed or trimmed.startswith("//"):
+        return None
+    if not trimmed.startswith("/"):
+        return None
+    if any(ch in trimmed for ch in ("\r", "\n")):
+        return None
+    return trimmed
 
 
 def _post_form(url: str, data: dict) -> dict:
@@ -51,14 +65,17 @@ def _get_json(url: str, headers: dict | None = None) -> dict:
 
 @router.post("/register", response_model=UsuarioOut)
 def register(payload: UsuarioCrear, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
-    if db.query(User).filter(User.email == payload.email).first():
+    if payload.role not in ("usuario", "propietario"):
+        raise HTTPException(status_code=400, detail="Rol invalido")
+    email = payload.email.strip().lower()
+    if db.query(User).filter(User.email == email).first():
         raise HTTPException(status_code=400, detail="Email ya registrado")
 
     u = User(
         role=payload.role,
         first_name=payload.first_name,
         last_name=payload.last_name,
-        email=payload.email,
+        email=email,
         hashed_password=hash_password(payload.password),
         business_name=payload.business_name,
         phone=payload.phone,
@@ -110,7 +127,8 @@ def register(payload: UsuarioCrear, background_tasks: BackgroundTasks, db: Sessi
 
 @router.post("/login", response_model=TokenOut)
 def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    u = db.query(User).filter(User.email == form.username).first()
+    username = (form.username or "").strip().lower()
+    u = db.query(User).filter(User.email == username).first()
     if not u or not verify_password(form.password, u.hashed_password):
         raise HTTPException(status_code=401, detail="Credenciales invalidas")
 
@@ -139,7 +157,9 @@ def google_login(
         if normalized_role in {"usuario", "propietario"}:
             state_payload["role"] = normalized_role
     if next:
-        state_payload["next"] = next
+        safe_next = _sanitize_next(next)
+        if safe_next:
+            state_payload["next"] = safe_next
 
     if state_payload:
         params["state"] = json.dumps(state_payload)
@@ -193,7 +213,7 @@ def google_callback(
                         requested_role = candidate
                 next_candidate = state_payload.get("next")
                 if isinstance(next_candidate, str) and next_candidate.strip():
-                    requested_next = next_candidate.strip()
+                    requested_next = _sanitize_next(next_candidate)
         except Exception:
             pass
 
@@ -266,12 +286,12 @@ def google_callback(
     frontend = settings.FRONTEND_ORIGIN.rstrip("/")
     redirect_url = f"{frontend}/auth/callback/google?token={token}&needs_profile={'1' if created else '0'}"
     if requested_next:
-        redirect_url += f"&next={quote(requested_next, safe='/:?&=')}"
+        redirect_url += f"&next={quote(requested_next, safe='/?:&=')}"
     return RedirectResponse(redirect_url)
 
 
 @router.post("/otp/request")
-def request_otp(payload: OtpRequestIn, db: Session = Depends(get_db)):
+def request_otp(payload: OtpRequestIn, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     """
     Genera un codigo OTP de 6 digitos y lo envia por email.
     """
@@ -301,7 +321,14 @@ def request_otp(payload: OtpRequestIn, db: Session = Depends(get_db)):
     db.commit()
 
     # Envia siempre el correo si la configuracion esta lista.
-    send_email_code(email, code)
+    subject = "Tu codigo de acceso"
+    text = (
+        "Tu codigo de acceso es:\n"
+        f"{code}\n\n"
+        "Este codigo expira en 10 minutos.\n"
+        "Si no solicitaste este codigo, ignora este correo."
+    )
+    background_tasks.add_task(send_email, email, subject, text)
 
     return {"message": "Si el correo existe, enviaremos un codigo."}
 

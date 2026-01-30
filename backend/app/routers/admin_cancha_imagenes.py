@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, Request
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from sqlalchemy.orm import Session
 from pathlib import Path
 import uuid
 
 from app.core.deps import get_db, require_role
+from app.core.images import safe_unlink_upload
 from app.modelos.modelos import Cancha, CanchaImagen
 
 router = APIRouter(prefix="/admin/canchas", tags=["admin-canchas-imagenes"])
@@ -17,7 +18,7 @@ ALLOWED = {
 }
 
 @router.post("/{cancha_id}/imagenes/upload", dependencies=[Depends(require_role("admin"))])
-async def subir_imagen(cancha_id: int, request: Request, archivo: UploadFile = File(...), db: Session = Depends(get_db)):
+async def subir_imagen(cancha_id: int, archivo: UploadFile = File(...), db: Session = Depends(get_db)):
     cancha = db.query(Cancha).filter(Cancha.id == cancha_id).first()
     if not cancha:
         raise HTTPException(404, "Cancha no encontrada")
@@ -36,8 +37,7 @@ async def subir_imagen(cancha_id: int, request: Request, archivo: UploadFile = F
     folder.mkdir(parents=True, exist_ok=True)
     (folder / name).write_bytes(data)
 
-    base = str(request.base_url).rstrip("/")
-    url = f"{base}/static/canchas/{cancha_id}/{name}"
+    url = f"/uploads/canchas/{cancha_id}/{name}"
 
     # orden automático al final
     ultimo = (
@@ -71,6 +71,9 @@ def eliminar_imagen(imagen_id: int, db: Session = Depends(get_db)):
     img = db.query(CanchaImagen).filter(CanchaImagen.id == imagen_id).first()
     if not img:
         raise HTTPException(404, "Imagen no encontrada")
+    url = img.url
     db.delete(img)
     db.commit()
+    if url:
+        safe_unlink_upload(url)
     return {"ok": True}

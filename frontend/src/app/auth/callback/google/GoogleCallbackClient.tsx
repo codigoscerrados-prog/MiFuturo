@@ -2,8 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { apiFetch } from "@/lib/api";
 import { getRoleFromToken, rutaPorRole, setToken } from "@/lib/auth";
+
+function sanitizeNext(value: string | null): string | null {
+    if (!value) return null;
+    const trimmed = value.trim();
+    if (!trimmed.startsWith("/") || trimmed.startsWith("//")) return null;
+    if (trimmed.includes("://")) return null;
+    return trimmed;
+}
 
 export default function GoogleCallbackClient() {
     const router = useRouter();
@@ -24,7 +31,8 @@ export default function GoogleCallbackClient() {
             setToken(token);
 
             const role = getRoleFromToken(token);
-            const target = next || rutaPorRole(role);
+            const safeNext = sanitizeNext(next);
+            const target = safeNext || rutaPorRole(role);
             router.replace(target);
         };
 

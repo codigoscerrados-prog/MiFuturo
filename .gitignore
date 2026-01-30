@@ -16,8 +16,12 @@ backend/.venv/
 backend/__pycache__/
 __pycache__/
 *.pyc
+backend/uploads/
 
 # Editor/OS
 .vscode/
 .idea/
 .DS_Store
+
+# Local tooling/output
+rutas_archivos.txt

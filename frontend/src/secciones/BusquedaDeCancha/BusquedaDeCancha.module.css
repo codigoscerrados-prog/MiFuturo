@@ -194,6 +194,7 @@
   margin: 0;
   font-weight: 900;
   font-size: 20px;
+  color: #fff;
 }
 
 .meta {
@@ -247,10 +248,16 @@
   padding: 10px 16px;
   border-radius: 999px;
   transition: transform var(--busqueda-fast), box-shadow var(--busqueda-fast);
+  color: #fff;
 }
 
 .botones :global(.btn:hover) {
   transform: translateY(-1px);
+}
+
+.botones :global(.btn.btn-outline-secondary) {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.6);
 }
 
 .paginacion {
@@ -279,6 +286,11 @@
 .pagBtn {
   min-width: 44px;
   padding: 6px 12px;
+  color: #fff;
+}
+
+.pagBtn.btn-outline-secondary {
+  border-color: rgba(255, 255, 255, 0.6);
 }
 
 .pagNumActivo {

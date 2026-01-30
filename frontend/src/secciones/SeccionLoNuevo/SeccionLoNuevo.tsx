@@ -723,7 +723,6 @@ export default function SeccionLoNuevo() {
                                         <div className={styles.cardBody}>
                                             <div className={styles.cardTop}>
                                                 <h3 className={styles.cardTitulo}>{card.nombre}</h3>
-                                                {card.zona && <span className={styles.zona}>{card.zona}</span>}
                                                 {(card.departamento || card.distrito) && (
                                                     <div className={styles.locationMeta}>
                                                         {card.departamento && (

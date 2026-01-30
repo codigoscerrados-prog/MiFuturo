@@ -54,9 +54,11 @@
   table-layout: fixed;
 }
 
+.table th:nth-child(2),
+.table td:nth-child(2),
 .table th:nth-child(3),
 .table td:nth-child(3) {
-  width: 240px;
+  width: 220px;
 }
 
 .table thead th {
@@ -133,8 +135,8 @@
   font-weight: 700;
   letter-spacing: 0.3em;
   text-transform: uppercase;
-  background: #22c55e;
-  color: #fff;
+  background: linear-gradient(135deg, #20d17c, #10b981);
+  color: #0b1220;
   box-shadow: 0 25px 60px rgba(16, 185, 129, 0.55);
   transition: transform 200ms ease, box-shadow 200ms ease, background 200ms ease;
 }
@@ -142,8 +144,8 @@
 .ctaInline:hover,
 .ctaInline:focus-visible {
   transform: translateY(-1px);
-  box-shadow: 0 30px 70px rgba(16, 185, 129, 0.75);
-  background: #15803d;
+  box-shadow: 0 30px 70px rgba(14, 165, 233, 0.75);
+  background: linear-gradient(135deg, #0ea5e9, #38bdf8);
 }
 
 .ctaInline:focus-visible {

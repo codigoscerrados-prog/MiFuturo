@@ -494,7 +494,7 @@ export default function SeccionLoNuevo() {
             const styles = getComputedStyle(el);
             const gapRaw = styles.columnGap || styles.gap || "0px";
             const gap = Number.parseFloat(gapRaw) || 0;
-            const stepSize = (first.offsetWidth + gap) * 2;
+            const stepSize = first.offsetWidth + gap;
             const max = el.scrollWidth - el.clientWidth - 2;
             if (el.scrollLeft >= max) {
                 el.scrollTo({ left: 0, behavior: "smooth" });
@@ -503,7 +503,7 @@ export default function SeccionLoNuevo() {
             el.scrollBy({ left: stepSize, behavior: "smooth" });
         }
 
-        autoplayRef.current = window.setInterval(step, 3800);
+        autoplayRef.current = window.setInterval(step, 5200);
         return () => {
             if (autoplayRef.current) window.clearInterval(autoplayRef.current);
         };

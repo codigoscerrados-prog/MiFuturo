@@ -17,8 +17,8 @@
 
 .paginaBannerRegistro {
   position: relative;
-  min-height: calc(100vh - 130px);
-  padding: 30px 0 4rem;
+  min-height: calc(100vh - var(--navH, 80px));
+  padding: calc(var(--navH, 30px) + 1.25rem) 0 4rem;
   background-image:
     linear-gradient(180deg, rgba(2, 6, 23, 0.92) 0%, rgba(2, 6, 23, 0.6) 35%, rgba(2, 6, 23, 0.3) 100%),
     url("/banner.avif");

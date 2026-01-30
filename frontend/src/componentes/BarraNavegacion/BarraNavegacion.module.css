@@ -96,12 +96,17 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  color: var(--nav-text);
+  color: #fff;
   --brand-logo-color: #fff;
 }
 
 .header[data-scrolled="true"] .brand {
-  --brand-logo-color: var(--nav-text);
+  --brand-logo-color: #fff;
+}
+
+.brand:hover,
+.brand:focus-visible {
+  color: #fff;
 }
 
 .logoIcon {

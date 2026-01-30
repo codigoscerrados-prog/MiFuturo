@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-export const SEO_DOMAIN = "https://lateralverde.pe";
+export const SEO_DOMAIN = "https://lateralverde.com";
 export const OG_IMAGE = "/og-default.png";
 
 function canonicalUrl(path: string) {
@@ -44,7 +44,7 @@ export function buildPageMetadata({
             title,
             description,
             url: canonical,
-            siteName: "LateralVerde",
+            siteName: "Lateral Verde",
             locale: "es_PE",
             type: "website",
             images: [

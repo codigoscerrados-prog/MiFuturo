@@ -5,6 +5,11 @@
     padding: 0;
 }
 
+.editing .tarjeta {
+    border-color: rgba(37, 99, 235, 0.45);
+    box-shadow: 0 20px 40px rgba(37, 99, 235, 0.18);
+}
+
 /* ===== Header ===== */
 .header {
     display: flex;
@@ -13,6 +18,18 @@
     gap: 12px;
     flex-wrap: wrap;
     margin-bottom: 12px;
+}
+
+.editBadge {
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 950;
+    color: #1e3a8a;
+    background: rgba(59, 130, 246, 0.16);
+    border: 1px solid rgba(59, 130, 246, 0.35);
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
 }
 
 .kicker {
@@ -62,6 +79,10 @@
 /* ===== Cards ===== */
 .tarjeta {
     padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: var(--radio-xl);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.88));
+    box-shadow: 0 14px 32px rgba(15, 23, 42, 0.12);
 }
 
 .stack {
@@ -71,7 +92,7 @@
 
 .divisor {
     height: 1px;
-    background: var(--borde);
+    background: rgba(15, 23, 42, 0.12);
     margin: 14px 0;
 }
 
@@ -108,27 +129,27 @@
 /* ===== Layout ===== */
 .gridPerfil {
     display: grid;
-    grid-template-columns: 380px 1fr;
-    gap: 14px;
+    grid-template-columns: 420px 1fr;
+    gap: 16px;
     align-items: start;
 }
 
 /* ===== Avatar ===== */
 .avatarCard {
     display: grid;
-    grid-template-columns: 92px 1fr;
+    grid-template-columns: 132px 1fr;
     gap: 12px;
     align-items: center;
 }
 
 .avatarWrap {
-    width: 92px;
-    height: 92px;
+    width: 132px;
+    height: 132px;
     border-radius: 999px;
-    border: 1px solid var(--borde);
-    background: var(--superficie);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.6);
     overflow: hidden;
-    box-shadow: var(--sombra-sm);
+    box-shadow: 0 18px 34px rgba(15, 23, 42, 0.18);
     display: grid;
     place-items: center;
     transition: box-shadow var(--transicion-fast), border-color var(--transicion-fast), transform var(--transicion-fast);
@@ -148,7 +169,7 @@
     place-items: center;
     font-weight: 950;
     color: var(--azulMarino);
-    font-size: 22px;
+    font-size: 30px;
     letter-spacing: 0.4px;
 }
 
@@ -214,14 +235,14 @@
 }
 
 .btnPrimary {
-    border: 1px solid rgba(15, 23, 42, 0.16);
-    background: linear-gradient(180deg, rgba(15, 23, 42, 0.08), rgba(15, 23, 42, 0.03));
-    color: var(--azulMarino);
+    border: none;
+    background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #7c3aed 100%);
+    color: #fff;
     padding: 10px 12px;
-    border-radius: 14px;
+    border-radius: 16px;
     font-weight: 950;
     cursor: pointer;
-    box-shadow: var(--sombra-sm);
+    box-shadow: 0 12px 26px rgba(37, 99, 235, 0.25);
     transition: transform var(--transicion-fast), box-shadow var(--transicion-fast), border-color var(--transicion-fast), background var(--transicion-fast);
 }
 
@@ -231,15 +252,21 @@
 }
 
 .btnGhost {
-    border: 1px solid var(--borde);
-    background: linear-gradient(180deg, var(--blanco), var(--superficie));
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    background: rgba(255, 255, 255, 0.75);
     color: var(--azulMarino);
     padding: 10px 12px;
-    border-radius: 14px;
+    border-radius: 16px;
     font-weight: 950;
     cursor: pointer;
-    box-shadow: var(--sombra-sm);
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
     transition: transform var(--transicion-fast), box-shadow var(--transicion-fast), border-color var(--transicion-fast), background var(--transicion-fast);
+}
+
+.btnPrimary:hover,
+.btnGhost:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 30px rgba(15, 23, 42, 0.18);
 }
 
 .btnPrimary:focus-visible,
@@ -290,18 +317,29 @@
 }
 
 .input {
-    height: 42px;
+    height: 44px;
     padding: 10px 12px;
     border-radius: 14px;
-    border: 1px solid var(--borde);
-    background: var(--blanco);
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    background: rgba(255, 255, 255, 0.9);
     color: var(--texto);
-    box-shadow: var(--sombra-sm);
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
     transition: border-color var(--transicion-fast), box-shadow var(--transicion-fast), background var(--transicion-fast);
 }
 
 .input:read-only {
-    background: linear-gradient(180deg, var(--blanco), var(--superficie));
+    background: rgba(255, 255, 255, 0.7);
+}
+
+.inputReadonly {
+    border-style: dashed;
+    box-shadow: none;
+}
+
+.inputEditable {
+    background: #fff;
+    border-color: rgba(37, 99, 235, 0.45);
+    box-shadow: 0 10px 22px rgba(37, 99, 235, 0.18);
 }
 
 /* ===== Hint box ===== */

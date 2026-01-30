@@ -8,6 +8,7 @@ import styles from "./SeccionPanel.module.css";
 
 import { clearToken, getRoleFromToken, getToken, rutaPorRole } from "@/lib/auth";
 import { apiFetch } from "@/lib/api";
+import BrandLogo from "@/components/BrandLogo";
 
 import PanelReservasPropietario from "./SeccionReservas";
 import PanelCanchasPropietario from "./SeccionCanchas";
@@ -405,9 +406,7 @@ export default function SeccionPanel({
                         <div className={styles.sidebarCard}>
                             <Link className={styles.brandLink} href="/" aria-label="Ir al inicio">
                                 <div className={styles.brand}>
-                                    <div className={styles.brandIcon} aria-hidden="true">
-                                        <i className="bi bi-building"></i>
-                                    </div>
+                                    <BrandLogo variant="icon" size="sm" className={styles.brandLogo} />
                                     <div>
                                         <p className={styles.kicker}>Proyecto Canchas</p>
                                         <p className={styles.brandTitle}>Panel</p>

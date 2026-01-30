@@ -196,7 +196,7 @@ export default function SeccionPerfil(props: SeccionPerfilProps) {
     }
 
     return (
-        <section className={styles.seccion}>
+        <section className={cn(styles.seccion, editMode && styles.editing)}>
             <div className={styles.header}>
                 <div>
                     <p className={styles.kicker}>Perfil</p>
@@ -205,6 +205,7 @@ export default function SeccionPerfil(props: SeccionPerfilProps) {
                         Revisa tu información y confirma con qué cuenta estás logueada
                     </p>
                 </div>
+                {editMode ? <span className={styles.editBadge}>Editando</span> : null}
             </div>
 
             {error ? <div className={styles.alertError}>{error}</div> : null}
@@ -214,7 +215,7 @@ export default function SeccionPerfil(props: SeccionPerfilProps) {
             ) : (
                 <div className={styles.gridPerfil}>
                     {/* Avatar card */}
-                    <div className={cn(styles.tarjeta, styles.stack)}>
+                    <div className={cn(styles.tarjeta, styles.stack, editMode ? styles.cardEditing : styles.cardReadonly)}>
                         <div className={styles.avatarCard}>
                             <div className={styles.avatarWrap}>
                                 {me?.avatar_url ? (
@@ -267,7 +268,7 @@ export default function SeccionPerfil(props: SeccionPerfilProps) {
                     </div>
 
                     {/* Datos */}
-                    <div className={cn(styles.tarjeta, styles.stack)}>
+                    <div className={cn(styles.tarjeta, styles.stack, editMode ? styles.cardEditing : styles.cardReadonly)}>
                             <div className={styles.between}>
                                 <div>
                                     <h3 className={styles.subtitulo}>Datos de tu cuenta</h3>
@@ -294,7 +295,7 @@ export default function SeccionPerfil(props: SeccionPerfilProps) {
                             <div className={styles.campo}>
                                 <label className={styles.label}>Nombre</label>
                                 <input
-                                    className={styles.input}
+                                    className={cn(styles.input, editMode ? styles.inputEditable : styles.inputReadonly)}
                                     value={editMode ? draft.first_name : (me?.first_name || "")}
                                     onChange={(e) => setDraft({ ...draft, first_name: e.target.value })}
                                     readOnly={!editMode}
@@ -304,7 +305,7 @@ export default function SeccionPerfil(props: SeccionPerfilProps) {
                             <div className={styles.campo}>
                                 <label className={styles.label}>Apellido</label>
                                 <input
-                                    className={styles.input}
+                                    className={cn(styles.input, editMode ? styles.inputEditable : styles.inputReadonly)}
                                     value={editMode ? draft.last_name : (me?.last_name || "")}
                                     onChange={(e) => setDraft({ ...draft, last_name: e.target.value })}
                                     readOnly={!editMode}
@@ -313,13 +314,13 @@ export default function SeccionPerfil(props: SeccionPerfilProps) {
 
                             <div className={styles.campo}>
                                 <label className={styles.label}>Correo</label>
-                                <input className={styles.input} value={email} readOnly />
+                                <input className={cn(styles.input, styles.inputReadonly)} value={email} readOnly />
                             </div>
 
                             <div className={styles.campo}>
                                 <label className={styles.label}>Teléfono</label>
                                 <input
-                                    className={styles.input}
+                                    className={cn(styles.input, editMode ? styles.inputEditable : styles.inputReadonly)}
                                     value={editMode ? draft.phone : (me?.phone || "")}
                                     onChange={(e) => setDraft({ ...draft, phone: e.target.value })}
                                     readOnly={!editMode}
@@ -330,7 +331,7 @@ export default function SeccionPerfil(props: SeccionPerfilProps) {
                                 <div className={styles.campo}>
                                     <label className={styles.label}>Negocio</label>
                                     <input
-                                        className={styles.input}
+                                        className={cn(styles.input, editMode ? styles.inputEditable : styles.inputReadonly)}
                                         value={editMode ? draft.business_name : (me?.business_name || "")}
                                         onChange={(e) => setDraft({ ...draft, business_name: e.target.value })}
                                         readOnly={!editMode}
@@ -342,7 +343,7 @@ export default function SeccionPerfil(props: SeccionPerfilProps) {
                                 <div className={styles.campo}>
                                     <label className={styles.label}>Posición</label>
                                     <input
-                                        className={styles.input}
+                                        className={cn(styles.input, editMode ? styles.inputEditable : styles.inputReadonly)}
                                         value={editMode ? draft.player_position : (me?.player_position || "")}
                                         onChange={(e) => setDraft({ ...draft, player_position: e.target.value })}
                                         readOnly={!editMode}
@@ -354,7 +355,7 @@ export default function SeccionPerfil(props: SeccionPerfilProps) {
                                 <div className={styles.campo}>
                                     <label className={styles.label}>Dorsal</label>
                                     <input
-                                        className={styles.input}
+                                        className={cn(styles.input, editMode ? styles.inputEditable : styles.inputReadonly)}
                                         type="number"
                                         min={0}
                                         max={99}

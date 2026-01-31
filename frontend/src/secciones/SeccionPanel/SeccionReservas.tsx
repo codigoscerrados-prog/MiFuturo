@@ -479,10 +479,16 @@ export default function PanelReservasPropietario({ token }: { token: string }) {
     }, [dayReservations]);
 
 
-    function selectDateByStr(dateStr: string) {
-        const [yy, mm, dd] = dateStr.split("-").map((x) => Number(x));
-        setSelectedDate(new Date(yy, mm - 1, dd));
-    }
+function selectDateByStr(dateStr: string) {
+    const [yy, mm, dd] = dateStr.split("-").map((x) => Number(x));
+    setSelectedDate(new Date(yy, mm - 1, dd));
+}
+
+function moveWeek(delta: number) {
+    const d = new Date(selectedDate);
+    d.setDate(d.getDate() + delta * 7);
+    setSelectedDate(d);
+}
 
     function openNewReservation(slot?: string) {
         if (!selectedCourtId && canchasActivas.length) setSelectedCourtId(canchasActivas[0].id);

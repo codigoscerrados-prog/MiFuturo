@@ -147,6 +147,7 @@ export default function ComplejoPublicoPage() {
     const [likes, setLikes] = useState(0);
     const [liked, setLiked] = useState(false);
     const descFrameRef = useRef<HTMLIFrameElement | null>(null);
+    const descWrapRef = useRef<HTMLDivElement | null>(null);
     const descObserverRef = useRef<ResizeObserver | null>(null);
     const descMutationRef = useRef<MutationObserver | null>(null);
 
@@ -171,21 +172,31 @@ export default function ComplejoPublicoPage() {
 
     const syncDescHeight = () => {
         const iframe = descFrameRef.current;
+        const wrap = descWrapRef.current;
         if (!iframe) return;
         try {
             const doc = iframe.contentDocument || iframe.contentWindow?.document;
             if (!doc) return;
             iframe.style.height = "1px";
             const height = doc.documentElement.scrollHeight || doc.body?.scrollHeight || 0;
-            if (height) iframe.style.height = `${height}px`;
+            if (height) {
+                iframe.style.height = `${height}px`;
+                if (wrap) wrap.style.height = `${height}px`;
+            }
         } catch {
             // ignore
         }
     };
 
+    const syncDescHeightBurst = () => {
+        syncDescHeight();
+        window.setTimeout(syncDescHeight, 200);
+        window.setTimeout(syncDescHeight, 800);
+    };
+
     useEffect(() => {
         if (!data?.descripcion) return;
-        const t = window.setTimeout(syncDescHeight, 0);
+        const t = window.setTimeout(syncDescHeightBurst, 0);
         const onResize = () => syncDescHeight();
         window.addEventListener("resize", onResize);
         return () => {
@@ -208,7 +219,7 @@ export default function ComplejoPublicoPage() {
             const mutation = new MutationObserver(() => syncDescHeight());
             if (doc.body) mutation.observe(doc.body, { childList: true, subtree: true, attributes: true });
             descMutationRef.current = mutation;
-            syncDescHeight();
+            syncDescHeightBurst();
             return () => {
                 observer.disconnect();
                 mutation.disconnect();
@@ -531,6 +542,26 @@ export default function ComplejoPublicoPage() {
                             </div>
                         ) : null}
 
+                        {data.canchas && data.canchas.length > 0 ? (
+                            <div className={styles.infoBlock}>
+                                <h2 className={styles.sectionTitle}>Canchas</h2>
+                                <div className={styles.canchasGrid}>
+                                    {data.canchas.map((c) => (
+                                        <article key={c.id} className={styles.canchaCard}>
+                                            <div className={styles.canchaBody}>
+                                                <span className={styles.canchaTag}>{data.nombre}</span>
+                                                <h3 className={styles.canchaName}>{c.nombre}</h3>
+                                                <p className={styles.canchaMeta}>
+                                                    {c.tipo} - {c.pasto}
+                                                </p>
+                                                <p className={styles.canchaPrice}>S/ {Number(c.precio_hora || 0).toFixed(0)} /h</p>
+                                            </div>
+                                        </article>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : null}
+
                         <div className={styles.actionBar}>
                             <button
                                 type="button"
@@ -576,13 +607,13 @@ export default function ComplejoPublicoPage() {
                 <section className={styles.section}>
                     <h2 className={styles.sectionTitle}>Descripcion</h2>
                     {data.descripcion ? (
-                        <div className={styles.htmlPreview}>
+                        <div className={styles.htmlPreview} ref={descWrapRef}>
                             <iframe
                                 className={styles.htmlFrame}
                                 sandbox="allow-same-origin allow-forms allow-popups"
                                 srcDoc={buildDescDoc(data.descripcion)}
                                 ref={descFrameRef}
-                                onLoad={syncDescHeight}
+                                onLoad={syncDescHeightBurst}
                                 scrolling="no"
                                 title="Descripcion del complejo"
                             />

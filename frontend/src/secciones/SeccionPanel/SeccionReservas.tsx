@@ -916,6 +916,7 @@ function moveWeek(delta: number) {
                             <div className={styles.weekButtons}>
                                 {weekDates.map((d) => {
                                     const ds = ymd(d);
+                                    if (ds < todayStr) return null;
                                     const label = d.toLocaleDateString("es-ES", { weekday: "short" });
                                     const hasReservation = (dayCache[ds] || []).length > 0;
                                     return (

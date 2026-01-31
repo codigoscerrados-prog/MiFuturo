@@ -103,6 +103,17 @@
     flex-wrap: wrap;
 }
 
+.actionsRow :global(.boton) {
+    text-decoration: none;
+}
+
+.actionsRow :global(.boton):hover {
+    border-color: rgba(34, 197, 94, 0.4);
+    background: rgba(34, 197, 94, 0.1);
+    color: #166534;
+    box-shadow: 0 10px 22px rgba(34, 197, 94, 0.18);
+}
+
 .loadingBox {
     padding: 16px;
     border-radius: 12px;

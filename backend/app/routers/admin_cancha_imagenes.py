@@ -1,10 +1,9 @@
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from sqlalchemy.orm import Session
-from pathlib import Path
 import uuid
 
 from app.core.deps import get_db, require_role
-from app.core.images import safe_unlink_upload
+from app.core.images import safe_unlink_upload, save_upload
 from app.modelos.modelos import Cancha, CanchaImagen
 
 router = APIRouter(prefix="/admin/canchas", tags=["admin-canchas-imagenes"])
@@ -33,11 +32,8 @@ async def subir_imagen(cancha_id: int, archivo: UploadFile = File(...), db: Sess
     ext = ALLOWED[archivo.content_type]
     name = f"{uuid.uuid4().hex}{ext}"
 
-    folder = Path("uploads") / "canchas" / str(cancha_id)
-    folder.mkdir(parents=True, exist_ok=True)
-    (folder / name).write_bytes(data)
-
-    url = f"/uploads/canchas/{cancha_id}/{name}"
+    key = f"canchas/{cancha_id}/{name}"
+    url = save_upload(data, archivo.content_type, key)
 
     # orden automático al final
     ultimo = (

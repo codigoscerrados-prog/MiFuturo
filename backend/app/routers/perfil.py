@@ -1,12 +1,11 @@
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from sqlalchemy.orm import Session
-from pathlib import Path
 import uuid
 from datetime import datetime, timedelta, timezone
 import math
 
 from app.core.deps import get_db, get_usuario_actual
-from app.core.images import safe_unlink_upload
+from app.core.images import safe_unlink_upload, save_upload
 from app.modelos.modelos import User, Suscripcion, Plan
 from app.esquemas.panel import PerfilOut, PerfilUpdate, PlanActualOut
 
@@ -58,11 +57,8 @@ async def subir_avatar(
     ext = ALLOWED[archivo.content_type]
     name = f"{uuid.uuid4().hex}{ext}"
 
-    folder = Path("uploads") / "perfiles" / str(u.id)
-    folder.mkdir(parents=True, exist_ok=True)
-    (folder / name).write_bytes(data)
-
-    url = f"/uploads/perfiles/{u.id}/{name}"
+    key = f"perfiles/{u.id}/{name}"
+    url = save_upload(data, archivo.content_type, key)
 
     if u.avatar_url:
         safe_unlink_upload(u.avatar_url)

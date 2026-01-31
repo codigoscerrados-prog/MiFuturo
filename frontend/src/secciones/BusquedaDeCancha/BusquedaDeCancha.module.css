@@ -232,6 +232,11 @@
 .precio {
   font-size: 16px;
   font-weight: 900;
+  color: #fff;
+  background: linear-gradient(135deg, rgba(14, 116, 144, 0.95), rgba(37, 99, 235, 0.9));
+  padding: 6px 10px;
+  border-radius: 12px;
+  letter-spacing: 0.2px;
 }
 
 .botones {

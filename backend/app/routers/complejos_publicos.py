@@ -3,11 +3,10 @@ from datetime import date, datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session, joinedload
-from pathlib import Path
 import uuid
 
 from app.core.deps import get_db, get_usuario_actual, require_role
-from app.core.images import resize_square_image, safe_unlink_upload
+from app.core.images import resize_square_image, safe_unlink_upload, save_upload
 from app.core.seguridad import decodificar_token
 from app.core.slug import slugify
 from app.modelos.modelos import Complejo, ComplejoImagen, ComplejoLike, Cancha, Reserva, User
@@ -194,9 +193,6 @@ async def subir_imagenes_complejo(
     )
     orden = (ultimo.orden + 1) if ultimo else 0
 
-    folder = Path("uploads") / "complejos" / str(complejo_id)
-    folder.mkdir(parents=True, exist_ok=True)
-
     nuevos: list[ComplejoImagen] = []
     for archivo in archivos:
         if archivo.content_type not in ALLOWED:
@@ -212,9 +208,8 @@ async def subir_imagenes_complejo(
         except Exception:
             pass
         name = f"galeria_{uuid.uuid4().hex}{ext}"
-        (folder / name).write_bytes(data)
-
-        url = f"/uploads/complejos/{complejo_id}/{name}"
+        key = f"complejos/{complejo_id}/{name}"
+        url = save_upload(data, archivo.content_type, key)
         img = ComplejoImagen(complejo_id=complejo_id, url=url, orden=orden, is_cover=False)
         orden += 1
         db.add(img)

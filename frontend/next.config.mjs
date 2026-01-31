@@ -19,11 +19,23 @@ function backendPattern(pathname) {
     };
 }
 
+function s3Pattern(hostname, pathname = "/**") {
+    return {
+        protocol: "https",
+        hostname,
+        pathname,
+    };
+}
+
 const nextConfig = {
     images: {
         remotePatterns: [
             backendPattern("/static/**"),
             backendPattern("/uploads/**"),
+            s3Pattern("mifuturo-saas-dev.s3.amazonaws.com"),
+            s3Pattern("mifuturo-saas-dev.s3.us-east-1.amazonaws.com"),
+            s3Pattern("mifuturo-saas-prod.s3.amazonaws.com"),
+            s3Pattern("mifuturo-saas-prod.s3.us-east-1.amazonaws.com"),
             // si usas otra ruta:
             // backendPattern("/media/**"),
         ],

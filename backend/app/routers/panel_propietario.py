@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
 from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
-from pathlib import Path
 import uuid
 import io
 
@@ -15,7 +14,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 
 from app.core.deps import get_db, require_role, get_usuario_actual
-from app.core.images import resize_square_image
+from app.core.images import resize_square_image, save_upload, safe_unlink_upload
 from app.core.slug import slugify
 from app.modelos.modelos import Complejo, Cancha, CanchaImagen, Reserva, Plan, Suscripcion, User
 from app.esquemas.esquemas import (
@@ -30,12 +29,6 @@ from app.esquemas.esquemas import (
 )
 
 router = APIRouter(prefix="/panel", tags=["panel"])
-
-# =======================
-# Upload settings
-# =======================
-UPLOAD_ROOT_COMPLEJOS = Path("uploads") / "complejos"
-UPLOAD_ROOT_CANCHAS = Path("uploads") / "canchas"
 
 MAX_BYTES = 5 * 1024 * 1024
 ALLOWED = {
@@ -297,18 +290,11 @@ async def subir_foto_complejo(
     except Exception:
         pass
 
-    folder = UPLOAD_ROOT_COMPLEJOS / str(complejo_id)
-    folder.mkdir(parents=True, exist_ok=True)
-
-    # ✅ borrar anteriores
-    for p in folder.iterdir():
-        if p.is_file():
-            p.unlink(missing_ok=True)
-
     filename = f"principal_{uuid.uuid4().hex}{ext}"
-    (folder / filename).write_bytes(data)
-
-    c.foto_url = f"/uploads/complejos/{complejo_id}/{filename}"
+    key = f"complejos/{complejo_id}/{filename}"
+    if c.foto_url:
+        safe_unlink_upload(c.foto_url)
+    c.foto_url = save_upload(data, archivo.content_type, key)
 
     db.add(c)
     db.commit()
@@ -392,11 +378,8 @@ async def subir_imagen_cancha(
     ext = ALLOWED[archivo.content_type]
     name = f"{uuid.uuid4().hex}{ext}"
 
-    folder = UPLOAD_ROOT_CANCHAS / str(cancha_id)
-    folder.mkdir(parents=True, exist_ok=True)
-    (folder / name).write_bytes(data)
-
-    url = f"/uploads/canchas/{cancha_id}/{name}"
+    key = f"canchas/{cancha_id}/{name}"
+    url = save_upload(data, archivo.content_type, key)
 
     ultimo = (
         db.query(CanchaImagen)

@@ -42,7 +42,7 @@
   position: relative;
   overflow: hidden;
   color: #f8fafc;
-  padding: 0;
+  padding: 20px 0;
 }
 
 .seccion::before {
@@ -176,8 +176,8 @@
 }
 
 .cardMain form {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
 }
 
@@ -208,6 +208,7 @@
 .socialButtons {
   display: flex;
   gap: 12px;
+  grid-column: 1 / -1;
 }
 
 .socialBtn {
@@ -240,6 +241,7 @@
   letter-spacing: 0.35px;
   color: var(--muted-soft);
   text-transform: uppercase;
+  grid-column: 1 / -1;
 }
 
 .dividerLine {
@@ -322,6 +324,7 @@
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+  grid-column: 1 / -1;
 }
 
 .checkboxWrapper {
@@ -386,6 +389,7 @@
   cursor: pointer;
   box-shadow: 0 22px 50px rgba(16, 185, 129, 0.4);
   transition: transform 220ms ease, box-shadow 220ms ease;
+  grid-column: 1 / -1;
 }
 
 .loginBtn:hover {
@@ -417,6 +421,7 @@
 .methodSwitch {
   margin-top: 8px;
   text-align: center;
+  grid-column: 1 / -1;
 }
 
 .linkBtn {
@@ -479,6 +484,10 @@
   .cardMain {
     border-left: none;
     padding: 28px;
+  }
+
+  .cardMain form {
+    grid-template-columns: 1fr;
   }
 }
 

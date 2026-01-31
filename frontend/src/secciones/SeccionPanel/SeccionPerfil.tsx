@@ -43,6 +43,9 @@ type SeccionPerfilProps = {
     onLogout?: () => void;
 };
 
+const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
+const ALLOWED_AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+
 export default function SeccionPerfil(props: SeccionPerfilProps) {
     const { token, onPerfilUpdated } = props;
 
@@ -128,6 +131,14 @@ export default function SeccionPerfil(props: SeccionPerfilProps) {
 
     async function onPickAvatar(file?: File | null) {
         if (!file) return;
+        if (!ALLOWED_AVATAR_TYPES.includes(file.type)) {
+            setError("Formato no valido. Usa JPG, PNG, WEBP o AVIF.");
+            return;
+        }
+        if (file.size > MAX_AVATAR_BYTES) {
+            setError("El avatar debe pesar max 2MB.");
+            return;
+        }
         const fd = new FormData();
         fd.append("archivo", file);
 

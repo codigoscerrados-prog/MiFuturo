@@ -86,7 +86,6 @@ function sanitizeHtml(value?: string | null) {
     if (!value) return "";
     let html = value;
     html = html.replace(/<\s*script[^>]*>[\s\S]*?<\s*\/\s*script>/gi, "");
-    html = html.replace(/<\s*style[^>]*>[\s\S]*?<\s*\/\s*style>/gi, "");
     html = html.replace(/\son\w+="[^"]*"/gi, "");
     html = html.replace(/\son\w+='[^']*'/gi, "");
     html = html.replace(/\son\w+=\S+/gi, "");
@@ -148,6 +147,14 @@ export default function ComplejoPublicoPage() {
             })
             .finally(() => setLoading(false));
     }, [slug]);
+
+    useEffect(() => {
+        if (typeof document === "undefined") return;
+        document.body.classList.add("lv-nav-solid");
+        return () => {
+            document.body.classList.remove("lv-nav-solid");
+        };
+    }, []);
 
     useEffect(() => {
         const modalOpen = galleryOpen || reserveOpen;
@@ -444,10 +451,14 @@ export default function ComplejoPublicoPage() {
                         <div className={styles.infoBlock}>
                             <h2 className={styles.sectionTitle}>Descripcion</h2>
                             {data.descripcion ? (
-                                <div
-                                    className={styles.sectionText}
-                                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(data.descripcion) }}
-                                />
+                                <div className={styles.htmlPreview}>
+                                    <iframe
+                                        className={styles.htmlFrame}
+                                        sandbox=""
+                                        srcDoc={sanitizeHtml(data.descripcion)}
+                                        title="Descripcion del complejo"
+                                    />
+                                </div>
                             ) : (
                                 <p className={styles.sectionText}>Sin descripcion.</p>
                             )}
@@ -514,16 +525,11 @@ export default function ComplejoPublicoPage() {
                         <div className={styles.canchasGrid}>
                             {data.canchas.map((c) => (
                                 <article key={c.id} className={styles.canchaCard}>
-                                    <div className={styles.canchaImage}>
-                                        <img
-                                            src={publicImgUrl(c.imagen_principal || data.foto_url || "/canchas/sintetico-marconi.avif")}
-                                            alt={c.nombre}
-                                        />
-                                    </div>
                                     <div className={styles.canchaBody}>
+                                        <span className={styles.canchaTag}>{data.nombre}</span>
                                         <h3 className={styles.canchaName}>{c.nombre}</h3>
                                         <p className={styles.canchaMeta}>
-                                            {c.tipo} - {c.pasto}
+                                            {c.tipo} • {c.pasto}
                                         </p>
                                         <p className={styles.canchaPrice}>S/ {Number(c.precio_hora || 0).toFixed(0)} /h</p>
                                     </div>

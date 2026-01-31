@@ -865,6 +865,33 @@ export default function BusquedaDeCancha({
         return end ? `${start} - ${end}` : `${start} + ${reservaDuracion}h`;
     }
 
+    const maxDuracionDisponible = useMemo(() => {
+        const start = selectedSlots[0];
+        if (!start) return 1;
+        const startIndex = horariosSlots.findIndex((slot) => slot.hora === start);
+        if (startIndex < 0) return 1;
+        let max = 0;
+        for (let i = startIndex; i < horariosSlots.length; i += 1) {
+            if (horariosSlots[i].ocupado) break;
+            max += 1;
+            if (max >= 4) break;
+        }
+        return Math.max(1, max);
+    }, [selectedSlots, horariosSlots]);
+
+    useEffect(() => {
+        const start = selectedSlots[0];
+        if (!start) return;
+        const nextDur = Math.min(reservaDuracion, maxDuracionDisponible);
+        if (nextDur !== reservaDuracion) {
+            setReservaDuracion(nextDur);
+        }
+        const nextSelection = buildSelection(start, nextDur, horariosSlots);
+        if (nextSelection && nextSelection.join("|") !== selectedSlots.join("|")) {
+            setSelectedSlots(nextSelection);
+        }
+    }, [maxDuracionDisponible, reservaDuracion, horariosSlots, selectedSlots, buildSelection]);
+
     // ✅ MODAL RESERVA
     function abrirModalReservaComplejo(cx: ComplejoCard) {
         setReservaComplejo(cx);
@@ -1195,7 +1222,7 @@ export default function BusquedaDeCancha({
                                         }}
                                     >
                                         {[1, 2, 3, 4].map((h) => (
-                                            <option key={h} value={String(h)}>
+                                            <option key={h} value={String(h)} disabled={h > maxDuracionDisponible}>
                                                 {h} hora{h > 1 ? "s" : ""}
                                             </option>
                                         ))}

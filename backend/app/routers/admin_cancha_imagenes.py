@@ -33,7 +33,10 @@ async def subir_imagen(cancha_id: int, archivo: UploadFile = File(...), db: Sess
     name = f"{uuid.uuid4().hex}{ext}"
 
     key = f"canchas/{cancha_id}/{name}"
-    url = save_upload(data, archivo.content_type, key)
+    try:
+        url = save_upload(data, archivo.content_type, key)
+    except Exception:
+        raise HTTPException(502, "No se pudo subir la imagen. Verifica permisos de S3.")
 
     # orden automático al final
     ultimo = (

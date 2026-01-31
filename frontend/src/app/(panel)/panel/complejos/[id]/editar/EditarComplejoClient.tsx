@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./page.module.css";
 import { apiFetch } from "@/lib/api";
@@ -39,6 +39,7 @@ type ComplejoPerfil = {
 };
 
 const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 
 export default function EditarComplejoClient() {
     const params = useParams();
@@ -53,6 +54,9 @@ export default function EditarComplejoClient() {
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [notice, setNotice] = useState<string | null>(null);
+    const descRef = useRef<HTMLDivElement | null>(null);
+    const descInitRef = useRef(false);
+    const [htmlMode, setHtmlMode] = useState(false);
 
     const canUploadMore = imagenes.length < 10;
 
@@ -81,6 +85,12 @@ export default function EditarComplejoClient() {
             .finally(() => setLoading(false));
     }, [id]);
 
+    useEffect(() => {
+        if (!form || !descRef.current || descInitRef.current) return;
+        descRef.current.innerHTML = form.descripcion || "";
+        descInitRef.current = true;
+    }, [form]);
+
     const payload = useMemo(() => {
         if (!form) return null;
         return {
@@ -103,6 +113,13 @@ export default function EditarComplejoClient() {
 
     function updateField<K extends keyof ComplejoForm>(key: K, value: ComplejoForm[K]) {
         setForm((prev) => (prev ? { ...prev, [key]: value } : prev));
+    }
+
+    function applyRichCommand(cmd: string, value?: string) {
+        if (!descRef.current) return;
+        descRef.current.focus();
+        document.execCommand(cmd, false, value);
+        updateField("descripcion", descRef.current.innerHTML);
     }
 
     async function handleSave() {
@@ -136,15 +153,23 @@ export default function EditarComplejoClient() {
             return;
         }
 
-        const oversize = Array.from(files).filter((file) => file.size > MAX_IMAGE_BYTES);
+        const list = Array.from(files);
+        const invalidType = list.filter((file) => !ALLOWED_IMAGE_TYPES.includes(file.type));
+        const oversize = list.filter((file) => file.size > MAX_IMAGE_BYTES);
+        const hadIssues = invalidType.length > 0 || oversize.length > 0;
+        if (invalidType.length) {
+            setNotice("Formato no valido. Usa JPG, PNG, WEBP o AVIF.");
+        }
         if (oversize.length) {
             setNotice("Cada imagen debe pesar max 2MB.");
         }
-        const validFiles = Array.from(files).filter((file) => file.size <= MAX_IMAGE_BYTES);
+        const validFiles = list.filter(
+            (file) => ALLOWED_IMAGE_TYPES.includes(file.type) && file.size <= MAX_IMAGE_BYTES
+        );
         if (validFiles.length === 0) return;
 
         setUploading(true);
-        setNotice(null);
+        if (!hadIssues) setNotice(null);
         try {
             const fd = new FormData();
             validFiles.forEach((file) => fd.append("archivos", file));
@@ -224,12 +249,72 @@ export default function EditarComplejoClient() {
                         </label>
                         <label className={styles.fieldWide}>
                             <span className={styles.label}>Descripcion</span>
-                            <textarea
-                                className={styles.textarea}
-                                rows={3}
-                                value={form.descripcion || ""}
-                                onChange={(e) => updateField("descripcion", e.target.value)}
-                            />
+                            <div className={styles.richToolbar}>
+                                <button type="button" className={styles.richBtn} onClick={() => applyRichCommand("bold")}>
+                                    <strong>B</strong>
+                                </button>
+                                <button type="button" className={styles.richBtn} onClick={() => applyRichCommand("italic")}>
+                                    <em>I</em>
+                                </button>
+                                <button type="button" className={styles.richBtn} onClick={() => applyRichCommand("underline")}>
+                                    <span style={{ textDecoration: "underline" }}>U</span>
+                                </button>
+                                <button type="button" className={styles.richBtn} onClick={() => applyRichCommand("insertUnorderedList")}>
+                                    Lista
+                                </button>
+                                <button type="button" className={styles.richBtn} onClick={() => applyRichCommand("insertOrderedList")}>
+                                    1. Lista
+                                </button>
+                                <button
+                                    type="button"
+                                    className={styles.richBtn}
+                                    onClick={() => {
+                                        const url = window.prompt("URL del enlace");
+                                        if (url) applyRichCommand("createLink", url);
+                                    }}
+                                >
+                                    Enlace
+                                </button>
+                                <button type="button" className={styles.richBtn} onClick={() => applyRichCommand("removeFormat")}>
+                                    Limpiar
+                                </button>
+                                <label className={styles.richToggle}>
+                                    <input
+                                        type="checkbox"
+                                        checked={htmlMode}
+                                        onChange={(e) => setHtmlMode(e.target.checked)}
+                                    />
+                                    HTML/CSS
+                                </label>
+                            </div>
+                            {!htmlMode ? (
+                                <div
+                                    ref={descRef}
+                                    className={styles.richEditor}
+                                    contentEditable
+                                    onInput={(e) => updateField("descripcion", (e.currentTarget as HTMLDivElement).innerHTML)}
+                                    aria-label="Descripcion con formato"
+                                />
+                            ) : (
+                                <textarea
+                                    className={styles.htmlEditor}
+                                    value={form.descripcion || ""}
+                                    onChange={(e) => {
+                                        updateField("descripcion", e.target.value);
+                                        if (descRef.current) descRef.current.innerHTML = e.target.value;
+                                    }}
+                                    rows={8}
+                                />
+                            )}
+                            <div className={styles.previewWrap}>
+                                <span className={styles.previewLabel}>Vista previa</span>
+                                <iframe
+                                    className={styles.previewFrame}
+                                    sandbox=""
+                                    srcDoc={form.descripcion || ""}
+                                    title="Vista previa HTML"
+                                />
+                            </div>
                         </label>
                         <label className={styles.fieldWide}>
                             <span className={styles.label}>Direccion</span>

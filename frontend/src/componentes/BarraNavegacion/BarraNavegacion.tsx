@@ -33,7 +33,6 @@ export default function BarraNavegacion() {
     const hideNav =
         pathname?.startsWith("/panel") ||
         pathname === "/registrarse" ||
-        pathname === "/iniciar-sesion" ||
         isAuthPath;
 
     const [token, setToken] = useState<string | null>(null);

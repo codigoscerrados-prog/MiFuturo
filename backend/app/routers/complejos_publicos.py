@@ -209,7 +209,10 @@ async def subir_imagenes_complejo(
             pass
         name = f"galeria_{uuid.uuid4().hex}{ext}"
         key = f"complejos/{complejo_id}/{name}"
-        url = save_upload(data, archivo.content_type, key)
+        try:
+            url = save_upload(data, archivo.content_type, key)
+        except Exception:
+            raise HTTPException(502, "No se pudo subir la imagen. Verifica permisos de S3.")
         img = ComplejoImagen(complejo_id=complejo_id, url=url, orden=orden, is_cover=False)
         orden += 1
         db.add(img)

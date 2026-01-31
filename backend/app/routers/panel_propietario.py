@@ -294,7 +294,10 @@ async def subir_foto_complejo(
     key = f"complejos/{complejo_id}/{filename}"
     if c.foto_url:
         safe_unlink_upload(c.foto_url)
-    c.foto_url = save_upload(data, archivo.content_type, key)
+    try:
+        c.foto_url = save_upload(data, archivo.content_type, key)
+    except Exception:
+        raise HTTPException(502, "No se pudo subir la imagen. Verifica permisos de S3.")
 
     db.add(c)
     db.commit()
@@ -379,7 +382,10 @@ async def subir_imagen_cancha(
     name = f"{uuid.uuid4().hex}{ext}"
 
     key = f"canchas/{cancha_id}/{name}"
-    url = save_upload(data, archivo.content_type, key)
+    try:
+        url = save_upload(data, archivo.content_type, key)
+    except Exception:
+        raise HTTPException(502, "No se pudo subir la imagen. Verifica permisos de S3.")
 
     ultimo = (
         db.query(CanchaImagen)

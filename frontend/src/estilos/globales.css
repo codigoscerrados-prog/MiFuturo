@@ -83,7 +83,7 @@ main {
     min-height: calc(100vh - var(--navH, 80px));
 }
 
-:global(body.lv-auth-page) main {
+body.lv-auth-page main {
     padding-top: 0;
 }
 

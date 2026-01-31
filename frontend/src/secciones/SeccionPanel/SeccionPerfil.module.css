@@ -120,9 +120,9 @@
 
 .accountLogout {
     border-radius: 999px;
-    border: 1px solid rgba(15, 23, 42, 0.12);
-    background: #fff;
-    color: var(--azulMarino);
+    border: 1px solid rgba(220, 38, 38, 0.35);
+    background: rgba(220, 38, 38, 0.08);
+    color: #b91c1c;
     display: grid;
     place-items: center;
     cursor: pointer;
@@ -137,7 +137,8 @@
 
 .accountLogout:hover {
     transform: translateY(-1px);
-    box-shadow: var(--sombra-sm);
+    background: rgba(220, 38, 38, 0.18);
+    box-shadow: 0 10px 20px rgba(220, 38, 38, 0.18);
 }
 
 .planWrap {

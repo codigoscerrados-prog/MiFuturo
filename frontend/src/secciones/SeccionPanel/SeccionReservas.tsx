@@ -917,11 +917,16 @@ function moveWeek(delta: number) {
                                 {weekDates.map((d) => {
                                     const ds = ymd(d);
                                     const label = d.toLocaleDateString("es-ES", { weekday: "short" });
+                                    const hasReservation = (dayCache[ds] || []).length > 0;
                                     return (
                                         <button
                                             key={ds}
                                             type="button"
-                                            className={cn(styles.weekBtn, ds == selectedDateStr && styles.weekBtnActive)}
+                                            className={cn(
+                                                styles.weekBtn,
+                                                hasReservation && styles.weekBtnHas,
+                                                ds == selectedDateStr && styles.weekBtnActive
+                                            )}
                                             onClick={() => selectDateByStr(ds)}
                                         >
                                             <span className={styles.weekLabel}>{label}</span>

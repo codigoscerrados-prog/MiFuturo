@@ -125,7 +125,7 @@ export default function SeccionPanel({
         return (r as Role) || "usuario";
     }, [roleProp, token]);
 
-    // ✅ Siempre iniciar en Perfil
+    // Siempre iniciar en Perfil
     const initialTabSet = useRef(false);
     const [tab, setTab] = useState<string>("perfil");
     useEffect(() => {
@@ -302,7 +302,7 @@ export default function SeccionPanel({
         return [{ key: "admin", label: "Admin", locked: false }];
     }, [role, isPro]);
 
-    // ✅ Si el tab actual no existe, volver a Perfil
+    // Si el tab actual no existe, volver a Perfil
     useEffect(() => {
         if (!tabs.some((t) => t.key === tab)) setTab("perfil");
     }, [tabs, tab]);
@@ -440,6 +440,12 @@ export default function SeccionPanel({
 
                             <div id="panel-reservas-calendar-slot" className={styles.sidebarCalendarSlot} />
 
+                            <div className={styles.sidebarFooter}>
+                                <button type="button" className={styles.sidebarLogout} onClick={cerrarSesion}>
+                                    <i className="bi bi-door-open" aria-hidden="true"></i>
+                                    <span className={styles.sidebarLogoutText}>Cerrar sesión</span>
+                                </button>
+                            </div>
                         </div>
                     </aside>
 

@@ -203,7 +203,7 @@ export default function SeccionPerfil(props: SeccionPerfilProps) {
                     <p className={styles.kicker}>Perfil</p>
                     <h1 className={styles.titulo}>Mi cuenta</h1>
                     <p className={styles.muted}>
-                        Revisa tu informaci?n y confirma con qu? cuenta est?s logueada
+                        Revisa tu información y confirma con qué cuenta estás logueada
                     </p>
                 </div>
                 <div className={styles.headerRight}>
@@ -221,15 +221,6 @@ export default function SeccionPerfil(props: SeccionPerfilProps) {
                             <p className={styles.accountName}>{nombreCompleto}</p>
                             <p className={styles.accountMeta}>{me?.business_name || "—"}</p>
                         </div>
-                        <button
-                            type="button"
-                            className={styles.accountLogout}
-                            onClick={props.onLogout}
-                            aria-label="Cerrar sesion"
-                            title="Cerrar sesion"
-                        >
-                            <i className="bi bi-door-open" aria-hidden="true"></i>
-                        </button>
                     </div>
 
                     <div className={styles.planWrap}>

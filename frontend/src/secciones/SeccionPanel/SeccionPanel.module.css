@@ -257,6 +257,10 @@
     font-weight: 800;
     border-radius: 12px;
     padding: 10px 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
     cursor: pointer;
     transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
 }
@@ -270,6 +274,14 @@
 .sidebarLogout:focus-visible {
     outline: none;
     box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.18);
+}
+
+.sidebarLogoutText {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+    transition: opacity 0.18s ease, max-width 0.18s ease;
 }
 
 .sidebarSummary {
@@ -651,6 +663,14 @@
 
 .sidebar:not(:hover):not(:focus-within) .tabIcon {
     color: var(--panel-text);
+}
+
+.sidebar:not(:hover):not(:focus-within) .sidebarLogoutText {
+    opacity: 0;
+    max-width: 0;
+    width: 0;
+    overflow: hidden;
+    pointer-events: none;
 }
 
 .tab:hover {

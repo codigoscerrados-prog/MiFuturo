@@ -221,8 +221,6 @@ export default function SeccionPerfil(props: SeccionPerfilProps) {
                     {editMode ? <span className={styles.editBadge}>Editando</span> : null}
                 </div>
             </div>
-                {editMode ? <span className={styles.editBadge}>Editando</span> : null}
-            </div>
 
             {error ? <div className={styles.alertError}>{error}</div> : null}
 

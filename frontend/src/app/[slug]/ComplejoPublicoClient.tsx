@@ -579,7 +579,7 @@ export default function ComplejoPublicoPage() {
                         <div className={styles.htmlPreview}>
                             <iframe
                                 className={styles.htmlFrame}
-                                sandbox="allow-same-origin"
+                                sandbox="allow-same-origin allow-forms allow-popups"
                                 srcDoc={buildDescDoc(data.descripcion)}
                                 ref={descFrameRef}
                                 onLoad={syncDescHeight}

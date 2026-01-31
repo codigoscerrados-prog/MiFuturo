@@ -175,6 +175,32 @@
   overflow: hidden;
 }
 
+.panelGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  width: 100%;
+}
+
+.panelSide {
+  padding: clamp(24px, 2.4vw, 32px);
+  border-right: 1px solid var(--card-border);
+  background: rgba(15, 23, 42, 0.95);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.panelSide .cabecera {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+.panelMain {
+  padding: 0;
+}
+
 .form {
   display: flex;
   flex-direction: column;
@@ -446,6 +472,15 @@
 }
 
 @media (max-width: 900px) {
+  .panelGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .panelSide {
+    border-right: none;
+    border-bottom: 1px solid var(--card-border);
+  }
+
   .filas {
     grid-template-columns: 1fr;
   }

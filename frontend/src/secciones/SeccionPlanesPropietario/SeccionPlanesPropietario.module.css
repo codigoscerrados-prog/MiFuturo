@@ -113,6 +113,7 @@
 
 .tableWrap {
     margin-top: 16px;
+    overflow-x: auto;
 }
 
 .tableCard {
@@ -128,6 +129,7 @@
     margin: 0 !important;
     border-collapse: separate;
     border-spacing: 0;
+    min-width: 720px;
 }
 
 .table thead th {

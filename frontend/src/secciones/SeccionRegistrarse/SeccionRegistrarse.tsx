@@ -183,124 +183,131 @@ export default function SeccionRegistrarse({
                 <div className={styles.brandHero}>
                     <BrandLogo href="/" variant="compact" size="lg" className={styles.brandHeroLogo} />
                 </div>
-                <header className={styles.cabecera}>
-                    <p className={styles.badge}>{headerBadge}</p>
-                    <h1 className={styles.titulo}>{headerTitulo}</h1>
-                    <p className={styles.subtitulo}>{headerSubtitulo}</p>
-
-                    <div className={styles.linksTop}>
-                        <span className={styles.muted}>¿Ya tienes cuenta?</span>
-                        <Link className={styles.link} href="/iniciar-sesion">Iniciar sesión</Link>
-                    </div>
-                </header>
 
                 <section className={`tarjeta ${styles.panel}`}>
-                    <form onSubmit={enviar} className={styles.form}>
-                        {error && <div className={styles.error}>{error}</div>}
+                    <div className={styles.panelGrid}>
+                        <aside className={styles.panelSide}>
+                        <header className={styles.cabecera}>
+                            <p className={styles.badge}>{headerBadge}</p>
+                            <h1 className={styles.titulo}>{headerTitulo}</h1>
+                            <p className={styles.subtitulo}>{headerSubtitulo}</p>
 
-                        <div className={styles.oauthStack}>
-                            <button
-                                type="button"
-                                className={`boton botonPrimario ${styles.btnGoogle}`}
-                                onClick={() =>
-                                    (window.location.href = oauthUrl("/auth/google/login", {
-                                        role,
-                                        next: googleNextPath,
-                                    }))
-                                }
-                            >
-                                <span className={styles.googleIcon} aria-hidden="true">
-                                    <GoogleMark width={18} height={18} aria-hidden="true" />
-                                </span>
-                                Continuar con Google
-                            </button>
-                            <div className={styles.divider}>
-                                <span>o registra con correo</span>
+                            <div className={styles.linksTop}>
+                                <span className={styles.muted}>¿Ya tienes cuenta?</span>
+                                <Link className={styles.link} href="/iniciar-sesion">Iniciar sesión</Link>
                             </div>
-                        </div>
+                        </header>
+                        </aside>
 
-                        {mostrarSelector && (
-                            <div className={styles.roles}>
+                        <div className={styles.panelMain}>
+                        <form onSubmit={enviar} className={styles.form}>
+                            {error && <div className={styles.error}>{error}</div>}
+
+                            <div className={styles.oauthStack}>
                                 <button
                                     type="button"
-                                    className={`${styles.rolBtn} ${role === "usuario" ? styles.rolOn : ""}`}
-                                    onClick={() => setRole("usuario")}
-                                    aria-pressed={role === "usuario"}
+                                    className={`boton botonPrimario ${styles.btnGoogle}`}
+                                    onClick={() =>
+                                        (window.location.href = oauthUrl("/auth/google/login", {
+                                            role,
+                                            next: googleNextPath,
+                                        }))
+                                    }
                                 >
-                                    Usuario
+                                    <span className={styles.googleIcon} aria-hidden="true">
+                                        <GoogleMark width={18} height={18} aria-hidden="true" />
+                                    </span>
+                                    Continuar con Google
                                 </button>
-                                <button
-                                    type="button"
-                                    className={`${styles.rolBtn} ${role === "propietario" ? styles.rolOn : ""}`}
-                                onClick={() => {
-                                    const next = role === "propietario" ? "/panel/planes" : "/panel";
-                                    window.location.href = oauthUrl("/auth/google/login", {
-                                        role,
-                                        next,
-                                    });
-                                }}
-
-                                    aria-pressed={role === "propietario"}
-                                >
-                                    Propietario
-                                </button>
+                                <div className={styles.divider}>
+                                    <span>o registra con correo</span>
+                                </div>
                             </div>
-                        )}
 
-                        <div className={styles.filas}>
-                            <label className={styles.campo}>
-                                <span className={styles.label}>Nombres</span>
-                                <input className={styles.input} value={first_name} onChange={(e) => setFirst(e.target.value)} required />
-                            </label>
+                            {mostrarSelector && (
+                                <div className={styles.roles}>
+                                    <button
+                                        type="button"
+                                        className={`${styles.rolBtn} ${role === "usuario" ? styles.rolOn : ""}`}
+                                        onClick={() => setRole("usuario")}
+                                        aria-pressed={role === "usuario"}
+                                    >
+                                        Usuario
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`${styles.rolBtn} ${role === "propietario" ? styles.rolOn : ""}`}
+                                    onClick={() => {
+                                        const next = role === "propietario" ? "/panel/planes" : "/panel";
+                                        window.location.href = oauthUrl("/auth/google/login", {
+                                            role,
+                                            next,
+                                        });
+                                    }}
 
-                            <label className={styles.campo}>
-                                <span className={styles.label}>Apellidos</span>
-                                <input className={styles.input} value={last_name} onChange={(e) => setLast(e.target.value)} required />
-                            </label>
-
-                            <label className={styles.campo}>
-                                <span className={styles.label}>Correo</span>
-                                <input className={styles.input} value={email} onChange={(e) => setEmail(e.target.value)} type="email" required />
-                            </label>
-
-                            <label className={styles.campo}>
-                                <span className={styles.label}>Teléfono</span>
-                                <input className={styles.input} value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" placeholder="Ej: 922023667" />
-                            </label>
-
-                            {role === "propietario" && (
-                                <label className={styles.campoFull}>
-                                    <span className={styles.label}>Nombre del negocio *</span>
-                                    <input className={styles.input} value={business_name} onChange={(e) => setBusiness(e.target.value)} required />
-                                </label>
+                                        aria-pressed={role === "propietario"}
+                                    >
+                                        Propietario
+                                    </button>
+                                </div>
                             )}
 
-                            <label className={styles.campo}>
-                                <span className={styles.label}>Contraseña</span>
-                                <input className={styles.input} value={password} onChange={(e) => setPass(e.target.value)} type="password" required />
-                                <span className={styles.hint}>Mínimo 6 caracteres.</span>
-                            </label>
+                            <div className={styles.filas}>
+                                <label className={styles.campo}>
+                                    <span className={styles.label}>Nombres</span>
+                                    <input className={styles.input} value={first_name} onChange={(e) => setFirst(e.target.value)} required />
+                                </label>
 
-                            <label className={styles.campo}>
-                                <span className={styles.label}>Confirmar</span>
-                                <input className={styles.input} value={password2} onChange={(e) => setPass2(e.target.value)} type="password" required />
-                                {password2 && password !== password2 && <span className={styles.hintBad}>Las contraseñas no coinciden.</span>}
-                            </label>
+                                <label className={styles.campo}>
+                                    <span className={styles.label}>Apellidos</span>
+                                    <input className={styles.input} value={last_name} onChange={(e) => setLast(e.target.value)} required />
+                                </label>
+
+                                <label className={styles.campo}>
+                                    <span className={styles.label}>Correo</span>
+                                    <input className={styles.input} value={email} onChange={(e) => setEmail(e.target.value)} type="email" required />
+                                </label>
+
+                                <label className={styles.campo}>
+                                    <span className={styles.label}>Teléfono</span>
+                                    <input className={styles.input} value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" placeholder="Ej: 922023667" />
+                                </label>
+
+                                {role === "propietario" && (
+                                    <label className={styles.campoFull}>
+                                        <span className={styles.label}>Nombre del negocio *</span>
+                                        <input className={styles.input} value={business_name} onChange={(e) => setBusiness(e.target.value)} required />
+                                    </label>
+                                )}
+
+                                <label className={styles.campo}>
+                                    <span className={styles.label}>Contraseña</span>
+                                    <input className={styles.input} value={password} onChange={(e) => setPass(e.target.value)} type="password" required />
+                                    <span className={styles.hint}>Mínimo 6 caracteres.</span>
+                                </label>
+
+                                <label className={styles.campo}>
+                                    <span className={styles.label}>Confirmar</span>
+                                    <input className={styles.input} value={password2} onChange={(e) => setPass2(e.target.value)} type="password" required />
+                                    {password2 && password !== password2 && <span className={styles.hintBad}>Las contraseñas no coinciden.</span>}
+                                </label>
+                            </div>
+
+                            <div className={styles.acciones}>
+                                <button className={`boton botonPrimario ${styles.btnPrincipal}`} disabled={!puede || cargando} type="submit">
+                                    {cargando ? "Creando…" : "Crear cuenta"}
+                                </button>
+                                <Link className={`boton ${styles.btnSec}`} href="/">
+                                    Volver al inicio
+                                </Link>
+                            </div>
+
+                            <p className={styles.aviso}>
+                                Luego podrás activar funciones <strong>PRO</strong> desde tu panel (suscripciones lo conectamos después).
+                            </p>
+                        </form>
                         </div>
-
-                        <div className={styles.acciones}>
-                            <button className={`boton botonPrimario ${styles.btnPrincipal}`} disabled={!puede || cargando} type="submit">
-                                {cargando ? "Creando…" : "Crear cuenta"}
-                            </button>
-                            <Link className={`boton ${styles.btnSec}`} href="/">
-                                Volver al inicio
-                            </Link>
-                        </div>
-
-                        <p className={styles.aviso}>
-                            Luego podrás activar funciones <strong>PRO</strong> desde tu panel (suscripciones lo conectamos después).
-                        </p>
-                    </form>
+                    </div>
                 </section>
             </div>
         </section>

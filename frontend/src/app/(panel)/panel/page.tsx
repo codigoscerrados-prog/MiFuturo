@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function PanelPage() {
     return (
-        <main className="fondoSeccion fondoA espaciadoSeccion" style={{ marginTop: "0" }}>
+        <main className="fondoSeccion fondoA espaciadoSeccion" style={{ marginTop: "0", padding: 0 }}>
             <SeccionPanel />
         </main>
     );

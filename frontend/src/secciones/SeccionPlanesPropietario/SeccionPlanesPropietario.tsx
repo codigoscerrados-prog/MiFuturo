@@ -124,7 +124,7 @@ export default function SeccionPlanesPropietario() {
                 {error ? <div className={styles.alertError}>{error}</div> : null}
                 {ok ? <div className={styles.alertOk}>{ok}</div> : null}
 
-                <div className={`d-none d-lg-block ${styles.tableWrap}`}>
+                <div className={styles.tableWrap}>
                     <div className={`card rounded-4 ${styles.tableCard}`}>
                         <div className="table-responsive">
                             <table className={`table align-middle ${styles.table}`}>

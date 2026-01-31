@@ -478,6 +478,25 @@ export default function PanelReservasPropietario({ token }: { token: string }) {
         };
     }, [dayReservations]);
 
+    const monthReservations = useMemo(() => {
+        const y = currentMonth.getFullYear();
+        const m = pad2(currentMonth.getMonth() + 1);
+        const prefix = `${y}-${m}-`;
+        return Object.entries(dayCache)
+            .filter(([key]) => key.startsWith(prefix))
+            .flatMap(([, rows]) => rows || []);
+    }, [dayCache, currentMonth]);
+
+    const monthMetrics = useMemo(() => {
+        const active = monthReservations.filter(isActiveReservation);
+        const pagadas = active.filter((r) => (r.payment_status || r.estado) === "pagada");
+        const totalPagado = pagadas.reduce((sum, r) => sum + Number(r.total_amount || 0), 0);
+        return {
+            agendas: active.length,
+            pagadasSoles: totalPagado,
+        };
+    }, [monthReservations]);
+
 
 function selectDateByStr(dateStr: string) {
     const [yy, mm, dd] = dateStr.split("-").map((x) => Number(x));
@@ -791,8 +810,16 @@ function moveWeek(delta: number) {
                                     <span className={styles.metricValue}>{dayMetrics.agendas}</span>
                                 </div>
                                 <div className={styles.metricCard}>
+                                    <span className={styles.metricLabel}>Agendas del mes</span>
+                                    <span className={styles.metricValue}>{monthMetrics.agendas}</span>
+                                </div>
+                                <div className={styles.metricCard}>
                                     <span className={styles.metricLabel}>Pagadas</span>
                                     <span className={styles.metricValue}>S/ {dayMetrics.pagadasSoles.toFixed(0)}</span>
+                                </div>
+                                <div className={styles.metricCard}>
+                                    <span className={styles.metricLabel}>Total del mes</span>
+                                    <span className={styles.metricValue}>S/ {monthMetrics.pagadasSoles.toFixed(0)}</span>
                                 </div>
                                 <div className={styles.metricCard}>
                                     <span className={styles.metricLabel}>Faltan cobrar</span>

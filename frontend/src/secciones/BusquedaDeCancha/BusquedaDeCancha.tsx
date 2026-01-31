@@ -438,6 +438,7 @@ export default function BusquedaDeCancha({
     const [reservaFecha, setReservaFecha] = useState("");
     const [reservaError, setReservaError] = useState<string | null>(null);
     const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
+    const [reservaDuracion, setReservaDuracion] = useState(1);
     const [horariosSlots, setHorariosSlots] = useState<HorarioSlot[]>(() =>
         DEFAULT_HORARIOS.map((hora) => ({ hora, ocupado: false }))
     );
@@ -845,11 +846,31 @@ export default function BusquedaDeCancha({
         setDetalleComplejo(null);
     }
 
+    function buildSelection(startHora: string, duracionHoras: number, slots: HorarioSlot[]) {
+        const startIndex = slots.findIndex((slot) => slot.hora === startHora);
+        if (startIndex < 0) return null;
+        const chunk = slots.slice(startIndex, startIndex + duracionHoras);
+        if (chunk.length < duracionHoras) return null;
+        if (chunk.some((slot) => slot.ocupado)) return null;
+        return chunk.map((slot) => slot.hora);
+    }
+
+    function formatSelectedRange() {
+        const start = selectedSlots[0];
+        if (!start) return "Selecciona en la agenda";
+        const startIndex = horariosSlots.findIndex((slot) => slot.hora === start);
+        if (startIndex < 0) return start;
+        const endIndex = startIndex + reservaDuracion;
+        const end = horariosSlots[endIndex]?.hora;
+        return end ? `${start} - ${end}` : `${start} + ${reservaDuracion}h`;
+    }
+
     // ✅ MODAL RESERVA
     function abrirModalReservaComplejo(cx: ComplejoCard) {
         setReservaComplejo(cx);
         setReservaOpen(true);
         setReservaError(null);
+        setReservaDuracion(1);
 
         // defaults
         const first = cx.canchas[0];
@@ -865,6 +886,7 @@ export default function BusquedaDeCancha({
         setReservaComplejo(null);
         setReservaCanchaId(null);
         setReservaError(null);
+        setReservaDuracion(1);
     }
 
     function confirmarReservaWhatsApp() {
@@ -1151,10 +1173,39 @@ export default function BusquedaDeCancha({
                                     />
                                 </label>
 
+                                <label className={styles.modalField}>
+                                    <span className={styles.modalLabel}>
+                                        <i className="bi bi-hourglass-split me-2" aria-hidden="true"></i>
+                                        Duración
+                                    </span>
+                                    <select
+                                        className="form-select form-select-sm rounded-3"
+                                        value={String(reservaDuracion)}
+                                        onChange={(e) => {
+                                            const next = Math.max(1, Number(e.target.value) || 1);
+                                            setReservaDuracion(next);
+                                            if (!selectedSlots[0]) return;
+                                            const nextSelection = buildSelection(selectedSlots[0], next, horariosSlots);
+                                            if (!nextSelection) {
+                                                setReservaError("Ese rango no está disponible.");
+                                                return;
+                                            }
+                                            setReservaError(null);
+                                            setSelectedSlots(nextSelection);
+                                        }}
+                                    >
+                                        {[1, 2, 3, 4].map((h) => (
+                                            <option key={h} value={String(h)}>
+                                                {h} hora{h > 1 ? "s" : ""}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </label>
+
                                 <div className={styles.modalField}>
                                     <span className={styles.modalLabel}>Hora seleccionada</span>
                                     <div className={styles.modalStatic}>
-                                        {selectedSlots[0] ? `${selectedSlots[0]} hrs` : "Selecciona en la agenda"}
+                                        {formatSelectedRange()}
                                     </div>
                                 </div>
                                 {horariosError ? <p className={styles.modalTiny}>{horariosError}</p> : null}
@@ -1184,7 +1235,13 @@ export default function BusquedaDeCancha({
                                                     }`}
                                                     onClick={() => {
                                                         if (slot.ocupado) return;
-                                                        setSelectedSlots([slot.hora]);
+                                                        const nextSelection = buildSelection(slot.hora, reservaDuracion, horariosSlots);
+                                                        if (!nextSelection) {
+                                                            setReservaError("Ese rango no está disponible.");
+                                                            return;
+                                                        }
+                                                        setReservaError(null);
+                                                        setSelectedSlots(nextSelection);
                                                     }}
                                                     disabled={slot.ocupado}
                                                 >

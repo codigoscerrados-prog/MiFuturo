@@ -82,6 +82,18 @@ function formatDuracion(duracionHoras: number) {
     return duracionHoras === 1 ? "1 hora" : `${duracionHoras} horas`;
 }
 
+function sanitizeHtml(value?: string | null) {
+    if (!value) return "";
+    let html = value;
+    html = html.replace(/<\s*script[^>]*>[\s\S]*?<\s*\/\s*script>/gi, "");
+    html = html.replace(/<\s*style[^>]*>[\s\S]*?<\s*\/\s*style>/gi, "");
+    html = html.replace(/\son\w+="[^"]*"/gi, "");
+    html = html.replace(/\son\w+='[^']*'/gi, "");
+    html = html.replace(/\son\w+=\S+/gi, "");
+    html = html.replace(/javascript:/gi, "");
+    return html;
+}
+
 function buildMensajeReserva(complejo: ComplejoPerfil, cancha: Cancha, fechaISO: string, hora: string, duracionHoras: number) {
     const precio = Number(cancha.precio_hora || 0).toFixed(0);
     const duracionTxt = formatDuracion(duracionHoras);
@@ -165,8 +177,8 @@ export default function ComplejoPublicoPage() {
         return [];
     }, [data]);
 
-    const collage = gallery.slice(0, 5);
-    const extraCount = Math.max(0, gallery.length - 5);
+    const collage = gallery.slice(0, 4);
+    const extraCount = Math.max(0, gallery.length - 4);
     const activeGallery = useMemo(() => {
         if (!gallery.length) return null;
         const idx = Math.min(Math.max(galleryIndex, 0), gallery.length - 1);
@@ -361,58 +373,25 @@ export default function ComplejoPublicoPage() {
                         {zona ? <p className={styles.subtitle}>{zona}</p> : null}
                     </div>
 
-                    <div className={styles.actions}>
-                        <button
-                            type="button"
-                            className={styles.actionBtn}
-                            onClick={handleShare}
-                            title="Compartir"
-                        >
-                            <i className="bi bi-share" aria-hidden="true"></i>
-                            Compartir
-                        </button>
-
-                        <button
-                            type="button"
-                            className={`${styles.actionBtn} ${liked ? styles.actionBtnActive : ""}`}
-                            onClick={handleToggleLike}
-                            disabled={likePending}
-                            title="Me gusta"
-                        >
-                            <i className={`bi ${liked ? "bi-heart-fill" : "bi-heart"}`} aria-hidden="true"></i>
-                            Me gusta
-                            <span className={styles.likeCount}>{likes}</span>
-                        </button>
-
-                        {data.is_owner ? (
-                            <Link href={`/panel/complejos/${data.id}/editar`} className={styles.actionBtn}>
-                                <i className="bi bi-pencil-square" aria-hidden="true"></i>
-                                Editar
-                            </Link>
-                        ) : (
-                            <button
-                                type="button"
-                                className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}
-                                onClick={abrirReserva}
-                            >
-                                <i className="bi bi-calendar2-plus" aria-hidden="true"></i>
-                                Reservar
-                            </button>
-                        )}
+                    <div className={styles.actionsHint}>
+                        <span className={styles.statBadge}>
+                            {data.canchas?.length || 0} canchas
+                        </span>
+                        {precioStats.max ? (
+                            <span className={styles.statBadge}>
+                                S/ {Math.min(precioStats.min, Math.min(precioStats.max, PRECIO_MAX_VISIBLE)).toFixed(0)} –{" "}
+                                {Math.min(precioStats.max, PRECIO_MAX_VISIBLE).toFixed(0)} /h
+                            </span>
+                        ) : null}
                     </div>
                 </header>
 
-                <section className={styles.collageSection}>
-                    {collage.length > 0 ? (
-                        <>
-                            <div className={styles.collage}>
-                                <img
-                                    src={publicImgUrl(collage[0].url)}
-                                    alt={data.nombre}
-                                    className={styles.collageMain}
-                                />
+                <section className={styles.heroGrid}>
+                    <div className={styles.collageSection}>
+                        {collage.length > 0 ? (
+                            <>
                                 <div className={styles.collageGrid}>
-                                    {collage.slice(1).map((img, idx) => {
+                                    {collage.slice(0, 4).map((img, idx) => {
                                         const isLast = idx === 3;
                                         return (
                                             <button
@@ -420,7 +399,7 @@ export default function ComplejoPublicoPage() {
                                                 key={img.id}
                                                 className={styles.collageItem}
                                                 onClick={() => {
-                                                    setGalleryIndex(idx + 1);
+                                                    setGalleryIndex(idx);
                                                     setGalleryOpen(true);
                                                 }}
                                             >
@@ -432,52 +411,101 @@ export default function ComplejoPublicoPage() {
                                         );
                                     })}
                                 </div>
-                            </div>
-                            <div className={styles.viewAllRow}>
-                                <button
-                                    type="button"
-                                    className={styles.viewAll}
-                                    onClick={() => {
-                                        setGalleryIndex(0);
-                                        setGalleryOpen(true);
-                                    }}
-                                >
-                                    Ver todas
-                                </button>
-                                <button
-                                    type="button"
-                                    className={styles.viewAllMobile}
-                                    onClick={() => {
-                                        setGalleryIndex(0);
-                                        setGalleryOpen(true);
-                                    }}
-                                >
-                                    Ver fotos ({gallery.length})
-                                </button>
-                            </div>
-                        </>
-                    ) : (
-                        <div className={styles.collageEmpty}>Sin fotos aun</div>
-                    )}
-                </section>
+                                <div className={styles.viewAllRow}>
+                                    <button
+                                        type="button"
+                                        className={styles.viewAll}
+                                        onClick={() => {
+                                            setGalleryIndex(0);
+                                            setGalleryOpen(true);
+                                        }}
+                                    >
+                                        Ver todas
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={styles.viewAllMobile}
+                                        onClick={() => {
+                                            setGalleryIndex(0);
+                                            setGalleryOpen(true);
+                                        }}
+                                    >
+                                        Ver fotos ({gallery.length})
+                                    </button>
+                                </div>
+                            </>
+                        ) : (
+                            <div className={styles.collageEmpty}>Sin fotos aun</div>
+                        )}
+                    </div>
 
-                <section className={styles.section}>
-                    <h2 className={styles.sectionTitle}>Descripcion</h2>
-                    <p className={styles.sectionText}>{data.descripcion || "Sin descripcion."}</p>
-                </section>
-
-                {features.length > 0 ? (
-                    <section className={styles.section}>
-                        <h2 className={styles.sectionTitle}>Caracteristicas</h2>
-                        <div className={styles.chips}>
-                            {features.map((f) => (
-                                <span key={f} className={styles.chip}>
-                                    {f}
-                                </span>
-                            ))}
+                    <aside className={styles.infoPanel}>
+                        <div className={styles.infoBlock}>
+                            <h2 className={styles.sectionTitle}>Descripcion</h2>
+                            {data.descripcion ? (
+                                <div
+                                    className={styles.sectionText}
+                                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(data.descripcion) }}
+                                />
+                            ) : (
+                                <p className={styles.sectionText}>Sin descripcion.</p>
+                            )}
                         </div>
-                    </section>
-                ) : null}
+
+                        {features.length > 0 ? (
+                            <div className={styles.infoBlock}>
+                                <h2 className={styles.sectionTitle}>Caracteristicas</h2>
+                                <div className={styles.chips}>
+                                    {features.map((f) => (
+                                        <span key={f} className={styles.chip}>
+                                            {f}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : null}
+
+                        <div className={styles.actionBar}>
+                            <button
+                                type="button"
+                                className={styles.actionBtn}
+                                onClick={handleShare}
+                                title="Compartir"
+                            >
+                                <i className="bi bi-share" aria-hidden="true"></i>
+                                Compartir
+                            </button>
+
+                            <button
+                                type="button"
+                                className={`${styles.actionBtn} ${liked ? styles.actionBtnActive : ""}`}
+                                onClick={handleToggleLike}
+                                disabled={likePending}
+                                title="Me gusta"
+                            >
+                                <i className={`bi ${liked ? "bi-heart-fill" : "bi-heart"}`} aria-hidden="true"></i>
+                                Me gusta
+                                <span className={styles.likeCount}>{likes}</span>
+                            </button>
+
+                            {data.is_owner ? (
+                                <Link href={`/panel/complejos/${data.id}/editar`} className={styles.actionBtn}>
+                                    <i className="bi bi-pencil-square" aria-hidden="true"></i>
+                                    Editar
+                                </Link>
+                            ) : (
+                                <button
+                                    type="button"
+                                    className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}
+                                    onClick={abrirReserva}
+                                >
+                                    <i className="bi bi-calendar2-plus" aria-hidden="true"></i>
+                                    Reservar
+                                </button>
+                            )}
+                        </div>
+                    </aside>
+                </section>
 
                 {data.canchas && data.canchas.length > 0 ? (
                     <section className={styles.section}>

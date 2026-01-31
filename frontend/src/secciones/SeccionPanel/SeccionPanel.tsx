@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import styles from "./SeccionPanel.module.css";
 
 import { clearToken, getRoleFromToken, getToken, rutaPorRole } from "@/lib/auth";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, apiUrl } from "@/lib/api";
 import BrandLogo from "@/components/BrandLogo";
 
 import PanelReservasPropietario from "./SeccionReservas";
@@ -271,10 +271,41 @@ export default function SeccionPanel({
         return qs ? `?${qs}` : "";
     }
 
-    function handleExportHistorial(format: "excel" | "pdf") {
+    async function handleExportHistorial(format: "excel" | "pdf") {
         const extension = format === "excel" ? "xlsx" : "pdf";
-        const url = `/panel-reservas/export/${extension}${buildHistorialExportQuery()}`;
-        window.open(url, "_blank");
+        const url = apiUrl(`/panel/reservas/export.${extension}${buildHistorialExportQuery()}`);
+        if (!token) {
+            setHistorialError("Necesitas iniciar sesión para exportar.");
+            return;
+        }
+
+        try {
+            setHistorialError(null);
+            const res = await fetch(url, {
+                headers: {
+                    Authorization: token.startsWith("Bearer ") ? token : `Bearer ${token}`,
+                },
+            });
+            if (!res.ok) {
+                const msg = await res.text().catch(() => "");
+                throw new Error(msg || `No se pudo exportar (${res.status}).`);
+            }
+
+            const blob = await res.blob();
+            const disposition = res.headers.get("content-disposition") || "";
+            const match = disposition.match(/filename="?([^"]+)"?/i);
+            const filename = match?.[1] || `reservas.${extension}`;
+
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(link.href);
+        } catch (e: any) {
+            setHistorialError(e?.message || "No se pudo exportar el archivo.");
+        }
     }
 
     function resetHistorialFilters() {

@@ -37,6 +37,9 @@ type ComplejoOut = ComplejoForm;
 type ComplejoPerfil = {
     imagenes: ComplejoImagen[];
 };
+
+const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+
 export default function EditarComplejoClient() {
     const params = useParams();
     const router = useRouter();
@@ -133,11 +136,18 @@ export default function EditarComplejoClient() {
             return;
         }
 
+        const oversize = Array.from(files).filter((file) => file.size > MAX_IMAGE_BYTES);
+        if (oversize.length) {
+            setNotice("Cada imagen debe pesar max 2MB.");
+        }
+        const validFiles = Array.from(files).filter((file) => file.size <= MAX_IMAGE_BYTES);
+        if (validFiles.length === 0) return;
+
         setUploading(true);
         setNotice(null);
         try {
             const fd = new FormData();
-            Array.from(files).forEach((file) => fd.append("archivos", file));
+            validFiles.forEach((file) => fd.append("archivos", file));
             const res = await apiFetch<ComplejoImagen[]>(`/complejos/${id}/imagenes`, {
                 token,
                 method: "POST",

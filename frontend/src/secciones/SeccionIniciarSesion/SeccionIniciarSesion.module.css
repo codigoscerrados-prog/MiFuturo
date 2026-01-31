@@ -64,6 +64,7 @@
   overflow: hidden;
   position: relative;
   z-index: 1;
+  margin-top: clamp(-24px, -2.5vw, -8px);
 }
 
 .cardGrid {

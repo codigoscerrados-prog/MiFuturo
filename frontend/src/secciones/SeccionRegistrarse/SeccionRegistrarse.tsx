@@ -180,14 +180,13 @@ export default function SeccionRegistrarse({
     return (
         <section className={seccionClass}>
             <div className={`contenedor ${styles.grid}`}>
-                <div className={styles.brandHero}>
-                    <BrandLogo href="/" variant="compact" size="lg" />
-                </div>
-
                 <section className={`tarjeta ${styles.panel}`}>
                     <div className={styles.panelGrid}>
                         <aside className={styles.panelSide}>
                         <header className={styles.cabecera}>
+                            <div className={styles.brandRow}>
+                                <BrandLogo href="/" variant="compact" size="lg" />
+                            </div>
                             <p className={styles.badge}>{headerBadge}</p>
                             <h1 className={styles.titulo}>{headerTitulo}</h1>
                             <p className={styles.subtitulo}>{headerSubtitulo}</p>

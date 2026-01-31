@@ -1329,9 +1329,9 @@
 
 .metricsGrid {
     display: grid;
-    grid-template-columns: repeat(5, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 10px;
-    min-width: 720px;
+    min-width: 0;
 }
 
 .metricCard {

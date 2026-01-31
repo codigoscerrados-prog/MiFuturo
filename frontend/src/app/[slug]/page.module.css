@@ -1,5 +1,9 @@
 .page {
     padding: 90px 16px 60px;
+    background:
+        radial-gradient(circle at 10% 0%, rgba(37, 99, 235, 0.08), transparent 45%),
+        radial-gradient(circle at 90% 10%, rgba(16, 185, 129, 0.06), transparent 45%),
+        linear-gradient(180deg, #f8fafc 0%, #eef2f7 60%, #e9eef6 100%);
 }
 
 .container {
@@ -15,6 +19,23 @@
     justify-content: space-between;
     gap: 16px;
     flex-wrap: wrap;
+}
+
+.actionsHint {
+    display: inline-flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.statBadge {
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--borde);
+    background: rgba(15, 23, 42, .04);
+    color: var(--azulMarino);
+    font-weight: 900;
+    font-size: 12px;
 }
 
 .kicker {
@@ -90,34 +111,26 @@
     font-size: 12px;
 }
 
+.heroGrid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+    gap: 20px;
+    align-items: start;
+}
+
 .collageSection {
     display: grid;
-    gap: 10px;
-}
-
-.collage {
-    position: relative;
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 10px;
-    border-radius: 18px;
-    overflow: hidden;
-    aspect-ratio: 3 / 2;
-}
-
-.collageMain {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
+    gap: 12px;
 }
 
 .collageGrid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
-    height: 100%;
+    border-radius: 18px;
+    overflow: hidden;
+    background: rgba(15, 23, 42, .06);
+    padding: 10px;
 }
 
 .collageItem {
@@ -128,7 +141,7 @@
     cursor: pointer;
     border-radius: 14px;
     overflow: hidden;
-    height: 100%;
+    aspect-ratio: 1 / 1;
 }
 
 .collageItem img {
@@ -178,6 +191,30 @@
     font-weight: 900;
     color: var(--muted);
     background: linear-gradient(180deg, var(--blanco), var(--superficie));
+}
+
+.infoPanel {
+    display: grid;
+    gap: 16px;
+    padding: 16px;
+    border-radius: 18px;
+    border: 1px solid var(--borde);
+    background: linear-gradient(180deg, var(--blanco), var(--superficie));
+    box-shadow: var(--sombra-sm);
+}
+
+.infoBlock {
+    display: grid;
+    gap: 8px;
+}
+
+.actionBar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    padding-top: 8px;
+    border-top: 1px solid var(--borde);
 }
 
 .section {
@@ -511,13 +548,8 @@
 }
 
 @media (max-width: 900px) {
-    .collage {
+    .heroGrid {
         grid-template-columns: 1fr;
-        aspect-ratio: 1 / 1;
-    }
-
-    .collageGrid {
-        display: none;
     }
 
     .viewAll {

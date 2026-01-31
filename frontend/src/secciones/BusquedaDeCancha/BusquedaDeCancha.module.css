@@ -270,6 +270,7 @@
   border: none;
   color: #0b1220;
   box-shadow: 0 12px 26px rgba(16, 185, 129, 0.28);
+  white-space: nowrap;
 }
 
 .ctaGreen:hover {

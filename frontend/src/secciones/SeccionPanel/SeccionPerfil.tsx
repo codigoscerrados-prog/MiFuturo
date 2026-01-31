@@ -207,6 +207,31 @@ export default function SeccionPerfil(props: SeccionPerfilProps) {
                     </p>
                 </div>
                 <div className={styles.headerRight}>
+                    <div className={styles.accountBar}>
+                        <div className={styles.accountAvatar}>
+                            {me?.avatar_url ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={me.avatar_url} alt={nombreCompleto} className={styles.accountAvatarImg} />
+                            ) : (
+                                <span className={styles.accountAvatarText}>{initials(nombreCompleto)}</span>
+                            )}
+                        </div>
+                        <div className={styles.accountInfo}>
+                            <p className={styles.accountTitle}>Mi cuenta</p>
+                            <p className={styles.accountName}>{nombreCompleto}</p>
+                            <p className={styles.accountMeta}>{me?.business_name || "—"}</p>
+                        </div>
+                        <button
+                            type="button"
+                            className={styles.accountLogout}
+                            onClick={props.onLogout}
+                            aria-label="Cerrar sesion"
+                            title="Cerrar sesion"
+                        >
+                            <i className="bi bi-box-arrow-right" aria-hidden="true"></i>
+                        </button>
+                    </div>
+
                     <div className={styles.planWrap}>
                         <div className={planChipClass}>
                             <span className={styles.planChipLabel}>Plan</span>

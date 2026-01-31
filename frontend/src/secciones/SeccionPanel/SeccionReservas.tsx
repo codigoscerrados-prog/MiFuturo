@@ -1,7 +1,6 @@
 "use client";
 
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import styles from "./SeccionReservas.module.css";
 import { apiFetch } from "@/lib/api";
 
@@ -41,10 +40,6 @@ const SLOT_MINUTES = 30;
 const DURATION_OPTIONS = [30, 60, 90, 120] as const;
 const DEFAULT_DURATION_MINUTES = 60;
 
-const MONTH_NAMES = [
-    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
-] as const;
 
 type CourtColorSet = {
     dot: string;
@@ -83,6 +78,14 @@ function formatDisplayDate(date: Date) {
         day: "numeric",
         month: "short",
     });
+}
+
+function startOfWeek(date: Date) {
+    const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const day = d.getDay();
+    const diff = (day === 0 ? -6 : 1) - day;
+    d.setDate(d.getDate() + diff);
+    return d;
 }
 
 function parseHHMM(isoLike: string) {
@@ -274,8 +277,6 @@ export default function PanelReservasPropietario({ token }: { token: string }) {
     const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
     const toastTimerRef = useRef<number | null>(null);
 
-    const [sidebarSlot, setSidebarSlot] = useState<HTMLElement | null>(null);
-
     const [formCourtId, setFormCourtId] = useState<number | null>(null);
     const [formDate, setFormDate] = useState<string>("");
     const [formTime, setFormTime] = useState<string>(HALF_HOUR_SLOTS[0]);
@@ -309,9 +310,6 @@ export default function PanelReservasPropietario({ token }: { token: string }) {
         return arr.filter(isActiveReservation).length;
     }, [dayCache, todayStr]);
 
-    const monthYearLabel = useMemo(() => {
-        return `${MONTH_NAMES[currentMonth.getMonth()]} ${currentMonth.getFullYear()}`;
-    }, [currentMonth]);
 
     const fetchCanchas = useCallback(async () => {
         const data = await apiFetch<Cancha[]>("/panel/canchas", { token });
@@ -371,9 +369,8 @@ export default function PanelReservasPropietario({ token }: { token: string }) {
     }, [fetchCanchas]);
 
     useEffect(() => {
-        if (typeof document === "undefined") return;
-        setSidebarSlot(document.getElementById("panel-reservas-calendar-slot"));
-    }, []);
+        setCurrentMonth(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1));
+    }, [selectedDate]);
 
     // ✅ carga mes (1 llamada) y llena dayCache por fecha
     useEffect(() => {
@@ -432,21 +429,6 @@ export default function PanelReservasPropietario({ token }: { token: string }) {
         toastTimerRef.current = window.setTimeout(() => setToast(null), 3000);
     }, []);
 
-    const calendarCells = useMemo(() => {
-        const y = currentMonth.getFullYear();
-        const m = currentMonth.getMonth();
-        const firstDayIndex = new Date(y, m, 1).getDay(); // 0=Dom
-        const daysInMonth = new Date(y, m + 1, 0).getDate();
-
-        const cells: Array<{ type: "empty" } | { type: "day"; day: number; dateStr: string }> = [];
-        for (let i = 0; i < firstDayIndex; i++) cells.push({ type: "empty" });
-        for (let day = 1; day <= daysInMonth; day++) {
-            const dateStr = `${y}-${pad2(m + 1)}-${pad2(day)}`;
-            cells.push({ type: "day", day, dateStr });
-        }
-        return cells;
-    }, [currentMonth]);
-
     const occupiedSlotsByCourt = useMemo(() => {
         const map = new Map<number, Map<string, { res: Reserva; isStart: boolean }>>();
         for (const r of dayActiveReservations) {
@@ -496,9 +478,6 @@ export default function PanelReservasPropietario({ token }: { token: string }) {
         };
     }, [dayReservations]);
 
-    function changeMonth(delta: number) {
-        setCurrentMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() + delta, 1));
-    }
 
     function selectDateByStr(dateStr: string) {
         const [yy, mm, dd] = dateStr.split("-").map((x) => Number(x));
@@ -733,24 +712,7 @@ export default function PanelReservasPropietario({ token }: { token: string }) {
         return () => window.removeEventListener("keydown", onKey);
     }, []);
 
-    function isTodayDateStr(ds: string) {
-        return ds === todayStr;
-    }
-    function isSelectedDateStr(ds: string) {
-        return ds === selectedDateStr;
-    }
 
-    function dayDots(dateStr: string) {
-        const arr = (dayCache[dateStr] || []).filter(isActiveReservation);
-        if (!arr.length) return [];
-
-        const uniqueCourtIds: number[] = [];
-        for (const r of arr) {
-            if (!uniqueCourtIds.includes(r.cancha_id)) uniqueCourtIds.push(r.cancha_id);
-            if (uniqueCourtIds.length >= 3) break;
-        }
-        return uniqueCourtIds.map((id) => canchaColorById.get(id) || COURT_COLORSETS[0]);
-    }
 
     const now = new Date();
     const nowMinutes = now.getHours() * 60 + now.getMinutes();
@@ -763,110 +725,19 @@ export default function PanelReservasPropietario({ token }: { token: string }) {
         720,
         Math.max(320, 120 + canchasActivas.length * 90)
     );
-    const agendaScrollStyle = { maxHeight: `${agendaScrollHeight}px` };
+    const agendaScrollStyle = { maxHeight: `${agendaScrollHeight}px`, paddingLeft: "0px" };
     const isSelectedToday = selectedDateStr === todayStr;
-
-    const calendarNode = (
-        <section className={cn(styles.card, styles.cardCalendar)}>
-            <div className={styles.calendarTop}>
-                <button type="button" onClick={() => changeMonth(-1)} className={styles.iconBtn} aria-label="Mes anterior">
-                    <svg className={styles.icon} viewBox="0 0 24 24">
-                        <path d="M15 19l-7-7 7-7" />
-                    </svg>
-                </button>
-
-                <div className={styles.calendarTitle}>
-                    {monthYearLabel}
-                    {loadingMonth ? <span className={styles.loadingTag}> (cargando)</span> : null}
-                </div>
-
-                <button type="button" onClick={() => changeMonth(1)} className={styles.iconBtn} aria-label="Mes siguiente">
-                    <svg className={styles.icon} viewBox="0 0 24 24">
-                        <path d="M9 5l7 7-7 7" />
-                    </svg>
-                </button>
-            </div>
-
-            <div className={styles.weekdays}>
-                <span className={styles.weekday}>Dom</span>
-                <span className={styles.weekday}>Lun</span>
-                <span className={styles.weekday}>Mar</span>
-                <span className={styles.weekday}>Mie</span>
-                <span className={styles.weekday}>Jue</span>
-                <span className={styles.weekday}>Vie</span>
-                <span className={styles.weekday}>Sab</span>
-            </div>
-
-            <div className={styles.calendarGrid}>
-                {calendarCells.map((cell, idx) => {
-                    if (cell.type === "empty") return <div key={`e-${idx}`} className={styles.calendarEmpty} />;
-
-                    const ds = cell.dateStr;
-                    const dots = dayDots(ds);
-                    const isToday = isTodayDateStr(ds);
-                    const isSelected = isSelectedDateStr(ds);
-
-                    return (
-                        <button
-                            key={ds}
-                            type="button"
-                            className={cn(
-                                styles.calendarDay,
-                                isToday && styles.calendarDayToday,
-                                isSelected && styles.calendarDaySelected
-                            )}
-                            onClick={() => selectDateByStr(ds)}
-                            aria-pressed={isSelected}
-                        >
-                            <span className={styles.calendarDayNum}>{cell.day}</span>
-
-                            {dots.length ? (
-                                <span className={styles.dots} aria-hidden="true">
-                                    {dots.map((cset, i) => (
-                                        <span
-                                            key={`${ds}-dot-${i}`}
-                                            className={styles.dot}
-                                            style={{ backgroundColor: cset.dotSoft }}
-                                        />
-                                    ))}
-                                </span>
-                            ) : null}
-                        </button>
-                    );
-                })}
-            </div>
-
-            <div className={styles.divisor} />
-
-            <div className={styles.legendTop}>
-                <h3 className={styles.legendTitle}>Canchas</h3>
-                <span className={styles.legendHint}>Colores por cancha</span>
-            </div>
-
-            {canchasActivas.length === 0 ? (
-                <div className={styles.legendEmpty}>Aun no tienes canchas registradas.</div>
-            ) : (
-                <div className={styles.legendList}>
-                    {canchasActivas.map((c) => {
-                        const cs = canchaColorById.get(c.id) || COURT_COLORSETS[0];
-                        return (
-                            <div key={c.id} className={styles.legendItem}>
-                                <div className={styles.legendLeft}>
-                                    <span className={styles.legendDot} style={{ backgroundColor: cs.dot }} />
-                                    <span className={styles.legendName}>{c.nombre}</span>
-                                </div>
-                                <span className={styles.legendPrice}>S/ {Number(c.precio_hora || 0).toFixed(0)}/h</span>
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
-        </section>
-    );
+    const weekStart = useMemo(() => startOfWeek(selectedDate), [selectedDate]);
+    const weekDates = useMemo(() => {
+        return Array.from({ length: 7 }, (_, i) => {
+            const d = new Date(weekStart);
+            d.setDate(weekStart.getDate() + i);
+            return d;
+        });
+    }, [weekStart]);
 
     return (
         <div className={styles.shell}>
-            {sidebarSlot ? createPortal(calendarNode, sidebarSlot) : null}
             {/* Header */}
             <div className={styles.header}>
                 <div>
@@ -897,8 +768,7 @@ export default function PanelReservasPropietario({ token }: { token: string }) {
             {error ? <div className={styles.alertError}>{error}</div> : null}
 
             {/* Main Grid */}
-            <div className={cn(styles.mainGrid, sidebarSlot && styles.mainGridWide)}>
-                {!sidebarSlot ? calendarNode : null}
+            <div className={styles.mainGrid}>
 
                 {/* Lista del dÇða */}
                 <section className={cn(styles.card, styles.cardList)}>
@@ -1033,8 +903,30 @@ export default function PanelReservasPropietario({ token }: { token: string }) {
                             </p>
                         </div>
 
-                        <div className={styles.viewTabs} aria-hidden="true">
-                            <button type="button" className={cn(styles.viewBtn, styles.viewBtnActive)}>Hoy</button>
+                        <div className={styles.viewTabs}>
+                            <button type="button" className={styles.weekNavBtn} onClick={() => moveWeek(-1)} aria-label="Semana anterior">
+                                <i className="bi bi-chevron-left" aria-hidden="true"></i>
+                            </button>
+                            <div className={styles.weekButtons}>
+                                {weekDates.map((d) => {
+                                    const ds = ymd(d);
+                                    const label = d.toLocaleDateString("es-ES", { weekday: "short" });
+                                    return (
+                                        <button
+                                            key={ds}
+                                            type="button"
+                                            className={cn(styles.weekBtn, ds == selectedDateStr && styles.weekBtnActive)}
+                                            onClick={() => selectDateByStr(ds)}
+                                        >
+                                            <span className={styles.weekLabel}>{label}</span>
+                                            <span className={styles.weekDay}>{d.getDate()}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            <button type="button" className={styles.weekNavBtn} onClick={() => moveWeek(1)} aria-label="Semana siguiente">
+                                <i className="bi bi-chevron-right" aria-hidden="true"></i>
+                            </button>
                         </div>
                     </div>
 

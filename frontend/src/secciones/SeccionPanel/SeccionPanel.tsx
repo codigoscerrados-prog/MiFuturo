@@ -444,37 +444,6 @@ export default function SeccionPanel({
                     </aside>
 
                     <div className={styles.main}>
-                        <div className={styles.mainTop}>
-                            <details className={styles.userDropdown} open>
-                                <summary className={styles.userSummary}>
-                                    <span>Mi cuenta</span>
-                                    <i className={`bi bi-chevron-down ${styles.userChevron}`} aria-hidden="true"></i>
-                                </summary>
-                                <div className={styles.userCard}>
-                                    <div className={styles.avatar}>
-                                        {perfil?.avatar_url ? (
-                                            <img src={perfil.avatar_url} alt={displayName} className={styles.avatarImg} />
-                                        ) : (
-                                            <span className={styles.avatarText}>{displayName.slice(0, 1).toUpperCase()}</span>
-                                        )}
-                                    </div>
-                                    <div className={styles.userInfo}>
-                                        <p className={styles.userName}>{displayName}</p>
-                                        {perfil?.email ? <p className={styles.userMeta}>{perfil.email}</p> : null}
-                                    </div>
-                                    <button
-                                        type="button"
-                                        className={styles.userLogout}
-                                        onClick={cerrarSesion}
-                                        aria-label="Cerrar sesion"
-                                        title="Cerrar sesion"
-                                    >
-                                        <i className="bi bi-box-arrow-right" aria-hidden="true"></i>
-                                    </button>
-                                </div>
-                            </details>
-                        </div>
-
                         <div className={styles.header}>
                             
 

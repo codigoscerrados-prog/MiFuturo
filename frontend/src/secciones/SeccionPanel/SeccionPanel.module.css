@@ -94,8 +94,8 @@
 
 .main > * {
     width: 100%;
-    max-width: 1160px;
-    margin-inline: auto;
+    max-width: none;
+    margin-inline: 0;
 }
 
 .brand {

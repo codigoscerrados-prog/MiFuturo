@@ -26,6 +26,114 @@
     gap: 12px;
     flex-wrap: wrap;
     justify-content: flex-end;
+    margin-left: auto;
+}
+
+.accountBar {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px;
+    border: 1px solid var(--borde);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: var(--sombra-sm);
+}
+
+.accountAvatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    background: rgba(15, 23, 42, 0.04);
+}
+
+.accountAvatarImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.accountAvatarText {
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--azulMarino);
+}
+
+.accountInfo {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+
+.accountTitle {
+    margin: 0;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 800;
+    color: var(--muted);
+}
+
+.accountName {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--azulMarino);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+}
+
+.accountMeta {
+    margin: 0;
+    font-size: 11.5px;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+}
+
+@media (max-width: 720px) {
+    .headerRight {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .accountBar {
+        width: 100%;
+        border-radius: 14px;
+        justify-content: space-between;
+    }
+
+    .accountName,
+    .accountMeta {
+        max-width: 100%;
+    }
+}
+
+.accountLogout {
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    background: #fff;
+    color: var(--azulMarino);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: transform var(--transicion-fast), box-shadow var(--transicion-fast);
+}
+
+.accountLogout:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--sombra-sm);
 }
 
 .planWrap {

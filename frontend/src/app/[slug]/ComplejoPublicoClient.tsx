@@ -623,25 +623,7 @@ export default function ComplejoPublicoPage() {
                     )}
                 </section>
 
-                {data.canchas && data.canchas.length > 0 ? (
-                    <section className={styles.section}>
-                        <h2 className={styles.sectionTitle}>Canchas</h2>
-                        <div className={styles.canchasGrid}>
-                            {data.canchas.map((c) => (
-                                <article key={c.id} className={styles.canchaCard}>
-                                    <div className={styles.canchaBody}>
-                                        <span className={styles.canchaTag}>{data.nombre}</span>
-                                        <h3 className={styles.canchaName}>{c.nombre}</h3>
-                                        <p className={styles.canchaMeta}>
-                                            {c.tipo} • {c.pasto}
-                                        </p>
-                                        <p className={styles.canchaPrice}>S/ {Number(c.precio_hora || 0).toFixed(0)} /h</p>
-                                    </div>
-                                </article>
-                            ))}
-                        </div>
-                    </section>
-                ) : null}
+                {null}
 
                 {(data.latitud != null && data.longitud != null) ? (
                     <section className={styles.section}>

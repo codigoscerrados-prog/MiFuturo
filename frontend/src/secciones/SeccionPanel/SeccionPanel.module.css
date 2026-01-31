@@ -30,12 +30,18 @@
 }
 
 .layout {
+    --sidebar-w: 72px;
     display: grid;
-    grid-template-columns: 260px minmax(0, 1fr);
+    grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
     gap: 0;
     align-items: stretch;
     min-height: 100vh;
     background: var(--panel-bg);
+}
+
+.layout:has(.sidebar:hover),
+.layout:has(.sidebar:focus-within) {
+    --sidebar-w: 260px;
 }
 
 .sidebar {
@@ -45,6 +51,7 @@
     height: 100vh;
     border-right: 1px solid var(--panel-border);
     background: var(--panel-bg);
+    transition: width 0.2s ease;
 }
 
 .sidebarCard {
@@ -57,6 +64,7 @@
     flex-direction: column;
     gap: 16px;
     height: 100vh;
+    overflow: hidden;
 }
 
 .main {
@@ -107,6 +115,7 @@
     font-weight: 800;
     color: var(--panel-text);
     font-size: 16px;
+    white-space: nowrap;
 }
 
 .kicker {
@@ -163,6 +172,9 @@
     margin: 0;
     font-weight: 800;
     color: var(--panel-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .userMeta {
@@ -205,6 +217,12 @@
 .sidebarCalendarSlot {
     min-height: 0;
     margin-top: 12px;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+:global(#panel-reservas-calendar-slot) > * {
+    max-width: 100%;
 }
 
 .sidebarFooter {
@@ -525,15 +543,86 @@
     min-width: 0;
 }
 
+.userDropdown {
+    border: 1px solid var(--panel-border);
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: var(--panel-shadow-soft);
+    overflow: hidden;
+}
+
+.userSummary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    font-weight: 700;
+    color: var(--panel-text);
+    cursor: pointer;
+    list-style: none;
+}
+
+.userSummary::-webkit-details-marker {
+    display: none;
+}
+
+.userChevron {
+    transition: transform 0.18s ease;
+}
+
+.userDropdown[open] .userChevron {
+    transform: rotate(180deg);
+}
+
+.userDropdown .userCard {
+    border: none;
+    box-shadow: none;
+    border-top: 1px solid var(--panel-border);
+    border-radius: 0;
+}
+
 .tabLeft span {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    max-width: 200px;
+    transition: opacity 0.18s ease, max-width 0.18s ease;
 }
 
 .tabIcon {
     font-size: 1rem;
     color: var(--panel-muted);
+}
+
+/* Sidebar colapsado (solo iconos) */
+.sidebar:not(:hover):not(:focus-within) .brandTitle,
+.sidebar:not(:hover):not(:focus-within) .kicker,
+.sidebar:not(:hover):not(:focus-within) .userInfo,
+.sidebar:not(:hover):not(:focus-within) .userMeta,
+.sidebar:not(:hover):not(:focus-within) .lockBadge {
+    opacity: 0;
+    max-width: 0;
+    width: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.sidebar:not(:hover):not(:focus-within) .userCard {
+    padding: 10px;
+}
+
+.sidebar:not(:hover):not(:focus-within) .tab {
+    justify-content: center;
+}
+
+.sidebar:not(:hover):not(:focus-within) .tabLeft span {
+    opacity: 0;
+    max-width: 0;
+}
+
+.sidebar:not(:hover):not(:focus-within) .tabIcon {
+    color: var(--panel-text);
 }
 
 .tab:hover {

@@ -2,7 +2,7 @@ import SeccionRegistrarse from "@/secciones/SeccionRegistrarse/SeccionRegistrars
 
 export default function PageRegistrarPropietario() {
     return (
-        <main className="paginaBannerRegistro">
+        <main className="paginaBannerRegistro paginaBannerRegistroNoPad">
             <div className="fondoSeccion fondoA espaciadoSeccion">
                 <SeccionRegistrarse
                     defaultRole="propietario"

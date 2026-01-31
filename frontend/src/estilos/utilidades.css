@@ -32,6 +32,10 @@
   color: #fff;
 }
 
+.paginaBannerRegistroNoPad {
+  padding-top: 0;
+}
+
 .paginaBannerRegistro > * {
   width: 100%;
   z-index: 1;

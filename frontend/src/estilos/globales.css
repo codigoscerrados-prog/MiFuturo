@@ -80,11 +80,8 @@ body {
 
 :is(body, #__next) > main,
 main {
+    padding-top: calc(var(--navH, 80px) + 1.25rem);
     min-height: calc(100vh - var(--navH, 80px));
-}
-
-body.lv-auth-page main {
-    padding-top: 0;
 }
 
 /* ===== Box Sizing Universal ===== */

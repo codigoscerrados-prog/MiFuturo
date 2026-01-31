@@ -111,6 +111,7 @@ function buildMensajeReserva(complejo: ComplejoPerfil, cancha: Cancha, fechaISO:
 export default function ComplejoPublicoPage() {
     const params = useParams();
     const slug = Array.isArray(params?.slug) ? params?.slug[0] : (params?.slug as string | undefined);
+    const PRECIO_MAX_VISIBLE = 300;
 
     const [data, setData] = useState<ComplejoPerfil | null>(null);
     const [loading, setLoading] = useState(true);

@@ -578,11 +578,11 @@ export default function SeccionComplejos({ token }: { token: string }) {
           {seleccionado && seleccionadoId !== "new" ? (
             <div className={styles.actionsRow}>
               <Link className="boton botonPrimario" href={`/panel/complejos/${seleccionado.id}/editar`}>
-                Administrar perfil p?blico
+                Administrar perfil público
               </Link>
               {publicUrl ? (
                 <a className="boton botonNeon" href={publicUrl} target="_blank" rel="noreferrer">
-                  Ver perfil p?blico
+                  Ver perfil público
                 </a>
               ) : null}
             </div>

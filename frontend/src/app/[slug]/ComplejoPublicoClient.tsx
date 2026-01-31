@@ -149,6 +149,24 @@ export default function ComplejoPublicoPage() {
     }, [slug]);
 
     useEffect(() => {
+        if (!data?.descripcion) return;
+        const iframe = document.getElementById("descripcion-frame") as HTMLIFrameElement | null;
+        if (!iframe) return;
+        const onLoad = () => {
+            try {
+                const doc = iframe.contentDocument || iframe.contentWindow?.document;
+                if (!doc) return;
+                const height = doc.documentElement.scrollHeight || doc.body?.scrollHeight || 0;
+                if (height) iframe.style.height = `${height}px`;
+            } catch {
+                // ignore
+            }
+        };
+        iframe.addEventListener("load", onLoad);
+        return () => iframe.removeEventListener("load", onLoad);
+    }, [data?.descripcion]);
+
+    useEffect(() => {
         if (typeof document === "undefined") return;
         document.body.classList.add("lv-nav-solid");
         return () => {
@@ -376,7 +394,7 @@ export default function ComplejoPublicoPage() {
             <div className={styles.container}>
                 <header className={styles.header}>
                     <div>
-                        <p className={styles.kicker}>Perfil publico</p>
+                        <p className={styles.kicker}>Perfil público</p>
                         <h1 className={styles.title}>{data.nombre}</h1>
                         {zona ? <p className={styles.subtitle}>{zona}</p> : null}
                     </div>
@@ -448,22 +466,6 @@ export default function ComplejoPublicoPage() {
                     </div>
 
                     <aside className={styles.infoPanel}>
-                        <div className={styles.infoBlock}>
-                            <h2 className={styles.sectionTitle}>Descripcion</h2>
-                            {data.descripcion ? (
-                                <div className={styles.htmlPreview}>
-                                    <iframe
-                                        className={styles.htmlFrame}
-                                        sandbox=""
-                                        srcDoc={sanitizeHtml(data.descripcion)}
-                                        title="Descripcion del complejo"
-                                    />
-                                </div>
-                            ) : (
-                                <p className={styles.sectionText}>Sin descripcion.</p>
-                            )}
-                        </div>
-
                         {features.length > 0 ? (
                             <div className={styles.infoBlock}>
                                 <h2 className={styles.sectionTitle}>Caracteristicas</h2>
@@ -517,6 +519,23 @@ export default function ComplejoPublicoPage() {
                             )}
                         </div>
                     </aside>
+                </section>
+
+                <section className={styles.section}>
+                    <h2 className={styles.sectionTitle}>Descripcion</h2>
+                    {data.descripcion ? (
+                        <div className={styles.htmlPreview}>
+                            <iframe
+                                id="descripcion-frame"
+                                className={styles.htmlFrame}
+                                sandbox=""
+                                srcDoc={sanitizeHtml(data.descripcion)}
+                                title="Descripcion del complejo"
+                            />
+                        </div>
+                    ) : (
+                        <p className={styles.sectionText}>Sin descripcion.</p>
+                    )}
                 </section>
 
                 {data.canchas && data.canchas.length > 0 ? (

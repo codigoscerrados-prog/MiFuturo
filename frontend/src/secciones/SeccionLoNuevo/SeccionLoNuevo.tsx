@@ -690,8 +690,8 @@ export default function SeccionLoNuevo() {
                         const chips = FEATURES.filter((f) => card.features?.[f.key]);
                         const tieneOwner = Boolean(card.owner_id);
                         const esEstandar = !card.verificado;
-                        const mostrarReservar = tieneOwner && !esEstandar;
-                        const mostrarMensajeVerificado = tieneOwner && !mostrarReservar;
+                        const mostrarReservar = card.verificado;
+                        const mostrarMensajeVerificado = tieneOwner && esEstandar;
                         const adminWhatsappUrl = buildWhatsAppUrl(
                             ADMINISTRAR_WHATSAPP_PHONE,
                             ADMINISTRAR_WHATSAPP_MESSAGE
@@ -767,9 +767,9 @@ export default function SeccionLoNuevo() {
                                                             onClick={() => abrirReserva(card)}
                                                         >
                                                             <i className="bi bi-whatsapp me-2" aria-hidden="true"></i>
-                                                            Reservar
+                                                            Reservar por WhatsApp
                                                         </button>
-                                                    ) : esSinOwner ? (
+                                                    ) : esSinOwner && esEstandar ? (
                                                         <a
                                                             href={adminWhatsappUrl}
                                                             target="_blank"

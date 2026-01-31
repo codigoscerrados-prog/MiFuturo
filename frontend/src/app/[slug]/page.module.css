@@ -211,10 +211,12 @@
 .actionBar {
     display: flex;
     gap: 10px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     padding-top: 8px;
     border-top: 1px solid var(--borde);
+    white-space: nowrap;
+    overflow-x: auto;
 }
 
 .section {
@@ -244,8 +246,8 @@
 
 .htmlFrame {
     width: 100%;
-    min-height: 220px;
-    height: 280px;
+    min-height: 140px;
+    height: auto;
     border: none;
     display: block;
 }
@@ -280,6 +282,11 @@
     overflow: hidden;
     display: grid;
     grid-template-rows: auto;
+    max-width: 320px;
+}
+
+.canchasGrid {
+    justify-content: flex-start;
 }
 
 .canchaBody {

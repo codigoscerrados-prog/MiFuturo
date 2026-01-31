@@ -535,7 +535,7 @@ export default function ComplejoPublicoPage() {
                         <div className={styles.htmlPreview}>
                             <iframe
                                 className={styles.htmlFrame}
-                                sandbox=""
+                                sandbox="allow-same-origin"
                                 srcDoc={sanitizeHtml(data.descripcion)}
                                 ref={descFrameRef}
                                 onLoad={syncDescHeight}

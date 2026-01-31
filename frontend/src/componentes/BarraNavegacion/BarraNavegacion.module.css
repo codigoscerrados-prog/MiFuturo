@@ -129,7 +129,7 @@
 
 .brand:hover,
 .brand:focus-visible {
-  color: #fff;
+  color: inherit;
 }
 
 .logoIcon {

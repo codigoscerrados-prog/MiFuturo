@@ -51,19 +51,19 @@
     letter-spacing: .2px;
     font-weight: 900;
     text-transform: uppercase;
-    color: var(--muted);
+    color: rgba(255, 255, 255, .75);
 }
 
 .title {
     margin: 0;
     font-size: clamp(26px, 3.2vw, 40px);
     font-weight: 950;
-    color: var(--azulMarino);
+    color: #fff;
 }
 
 .subtitle {
     margin: 6px 0 0;
-    color: var(--muted);
+    color: rgba(255, 255, 255, .8);
     font-weight: 800;
 }
 
@@ -234,13 +234,21 @@
     margin: 0;
     font-size: 18px;
     font-weight: 950;
-    color: var(--azulMarino);
+    color: #fff;
 }
 
 .sectionText {
     margin: 0;
-    color: var(--muted);
+    color: rgba(255, 255, 255, .8);
     font-weight: 800;
+}
+
+.infoPanel .sectionTitle {
+    color: var(--azulMarino);
+}
+
+.infoPanel .sectionText {
+    color: var(--muted);
 }
 
 .htmlPreview {
@@ -252,7 +260,7 @@
 
 .htmlFrame {
     width: 100%;
-    min-height: 0;
+    min-height: 140px;
     height: 1px;
     border: none;
     display: block;
@@ -279,7 +287,7 @@
 .canchasGrid {
     display: grid;
     gap: 12px;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: minmax(0, 1fr);
 }
 
 .canchaCard {
@@ -290,7 +298,7 @@
     overflow: hidden;
     display: grid;
     grid-template-rows: auto;
-    max-width: 320px;
+    max-width: 420px;
 }
 
 .canchasGrid {

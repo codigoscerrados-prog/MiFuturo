@@ -1122,7 +1122,7 @@ export default function SeccionLoNuevo() {
                                 </div>
 
                                 <div className={`d-flex justify-content-end gap-2 flex-wrap ${styles.modalBtns}`}>
-                                    <button className="btn btn-outline-secondary rounded-pill px-3" type="button" onClick={cerrarModales}>
+                                    <button className={`btn btn-outline-secondary rounded-pill px-3 ${styles.btnCancel}`} type="button" onClick={cerrarModales}>
                                         Cancelar
                                     </button>
                                     <button className={`btn rounded-pill px-3 ${styles.ctaGreen}`} type="button" onClick={confirmarReservaWhatsApp}>

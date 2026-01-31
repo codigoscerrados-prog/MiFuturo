@@ -7,6 +7,12 @@
   color: var(--brand-logo-color, #fff);
 }
 
+.brandLogo:hover,
+.brandLogo:focus-visible,
+.brandLogo:active {
+  color: inherit;
+}
+
 .full {
   flex-direction: column;
   align-items: flex-start;
@@ -31,6 +37,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.1rem;
+  color: inherit;
 }
 
 .companyName {

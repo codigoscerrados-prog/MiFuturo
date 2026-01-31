@@ -475,6 +475,11 @@
   filter: brightness(1.05);
 }
 
+.btnCancel {
+  color: #fff !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
 .modalCard {
   width: min(720px, 100%);
   border-radius: 24px;
@@ -658,7 +663,7 @@
 }
 
 .modalLabel {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 800;
   color: #fff;
 }
@@ -670,7 +675,7 @@
   padding: 8px 10px;
   color: #f8fafc;
   font-weight: 800;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .modalError {

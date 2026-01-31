@@ -93,6 +93,24 @@ function sanitizeHtml(value?: string | null) {
     return html;
 }
 
+function buildDescDoc(raw?: string | null) {
+    const safe = sanitizeHtml(raw);
+    return `<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      html, body { margin: 0; padding: 0; height: auto; overflow: visible; }
+      body { min-height: 0; }
+      img, video { max-width: 100%; height: auto; }
+      * { box-sizing: border-box; }
+    </style>
+  </head>
+  <body>${safe}</body>
+</html>`;
+}
+
 function buildMensajeReserva(complejo: ComplejoPerfil, cancha: Cancha, fechaISO: string, hora: string, duracionHoras: number) {
     const precio = Number(cancha.precio_hora || 0).toFixed(0);
     const duracionTxt = formatDuracion(duracionHoras);
@@ -129,6 +147,8 @@ export default function ComplejoPublicoPage() {
     const [likes, setLikes] = useState(0);
     const [liked, setLiked] = useState(false);
     const descFrameRef = useRef<HTMLIFrameElement | null>(null);
+    const descObserverRef = useRef<ResizeObserver | null>(null);
+    const descMutationRef = useRef<MutationObserver | null>(null);
 
     useEffect(() => {
         if (!slug) return;
@@ -172,6 +192,30 @@ export default function ComplejoPublicoPage() {
             window.clearTimeout(t);
             window.removeEventListener("resize", onResize);
         };
+    }, [data?.descripcion]);
+
+    useEffect(() => {
+        const iframe = descFrameRef.current;
+        if (!data?.descripcion || !iframe) return;
+        try {
+            const doc = iframe.contentDocument || iframe.contentWindow?.document;
+            if (!doc) return;
+            descObserverRef.current?.disconnect();
+            descMutationRef.current?.disconnect();
+            const observer = new ResizeObserver(() => syncDescHeight());
+            observer.observe(doc.documentElement);
+            descObserverRef.current = observer;
+            const mutation = new MutationObserver(() => syncDescHeight());
+            if (doc.body) mutation.observe(doc.body, { childList: true, subtree: true, attributes: true });
+            descMutationRef.current = mutation;
+            syncDescHeight();
+            return () => {
+                observer.disconnect();
+                mutation.disconnect();
+            };
+        } catch {
+            return;
+        }
     }, [data?.descripcion]);
 
     useEffect(() => {
@@ -536,7 +580,7 @@ export default function ComplejoPublicoPage() {
                             <iframe
                                 className={styles.htmlFrame}
                                 sandbox="allow-same-origin"
-                                srcDoc={sanitizeHtml(data.descripcion)}
+                                srcDoc={buildDescDoc(data.descripcion)}
                                 ref={descFrameRef}
                                 onLoad={syncDescHeight}
                                 scrolling="no"

@@ -507,174 +507,197 @@ export default function SeccionPanel({
 
                         {error ? <div className={styles.alertError}>{error}</div> : null}
 
+                        
                         {cargando ? (
                             <div className={`tarjeta ${styles.tarjeta}`}>
                                 <p className={styles.muted}>Cargando...</p>
                             </div>
                         ) : (
                             <>
-                                {role === "propietario" && tab === "mi-complejo" ? <SeccionComplejos token={token} /> : null}
-                                {role === "propietario" && tab === "mis-canchas" ? <PanelCanchasPropietario token={token} /> : null}
-                                {role === "propietario" && tab === "reservas" ? <PanelReservasPropietario token={token} /> : null}
+                                {role === "propietario" && tab === "mi-complejo" ? (
+                                    <div className={styles.sectionWrap}>
+                                        <SeccionComplejos token={token} />
+                                    </div>
+                                ) : null}
+                                {role === "propietario" && tab === "mis-canchas" ? (
+                                    <div className={styles.sectionWrap}>
+                                        <PanelCanchasPropietario token={token} />
+                                    </div>
+                                ) : null}
+                                {role === "propietario" && tab === "reservas" ? (
+                                    <div className={styles.sectionWrap}>
+                                        <PanelReservasPropietario token={token} />
+                                    </div>
+                                ) : null}
                                 {role === "propietario" && tab === "historial" ? (
-                                    <section className={`tarjeta ${styles.historialCard}`}>
-                                        <div className={styles.historialHeader}>
-                                            <div>
-                                                <p className={styles.kicker}>Historial de reservas</p>
-                                                <h2 className={styles.historialTitle}>Datos del propietario</h2>
-                                                <p className={styles.historialMeta}>
-                                                    {displayName} · Emitido {emisionLabel}
+                                    <div className={styles.sectionWrap}>
+                                        <section className={`tarjeta ${styles.historialCard}`}>
+                                            <div className={styles.historialHeader}>
+                                                <div>
+                                                    <p className={styles.kicker}>Historial de reservas</p>
+                                                    <h2 className={styles.historialTitle}>Datos del propietario</h2>
+                                                    <p className={styles.historialMeta}>
+                                                        {displayName} ? Emitido {emisionLabel}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div className={styles.historialActions}>
+                                                <p className={styles.historialSubtitle}>
+                                                    Todas las reservas registradas con su estado, cliente, cancha, fecha y horario.
                                                 </p>
                                             </div>
-                                        </div>
 
-                                        <div className={styles.historialActions}>
-                                            <p className={styles.historialSubtitle}>
-                                                Todas las reservas registradas con su estado, cliente, cancha, fecha y horario.
-                                            </p>
-                                        </div>
+                                            <div className={styles.historialFilters}>
+                                                <label className={styles.historialFilterField}>
+                                                    <span>Buscar</span>
+                                                    <input
+                                                        type="text"
+                                                        value={searchTerm}
+                                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                                        placeholder="cliente, cancha o estado"
+                                                    />
+                                                </label>
+                                                <label className={styles.historialFilterField}>
+                                                    <span>Desde</span>
+                                                    <input
+                                                        type="date"
+                                                        value={filterDateStart}
+                                                        onChange={(e) => setFilterDateStart(e.target.value)}
+                                                    />
+                                                </label>
+                                                <label className={styles.historialFilterField}>
+                                                    <span>Hasta</span>
+                                                    <input
+                                                        type="date"
+                                                        value={filterDateEnd}
+                                                        onChange={(e) => setFilterDateEnd(e.target.value)}
+                                                    />
+                                                </label>
+                                                <button
+                                                    type="button"
+                                                    className="boton botonSecundario"
+                                                    onClick={resetHistorialFilters}
+                                                >
+                                                    Limpiar filtros
+                                                </button>
+                                            </div>
 
-                                        <div className={styles.historialFilters}>
-                                            <label className={styles.historialFilterField}>
-                                                <span>Buscar</span>
-                                                <input
-                                                    type="text"
-                                                    value={searchTerm}
-                                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                                    placeholder="cliente, cancha o estado"
-                                                />
-                                            </label>
-                                            <label className={styles.historialFilterField}>
-                                                <span>Desde</span>
-                                                <input
-                                                    type="date"
-                                                    value={filterDateStart}
-                                                    onChange={(e) => setFilterDateStart(e.target.value)}
-                                                />
-                                            </label>
-                                            <label className={styles.historialFilterField}>
-                                                <span>Hasta</span>
-                                                <input
-                                                    type="date"
-                                                    value={filterDateEnd}
-                                                    onChange={(e) => setFilterDateEnd(e.target.value)}
-                                                />
-                                            </label>
-                                            <button
-                                                type="button"
-                                                className="boton botonSecundario"
-                                                onClick={resetHistorialFilters}
-                                            >
-                                                Limpiar filtros
-                                            </button>
-                                        </div>
+                                            <div className={styles.historialExports}>
+                                                <button
+                                                    type="button"
+                                                    className="boton botonPrimario"
+                                                    onClick={() => handleExportHistorial("excel")}
+                                                >
+                                                    Exportar Excel
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="boton botonSecundario"
+                                                    onClick={() => handleExportHistorial("pdf")}
+                                                >
+                                                    Exportar PDF
+                                                </button>
+                                            </div>
 
-                                        <div className={styles.historialExports}>
-                                            <button
-                                                type="button"
-                                                className="boton botonPrimario"
-                                                onClick={() => handleExportHistorial("excel")}
-                                            >
-                                                Exportar Excel
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className="boton botonSecundario"
-                                                onClick={() => handleExportHistorial("pdf")}
-                                            >
-                                                Exportar PDF
-                                            </button>
-                                        </div>
-
-                                        {historialLoading ? (
-                                            <p className={styles.muted}>Cargando historial...</p>
-                                        ) : historialError ? (
-                                            <p className={styles.alertError}>{historialError}</p>
-                                        ) : (
-                                            <div className={styles.historialTableWrapper}>
-                                                <table className={styles.historialTable}>
-                                                    <thead>
-                                                        <tr>
-                                                            <th>#</th>
-                                                            <th>Cliente</th>
-                                                            <th>Cancha</th>
-                                                            <th>Fecha</th>
-                                                            <th>Hora inicio</th>
-                                                            <th>Hora fin</th>
-                                                            <th>Precio</th>
-                                                            <th>Estado</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {filteredHistorial.length === 0 ? (
+                                            {historialLoading ? (
+                                                <p className={styles.muted}>Cargando historial...</p>
+                                            ) : historialError ? (
+                                                <p className={styles.alertError}>{historialError}</p>
+                                            ) : (
+                                                <div className={styles.historialTableWrapper}>
+                                                    <table className={styles.historialTable}>
+                                                        <thead>
                                                             <tr>
-                                                                <td colSpan={8} className={styles.historialEmpty}>
-                                                                    No hay reservas en el historial.
-                                                                </td>
+                                                                <th>#</th>
+                                                                <th>Cliente</th>
+                                                                <th>Cancha</th>
+                                                                <th>Fecha</th>
+                                                                <th>Hora inicio</th>
+                                                                <th>Hora fin</th>
+                                                                <th>Precio</th>
+                                                                <th>Estado</th>
                                                             </tr>
-                                                        ) : (
-                                                            filteredHistorial.map((row, index) => (
-                                                                <tr key={`${row.id}-${index}`}>
-                                                                    <td>{index + 1}</td>
-                                                                    <td>{row.cliente}</td>
-                                                                    <td>{row.cancha}</td>
-                                                                    <td>{row.fecha}</td>
-                                                                    <td>{row.hora_inicio}</td>
-                                                                    <td>{row.hora_fin}</td>
-                                                                    <td>{formatMoney(row.precio)}</td>
-                                                                    <td>
-                                                                        <span
-                                                                            className={cn(
-                                                                                styles.historialStatus,
-                                                                                styles[`estado-${row.estado}` as any]
-                                                                            )}
-                                                                        >
-                                                                            {row.estado}
-                                                                        </span>
+                                                        </thead>
+                                                        <tbody>
+                                                            {filteredHistorial.length === 0 ? (
+                                                                <tr>
+                                                                    <td colSpan={8} className={styles.historialEmpty}>
+                                                                        No hay reservas en el historial.
                                                                     </td>
                                                                 </tr>
-                                                            ))
-                                                        )}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        )}
-                                    </section>
+                                                            ) : (
+                                                                filteredHistorial.map((row, index) => (
+                                                                    <tr key={`${row.id}-${index}`}>
+                                                                        <td>{index + 1}</td>
+                                                                        <td>{row.cliente}</td>
+                                                                        <td>{row.cancha}</td>
+                                                                        <td>{row.fecha}</td>
+                                                                        <td>{row.hora_inicio}</td>
+                                                                        <td>{row.hora_fin}</td>
+                                                                        <td>{formatMoney(row.precio)}</td>
+                                                                        <td>
+                                                                            <span
+                                                                                className={cn(
+                                                                                    styles.historialStatus,
+                                                                                    styles[`estado-${row.estado}` as any]
+                                                                                )}
+                                                                            >
+                                                                                {row.estado}
+                                                                            </span>
+                                                                        </td>
+                                                                    </tr>
+                                                                ))
+                                                            )}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            )}
+                                        </section>
+                                    </div>
                                 ) : null}
 
                                 {tab === "perfil" ? (
                                     perfil ? (
-                                        <SeccionPerfil
-                                            token={token}
-                                            role={role}
-                                            perfil={perfil}
-                                            onPerfilUpdated={(p: any) => {
-                                                setPerfil(p);
-                                                if (typeof onPerfilUpdated === "function") onPerfilUpdated(p);
-                                            }}
-                                            onLogout={cerrarSesion}
-                                        />
+                                        <div className={styles.sectionWrap}>
+                                            <SeccionPerfil
+                                                token={token}
+                                                role={role}
+                                                perfil={perfil}
+                                                onPerfilUpdated={(p: any) => {
+                                                    setPerfil(p);
+                                                    if (typeof onPerfilUpdated === "function") onPerfilUpdated(p);
+                                                }}
+                                                onLogout={cerrarSesion}
+                                            />
+                                        </div>
                                     ) : (
-                                        <div className={`tarjeta ${styles.tarjeta}`}>
-                                            <p className={styles.muted}>
-                                                No se pudo cargar tu perfil.{" "}
-                                                <button className="boton" type="button" onClick={() => window.location.reload()}>
-                                                    Recargar
-                                                </button>
-                                            </p>
+                                        <div className={styles.sectionWrap}>
+                                            <div className={`tarjeta ${styles.tarjeta}`}>
+                                                <p className={styles.muted}>
+                                                    No se pudo cargar tu perfil.{" "}
+                                                    <button className="boton" type="button" onClick={() => window.location.reload()}>
+                                                        Recargar
+                                                    </button>
+                                                </p>
+                                            </div>
                                         </div>
                                     )
                                 ) : null}
 
                                 {role === "usuario" && tab === "historial" ? (
-                                    <div className={`tarjeta ${styles.tarjeta}`}>
-                                        <p className={styles.muted}>Aqui va tu historial (tu componente actual).</p>
+                                    <div className={styles.sectionWrap}>
+                                        <div className={`tarjeta ${styles.tarjeta}`}>
+                                            <p className={styles.muted}>Aqui va tu historial (tu componente actual).</p>
+                                        </div>
                                     </div>
                                 ) : null}
 
                                 {role === "admin" && tab === "admin" ? (
-                                    <div className={`tarjeta ${styles.tarjeta}`}>
-                                        <p className={styles.muted}>Admin: usa la ruta {rutaPorRole("admin")} para tus modulos.</p>
+                                    <div className={styles.sectionWrap}>
+                                        <div className={`tarjeta ${styles.tarjeta}`}>
+                                            <p className={styles.muted}>Admin: usa la ruta {rutaPorRole("admin")} para tus modulos.</p>
+                                        </div>
                                     </div>
                                 ) : null}
                             </>

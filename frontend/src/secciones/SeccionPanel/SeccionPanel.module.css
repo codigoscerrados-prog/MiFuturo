@@ -59,12 +59,22 @@
     border-radius: 0;
     background: var(--panel-bg);
     box-shadow: none;
-    padding: 18px 16px;
+    padding: 16px 12px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
     height: 100vh;
     overflow: hidden;
+    overflow-y: auto;
+}
+
+.sidebarCard::-webkit-scrollbar {
+    width: 10px;
+}
+
+.sidebarCard::-webkit-scrollbar-thumb {
+    background: #e5e7eb;
+    border-radius: 999px;
 }
 
 .main {
@@ -96,6 +106,8 @@
 
 .brandLogo {
     transform: translateY(-1px);
+    width: 28px;
+    height: 28px;
 }
 
 .brandLink {
@@ -521,7 +533,7 @@
 .tabs {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
 }
 
 .tab {
@@ -538,7 +550,7 @@
     justify-content: space-between;
     gap: 10px;
     white-space: nowrap;
-    transition: border-color 0.16s ease, background 0.16s ease;
+    transition: border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
     position: relative;
 }
 
@@ -620,8 +632,8 @@
 }
 
 .sidebar:not(:hover):not(:focus-within) .brandLogo {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
 }
 
 .sidebar:not(:hover):not(:focus-within) .userCard {
@@ -644,11 +656,21 @@
 .tab:hover {
     border-color: #cfd6de;
     background: var(--panel-surface);
+    box-shadow: var(--panel-shadow-soft);
 }
 
 .tabActiva {
     border-color: #cfd6de;
     background: var(--panel-surface-2);
+}
+
+.sectionWrap {
+    display: grid;
+    gap: 16px;
+}
+
+.sectionWrap > * {
+    width: 100%;
 }
 
 .tabActiva::before {

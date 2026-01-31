@@ -197,14 +197,30 @@ export default function SeccionPerfil(props: SeccionPerfilProps) {
 
     return (
         <section className={cn(styles.seccion, editMode && styles.editing)}>
+
             <div className={styles.header}>
                 <div>
                     <p className={styles.kicker}>Perfil</p>
                     <h1 className={styles.titulo}>Mi cuenta</h1>
                     <p className={styles.muted}>
-                        Revisa tu información y confirma con qué cuenta estás logueada
+                        Revisa tu informaci?n y confirma con qu? cuenta est?s logueada
                     </p>
                 </div>
+                <div className={styles.headerRight}>
+                    <div className={styles.planWrap}>
+                        <div className={planChipClass}>
+                            <span className={styles.planChipLabel}>Plan</span>
+                            <span className={styles.planChipValue}>{planLabel}</span>
+                        </div>
+                        {role === "propietario" ? (
+                            <span className={styles.planHint}>
+                                {isPro ? "Acceso completo a canchas y reservas." : "Desbloquea Mis Canchas y Reservas con PRO."}
+                            </span>
+                        ) : null}
+                    </div>
+                    {editMode ? <span className={styles.editBadge}>Editando</span> : null}
+                </div>
+            </div>
                 {editMode ? <span className={styles.editBadge}>Editando</span> : null}
             </div>
 

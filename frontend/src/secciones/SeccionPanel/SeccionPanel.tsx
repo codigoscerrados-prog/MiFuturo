@@ -414,35 +414,6 @@ export default function SeccionPanel({
                                 </div>
                             </Link>
 
-                            <details className={styles.userDropdown} open>
-                                <summary className={styles.userSummary}>
-                                    <span>Mi cuenta</span>
-                                    <i className={`bi bi-chevron-down ${styles.userChevron}`} aria-hidden="true"></i>
-                                </summary>
-                                <div className={styles.userCard}>
-                                    <div className={styles.avatar}>
-                                        {perfil?.avatar_url ? (
-                                            <img src={perfil.avatar_url} alt={displayName} className={styles.avatarImg} />
-                                        ) : (
-                                            <span className={styles.avatarText}>{displayName.slice(0, 1).toUpperCase()}</span>
-                                        )}
-                                    </div>
-                                    <div className={styles.userInfo}>
-                                        <p className={styles.userName}>{displayName}</p>
-                                        {perfil?.email ? <p className={styles.userMeta}>{perfil.email}</p> : null}
-                                    </div>
-                                    <button
-                                        type="button"
-                                        className={styles.userLogout}
-                                        onClick={cerrarSesion}
-                                        aria-label="Cerrar sesion"
-                                        title="Cerrar sesion"
-                                    >
-                                        <i className="bi bi-box-arrow-right" aria-hidden="true"></i>
-                                    </button>
-                                </div>
-                            </details>
-
                             <details className={styles.sidebarNav} open>
                                 <summary className={styles.sidebarSummary}>
                                     <i className="bi bi-list" aria-hidden="true"></i>
@@ -473,27 +444,41 @@ export default function SeccionPanel({
                     </aside>
 
                     <div className={styles.main}>
+                        <div className={styles.mainTop}>
+                            <details className={styles.userDropdown} open>
+                                <summary className={styles.userSummary}>
+                                    <span>Mi cuenta</span>
+                                    <i className={`bi bi-chevron-down ${styles.userChevron}`} aria-hidden="true"></i>
+                                </summary>
+                                <div className={styles.userCard}>
+                                    <div className={styles.avatar}>
+                                        {perfil?.avatar_url ? (
+                                            <img src={perfil.avatar_url} alt={displayName} className={styles.avatarImg} />
+                                        ) : (
+                                            <span className={styles.avatarText}>{displayName.slice(0, 1).toUpperCase()}</span>
+                                        )}
+                                    </div>
+                                    <div className={styles.userInfo}>
+                                        <p className={styles.userName}>{displayName}</p>
+                                        {perfil?.email ? <p className={styles.userMeta}>{perfil.email}</p> : null}
+                                    </div>
+                                    <button
+                                        type="button"
+                                        className={styles.userLogout}
+                                        onClick={cerrarSesion}
+                                        aria-label="Cerrar sesion"
+                                        title="Cerrar sesion"
+                                    >
+                                        <i className="bi bi-box-arrow-right" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </details>
+                        </div>
+
                         <div className={styles.header}>
                             
 
                             <div className={styles.headerBtns}>
-                                <div className={styles.planWrap}>
-                                    <div className={planChipClass}>
-                                        <span className={styles.planChipLabel}>{planChipLabelText}</span>
-                                        <span className={styles.planChipValue}>{planLabel}</span>
-                                    </div>
-
-                                    {role === "propietario" ? (
-                                        <span className={styles.planHint}>
-                                            {planLoading
-                                                ? "Verificando tu plan..."
-                                                : isPro
-                                                    ? "Acceso completo a canchas y reservas."
-                                                    : "Desbloquea Mis Canchas y Reservas con PRO."}
-                                        </span>
-                                    ) : null}
-                                </div>
-
                                 {role === "propietario" && !planLoading && !isPro ? (
                                     <Link href="/plan-premium" className={`boton botonPrimario ${styles.upgradeBtn}`}>
                                         Subir a PRO

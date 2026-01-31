@@ -76,6 +76,12 @@
     background: var(--panel-bg);
 }
 
+.mainTop {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
 .main > * {
     width: 100%;
     max-width: 1160px;
@@ -549,6 +555,7 @@
     background: #ffffff;
     box-shadow: var(--panel-shadow-soft);
     overflow: hidden;
+    width: min(320px, 100%);
 }
 
 .userSummary {
@@ -606,6 +613,15 @@
     width: 0;
     overflow: hidden;
     pointer-events: none;
+}
+
+.sidebar:not(:hover):not(:focus-within) .brand {
+    justify-content: center;
+}
+
+.sidebar:not(:hover):not(:focus-within) .brandLogo {
+    width: 24px;
+    height: 24px;
 }
 
 .sidebar:not(:hover):not(:focus-within) .userCard {

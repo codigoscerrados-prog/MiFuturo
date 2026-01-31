@@ -20,6 +20,28 @@
     margin-bottom: 12px;
 }
 
+.headerRight {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.planWrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.planHint {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--muted);
+    max-width: 260px;
+    line-height: 1.25;
+}
 .editBadge {
     padding: 6px 12px;
     border-radius: 999px;

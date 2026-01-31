@@ -228,7 +228,7 @@ export default function SeccionPerfil(props: SeccionPerfilProps) {
                             aria-label="Cerrar sesion"
                             title="Cerrar sesion"
                         >
-                            <i className="bi bi-box-arrow-right" aria-hidden="true"></i>
+                            <i className="bi bi-door-open" aria-hidden="true"></i>
                         </button>
                     </div>
 

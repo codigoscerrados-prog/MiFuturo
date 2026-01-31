@@ -131,6 +131,12 @@
     transition: transform var(--transicion-fast), box-shadow var(--transicion-fast);
 }
 
+.accountLogout i {
+    display: block;
+    line-height: 1;
+    font-size: 15px;
+}
+
 .accountLogout:hover {
     transform: translateY(-1px);
     box-shadow: var(--sombra-sm);

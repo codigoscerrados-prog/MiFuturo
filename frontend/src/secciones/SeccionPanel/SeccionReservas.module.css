@@ -522,6 +522,12 @@
     transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
 }
 
+.weekNavBtn i {
+    display: block;
+    line-height: 1;
+    font-size: 16px;
+}
+
 .weekNavBtn:hover {
     transform: translateY(-1px);
     border-color: rgba(15, 23, 42, .25);

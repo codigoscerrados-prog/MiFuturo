@@ -911,7 +911,7 @@ function moveWeek(delta: number) {
 
                         <div className={styles.viewTabs}>
                             <button type="button" className={styles.weekNavBtn} onClick={() => moveWeek(-1)} aria-label="Semana anterior">
-                                <i className="bi bi-chevron-left" aria-hidden="true"></i>
+                                <i className="bi bi-arrow-left" aria-hidden="true"></i>
                             </button>
                             <div className={styles.weekButtons}>
                                 {weekDates.map((d) => {
@@ -931,7 +931,7 @@ function moveWeek(delta: number) {
                                 })}
                             </div>
                             <button type="button" className={styles.weekNavBtn} onClick={() => moveWeek(1)} aria-label="Semana siguiente">
-                                <i className="bi bi-chevron-right" aria-hidden="true"></i>
+                                <i className="bi bi-arrow-right" aria-hidden="true"></i>
                             </button>
                         </div>
                     </div>

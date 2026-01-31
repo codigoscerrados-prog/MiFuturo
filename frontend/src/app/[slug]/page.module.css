@@ -1,9 +1,16 @@
 .page {
     padding: 90px 16px 60px;
-    background:
-        radial-gradient(circle at 10% 0%, rgba(37, 99, 235, 0.08), transparent 45%),
-        radial-gradient(circle at 90% 10%, rgba(16, 185, 129, 0.06), transparent 45%),
-        linear-gradient(180deg, #f8fafc 0%, #eef2f7 60%, #e9eef6 100%);
+    background-image:
+        linear-gradient(rgba(2, 6, 23, 0.75) 0%, rgba(2, 6, 23, 0.5) 35%, rgba(2, 6, 23, 0.2) 100%),
+        url(/banner.avif);
+    background-position: 50%;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+}
+
+:global(body.lv-nav-solid) {
+    background-color: transparent;
 }
 
 .container {
@@ -70,12 +77,13 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 12px;
+    padding: 8px 10px;
     border-radius: 14px;
     border: 1px solid var(--borde);
     background: linear-gradient(180deg, var(--blanco), var(--superficie));
     color: var(--azulMarino);
     font-weight: 900;
+    font-size: 12px;
     cursor: pointer;
     box-shadow: var(--sombra-sm);
     transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
@@ -211,12 +219,10 @@
 .actionBar {
     display: flex;
     gap: 10px;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     align-items: center;
     padding-top: 8px;
     border-top: 1px solid var(--borde);
-    white-space: nowrap;
-    overflow-x: auto;
 }
 
 .section {
@@ -246,10 +252,11 @@
 
 .htmlFrame {
     width: 100%;
-    min-height: 140px;
-    height: auto;
+    min-height: 0;
+    height: 1px;
     border: none;
     display: block;
+    overflow: hidden;
 }
 
 .chips {
@@ -259,13 +266,14 @@
 }
 
 .chip {
-    padding: 8px 12px;
+    padding: 4px 8px;
     border-radius: 999px;
     border: 1px solid var(--borde);
     background: rgba(15, 23, 42, .04);
     font-weight: 900;
     color: var(--azulMarino);
-    font-size: 12px;
+    font-size: 10px;
+    letter-spacing: .2px;
 }
 
 .canchasGrid {

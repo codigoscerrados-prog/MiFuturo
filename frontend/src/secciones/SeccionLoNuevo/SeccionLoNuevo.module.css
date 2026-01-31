@@ -320,6 +320,7 @@
 .btnReservar {
   white-space: nowrap;
   box-shadow: var(--sombra-xs);
+  font-size: 11px;
 }
 
 .btnDetalle:hover {
@@ -337,8 +338,8 @@
 
 .btnReservar {
   border-radius: 16px;
-  padding: 8px 16px;
-  font-weight: 700;
+  padding: 6px 12px;
+  font-weight: 800;
   box-shadow: 0 16px 40px rgba(16, 185, 129, 0.4);
   display: inline-flex;
   align-items: center;
@@ -348,7 +349,7 @@
   max-width: 100%;
   white-space: nowrap;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.12em;
 }
 
 .cardPlaceholder {

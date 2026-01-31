@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
@@ -128,6 +128,7 @@ export default function ComplejoPublicoPage() {
     const [token, setToken] = useState<string | null>(null);
     const [likes, setLikes] = useState(0);
     const [liked, setLiked] = useState(false);
+    const descFrameRef = useRef<HTMLIFrameElement | null>(null);
 
     useEffect(() => {
         if (!slug) return;
@@ -148,22 +149,29 @@ export default function ComplejoPublicoPage() {
             .finally(() => setLoading(false));
     }, [slug]);
 
+    const syncDescHeight = () => {
+        const iframe = descFrameRef.current;
+        if (!iframe) return;
+        try {
+            const doc = iframe.contentDocument || iframe.contentWindow?.document;
+            if (!doc) return;
+            iframe.style.height = "1px";
+            const height = doc.documentElement.scrollHeight || doc.body?.scrollHeight || 0;
+            if (height) iframe.style.height = `${height}px`;
+        } catch {
+            // ignore
+        }
+    };
+
     useEffect(() => {
         if (!data?.descripcion) return;
-        const iframe = document.getElementById("descripcion-frame") as HTMLIFrameElement | null;
-        if (!iframe) return;
-        const onLoad = () => {
-            try {
-                const doc = iframe.contentDocument || iframe.contentWindow?.document;
-                if (!doc) return;
-                const height = doc.documentElement.scrollHeight || doc.body?.scrollHeight || 0;
-                if (height) iframe.style.height = `${height}px`;
-            } catch {
-                // ignore
-            }
+        const t = window.setTimeout(syncDescHeight, 0);
+        const onResize = () => syncDescHeight();
+        window.addEventListener("resize", onResize);
+        return () => {
+            window.clearTimeout(t);
+            window.removeEventListener("resize", onResize);
         };
-        iframe.addEventListener("load", onLoad);
-        return () => iframe.removeEventListener("load", onLoad);
     }, [data?.descripcion]);
 
     useEffect(() => {
@@ -526,10 +534,12 @@ export default function ComplejoPublicoPage() {
                     {data.descripcion ? (
                         <div className={styles.htmlPreview}>
                             <iframe
-                                id="descripcion-frame"
                                 className={styles.htmlFrame}
                                 sandbox=""
                                 srcDoc={sanitizeHtml(data.descripcion)}
+                                ref={descFrameRef}
+                                onLoad={syncDescHeight}
+                                scrolling="no"
                                 title="Descripcion del complejo"
                             />
                         </div>

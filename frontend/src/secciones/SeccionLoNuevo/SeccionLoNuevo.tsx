@@ -91,7 +91,30 @@ type CanchaMini = {
     isActive?: boolean;
 };
 
+type HorarioSlot = {
+    hora: string;
+    ocupado: boolean;
+};
+
 const DEFAULT_FOTO = "/canchas/sintetico-marconi.avif";
+const DEFAULT_HORARIOS = [
+    "06:00",
+    "07:00",
+    "08:00",
+    "09:00",
+    "10:00",
+    "11:00",
+    "12:00",
+    "13:00",
+    "14:00",
+    "15:00",
+    "16:00",
+    "17:00",
+    "18:00",
+    "19:00",
+    "20:00",
+    "21:00",
+];
 const PRECIO_MAX_VISIBLE = 300;
 
 const FEATURES: Array<{ key: keyof ComplejoFeatures; label: string }> = [
@@ -436,9 +459,66 @@ export default function SeccionLoNuevo() {
     const [activo, setActivo] = useState<Complejo | null>(null);
     const [reservaCanchaId, setReservaCanchaId] = useState<number | null>(null);
     const [reservaFecha, setReservaFecha] = useState("");
-    const [reservaHora, setReservaHora] = useState("");
     const [reservaDuracion, setReservaDuracion] = useState(1);
     const [reservaError, setReservaError] = useState<string | null>(null);
+    const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
+    const [horariosSlots, setHorariosSlots] = useState<HorarioSlot[]>(() =>
+        DEFAULT_HORARIOS.map((hora) => ({ hora, ocupado: false }))
+    );
+    const [horariosLoading, setHorariosLoading] = useState(false);
+    const [horariosError, setHorariosError] = useState("");
+
+    const canchaSeleccionada = useMemo(() => {
+        if (!activo || !activo.verificado) return null;
+        if (reservaCanchaId) {
+            const match = activo.canchas.find((c) => c.id === reservaCanchaId);
+            if (match) return match;
+        }
+        return activo.canchas[0] || null;
+    }, [activo, reservaCanchaId]);
+
+    useEffect(() => {
+        if (!reservaOpen) return;
+        if (!canchaSeleccionada) {
+            setHorariosSlots(DEFAULT_HORARIOS.map((hora) => ({ hora, ocupado: false })));
+            setSelectedSlots(DEFAULT_HORARIOS.slice(0, 1));
+            setHorariosError("");
+            setHorariosLoading(false);
+            return;
+        }
+        const fechaParam = reservaFecha || new Date().toISOString().slice(0, 10);
+        const ac = new AbortController();
+        setHorariosLoading(true);
+        setHorariosError("");
+
+        apiFetch<{ slots: HorarioSlot[] }>(`/public/canchas/${canchaSeleccionada.id}/horarios?fecha=${fechaParam}`, {
+            signal: ac.signal,
+            cache: "no-store",
+        })
+            .then((data) => {
+                if (data?.slots?.length) {
+                    const normalized = data.slots.map((slot) => ({
+                        hora: slot.hora,
+                        ocupado: Boolean(slot.ocupado),
+                    }));
+                    setHorariosSlots(normalized);
+                    const free = normalized.find((slot) => !slot.ocupado);
+                    setSelectedSlots(free ? [free.hora] : normalized.map((slot) => slot.hora).slice(0, 1));
+                } else {
+                    setHorariosSlots(DEFAULT_HORARIOS.map((hora) => ({ hora, ocupado: false })));
+                    setSelectedSlots(DEFAULT_HORARIOS.slice(0, 1));
+                }
+            })
+            .catch((err) => {
+                if (err?.name === "AbortError") return;
+                setHorariosSlots(DEFAULT_HORARIOS.map((hora) => ({ hora, ocupado: false })));
+                setSelectedSlots(DEFAULT_HORARIOS.slice(0, 1));
+                setHorariosError("No se pudieron cargar los horarios, usa los valores sugeridos.");
+            })
+            .finally(() => setHorariosLoading(false));
+
+        return () => ac.abort();
+    }, [canchaSeleccionada, reservaFecha, reservaOpen]);
 
     useEffect(() => {
         let activo = true;
@@ -543,8 +623,9 @@ export default function SeccionLoNuevo() {
         const today = new Date();
         const iso = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
         setReservaFecha(iso);
-        setReservaHora("19:00");
         setReservaDuracion(1);
+        setHorariosSlots(DEFAULT_HORARIOS.map((hora) => ({ hora, ocupado: false })));
+        setSelectedSlots(DEFAULT_HORARIOS.slice(0, 1));
     }
 
     function cerrarModales() {
@@ -569,6 +650,56 @@ export default function SeccionLoNuevo() {
         };
     }, [detalleOpen, reservaOpen]);
 
+    function buildSelection(startHora: string, duracionHoras: number, slots: HorarioSlot[]) {
+        const startIndex = slots.findIndex((slot) => slot.hora === startHora);
+        if (startIndex < 0) return null;
+        const chunk = slots.slice(startIndex, startIndex + duracionHoras);
+        if (chunk.length < duracionHoras) return null;
+        if (chunk.some((slot) => slot.ocupado)) return null;
+        return chunk.map((slot) => slot.hora);
+    }
+
+    function buildHoraRango(start: string, duracionHoras: number, slots: HorarioSlot[]) {
+        const startIndex = slots.findIndex((slot) => slot.hora === start);
+        if (startIndex < 0) return start;
+        const endIndex = startIndex + duracionHoras;
+        const end = slots[endIndex]?.hora;
+        return end ? `${start} - ${end}` : `${start} + ${duracionHoras}h`;
+    }
+
+    function formatSelectedRange() {
+        const start = selectedSlots[0];
+        if (!start) return "Selecciona en la agenda";
+        return buildHoraRango(start, reservaDuracion, horariosSlots);
+    }
+
+    const maxDuracionDisponible = useMemo(() => {
+        const start = selectedSlots[0];
+        if (!start) return 1;
+        const startIndex = horariosSlots.findIndex((slot) => slot.hora === start);
+        if (startIndex < 0) return 1;
+        let max = 0;
+        for (let i = startIndex; i < horariosSlots.length; i += 1) {
+            if (horariosSlots[i].ocupado) break;
+            max += 1;
+            if (max >= 4) break;
+        }
+        return Math.max(1, max);
+    }, [selectedSlots, horariosSlots]);
+
+    useEffect(() => {
+        const start = selectedSlots[0];
+        if (!start) return;
+        const nextDur = Math.min(reservaDuracion, maxDuracionDisponible);
+        if (nextDur !== reservaDuracion) {
+            setReservaDuracion(nextDur);
+        }
+        const nextSelection = buildSelection(start, nextDur, horariosSlots);
+        if (nextSelection && nextSelection.join("|") !== selectedSlots.join("|")) {
+            setSelectedSlots(nextSelection);
+        }
+    }, [maxDuracionDisponible, reservaDuracion, horariosSlots, selectedSlots]);
+
     function confirmarReservaWhatsApp() {
         if (!activo) return;
         const esEstandar = !activo.verificado;
@@ -585,8 +716,9 @@ export default function SeccionLoNuevo() {
             setReservaError("Selecciona una fecha.");
             return;
         }
-        if (!reservaHora) {
-            setReservaError("Selecciona una hora.");
+        const horaSeleccionada = selectedSlots[0];
+        if (!horaSeleccionada) {
+            setReservaError("Selecciona una hora en la agenda.");
             return;
         }
 
@@ -596,9 +728,10 @@ export default function SeccionLoNuevo() {
             return;
         }
 
+        const horaRango = buildHoraRango(horaSeleccionada, reservaDuracion, horariosSlots);
         const msg = esEstandar
-            ? construirMensajeWhatsAppEstandar(activo, reservaFecha, reservaHora, reservaDuracion)
-            : construirMensajeWhatsApp(cancha as CanchaMini, activo, reservaFecha, reservaHora, reservaDuracion);
+            ? construirMensajeWhatsAppEstandar(activo, reservaFecha, horaRango, reservaDuracion)
+            : construirMensajeWhatsApp(cancha as CanchaMini, activo, reservaFecha, horaRango, reservaDuracion);
         const url = buildWhatsAppUrl(phone, msg);
         if (process.env.NODE_ENV !== "production") {
             console.log("[whatsapp] mensaje:", msg);
@@ -805,7 +938,7 @@ export default function SeccionLoNuevo() {
                     }}
                 >
                     <div
-                        className={`card border-0 shadow-lg ${styles.modalCard}`}
+                        className={`card border-0 shadow-lg ${styles.modalCard} ${reservaOpen ? styles.modalCardLarge : ""}`}
                         onMouseDown={(e) => e.stopPropagation()}
                     >
                         <div className={`d-flex gap-3 justify-content-between align-items-start ${styles.modalHeader}`}>
@@ -870,79 +1003,129 @@ export default function SeccionLoNuevo() {
                                     </div>
                                 ) : null}
 
-                                <div className={styles.modalGrid}>
-                                    {activo.verificado && (
+                                <div className={styles.reservaLayout}>
+                                    <div className={styles.modalGrid}>
+                                        {activo.verificado && (
+                                            <label className={styles.modalField}>
+                                                <span className={styles.modalLabel}>
+                                                    <i className="bi bi-grid-3x3-gap me-2" aria-hidden="true"></i>
+                                                    Cancha
+                                                </span>
+                                                <select
+                                                    className="form-select form-select-sm rounded-3"
+                                                    value={String(reservaCanchaId ?? "")}
+                                                    onChange={(e) => {
+                                                        const v = e.target.value;
+                                                        setReservaCanchaId(v ? Number(v) : null);
+                                                    }}
+                                                >
+                                                    {activo.canchas.map((c) => (
+                                                        <option key={c.id} value={String(c.id)}>
+                                                            {c.nombre} • {c.tipo || "Cancha"} • {moneyPE(c.precioHora)}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </label>
+                                        )}
+
                                         <label className={styles.modalField}>
                                             <span className={styles.modalLabel}>
-                                                <i className="bi bi-grid-3x3-gap me-2" aria-hidden="true"></i>
-                                                Cancha
+                                                <i className="bi bi-calendar-event me-2" aria-hidden="true"></i>
+                                                Fecha
+                                            </span>
+                                            <input
+                                                className="form-control form-control-sm rounded-3"
+                                                type="date"
+                                                value={reservaFecha}
+                                                onChange={(e) => setReservaFecha(e.target.value)}
+                                            />
+                                        </label>
+
+                                        <label className={styles.modalField}>
+                                            <span className={styles.modalLabel}>
+                                                <i className="bi bi-hourglass-split me-2" aria-hidden="true"></i>
+                                                Duracion
                                             </span>
                                             <select
                                                 className="form-select form-select-sm rounded-3"
-                                                value={String(reservaCanchaId ?? "")}
+                                                value={String(reservaDuracion)}
                                                 onChange={(e) => {
-                                                    const v = e.target.value;
-                                                    setReservaCanchaId(v ? Number(v) : null);
+                                                    const next = Math.max(1, Number(e.target.value) || 1);
+                                                    setReservaDuracion(next);
+                                                    if (!selectedSlots[0]) return;
+                                                    const nextSelection = buildSelection(selectedSlots[0], next, horariosSlots);
+                                                    if (!nextSelection) {
+                                                        setReservaError("Ese rango no esta disponible.");
+                                                        return;
+                                                    }
+                                                    setReservaError(null);
+                                                    setSelectedSlots(nextSelection);
                                                 }}
                                             >
-                                                {activo.canchas.map((c) => (
-                                                    <option key={c.id} value={String(c.id)}>
-                                                        {c.nombre} - {c.tipo || "Cancha"} - {moneyPE(c.precioHora)}
+                                                {[1, 2, 3, 4].map((h) => (
+                                                    <option key={h} value={String(h)} disabled={h > maxDuracionDisponible}>
+                                                        {h} hora{h > 1 ? "s" : ""}
                                                     </option>
                                                 ))}
                                             </select>
                                         </label>
-                                    )}
 
-                                    <label className={styles.modalField}>
-                                        <span className={styles.modalLabel}>
-                                            <i className="bi bi-calendar-event me-2" aria-hidden="true"></i>
-                                            Fecha
-                                        </span>
-                                        <input
-                                            className="form-control form-control-sm rounded-3"
-                                            type="date"
-                                            value={reservaFecha}
-                                            onChange={(e) => setReservaFecha(e.target.value)}
-                                        />
-                                    </label>
+                                        <div className={styles.modalField}>
+                                            <span className={styles.modalLabel}>Hora seleccionada</span>
+                                            <div className={styles.modalStatic}>{formatSelectedRange()}</div>
+                                        </div>
+                                        {horariosError ? <p className={styles.modalTiny}>{horariosError}</p> : null}
+                                    </div>
 
-                                    <label className={styles.modalField}>
-                                        <span className={styles.modalLabel}>
-                                            <i className="bi bi-clock me-2" aria-hidden="true"></i>
-                                            Hora
-                                        </span>
-                                        <input
-                                            className="form-control form-control-sm rounded-3"
-                                            type="time"
-                                            value={reservaHora}
-                                            onChange={(e) => setReservaHora(e.target.value)}
-                                        />
-                                    </label>
-
-                                    <label className={styles.modalField}>
-                                        <span className={styles.modalLabel}>
-                                            <i className="bi bi-hourglass-split me-2" aria-hidden="true"></i>
-                                            Duracion
-                                        </span>
-                                        <select
-                                            className="form-select form-select-sm rounded-3"
-                                            value={reservaDuracion}
-                                            onChange={(e) => setReservaDuracion(Number(e.target.value))}
-                                        >
-                                            <option value="1">1 hora</option>
-                                            <option value="2">2 horas</option>
-                                            <option value="3">3 horas</option>
-                                            <option value="4">4 horas</option>
-                                        </select>
-                                    </label>
+                                    <div className={styles.agendaPanel}>
+                                        <h4 className={styles.agendaTitle}>Agenda del complejo</h4>
+                                        {horariosLoading ? (
+                                            <div className="d-flex align-items-center gap-2">
+                                                <span className="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                                                Cargando agenda…
+                                            </div>
+                                        ) : (
+                                            <div className={styles.agendaList}>
+                                                {horariosSlots.map((slot) => {
+                                                    const isSelected = selectedSlots.includes(slot.hora);
+                                                    return (
+                                                        <button
+                                                            key={slot.hora}
+                                                            type="button"
+                                                            className={`${styles.agendaSlot} ${
+                                                                slot.ocupado
+                                                                    ? styles.agendaSlotBusy
+                                                                    : isSelected
+                                                                    ? styles.agendaSlotActive
+                                                                    : ""
+                                                            }`}
+                                                            onClick={() => {
+                                                                if (slot.ocupado) return;
+                                                                const nextSelection = buildSelection(slot.hora, reservaDuracion, horariosSlots);
+                                                                if (!nextSelection) {
+                                                                    setReservaError("Ese rango no esta disponible.");
+                                                                    return;
+                                                                }
+                                                                setReservaError(null);
+                                                                setSelectedSlots(nextSelection);
+                                                            }}
+                                                            disabled={slot.ocupado}
+                                                        >
+                                                            <span>{slot.hora}</span>
+                                                            <span className={styles.agendaState}>{slot.ocupado ? "Ocupado" : "Disponible"}</span>
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <div className={`d-flex justify-content-end gap-2 flex-wrap ${styles.modalBtns}`}>
                                     <button className="btn btn-outline-secondary rounded-pill px-3" type="button" onClick={cerrarModales}>
                                         Cancelar
                                     </button>
-                                    <button className="btn btn-success rounded-pill px-3" type="button" onClick={confirmarReservaWhatsApp}>
+                                    <button className={`btn rounded-pill px-3 ${styles.ctaGreen}`} type="button" onClick={confirmarReservaWhatsApp}>
                                         <i className="bi bi-whatsapp me-2" aria-hidden="true"></i>
                                         Enviar WhatsApp
                                     </button>

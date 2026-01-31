@@ -10,6 +10,23 @@
   background: #0b1220;
 }
 
+:global(body.lv-auth-page) main {
+  margin: 0;
+  box-sizing: border-box;
+  color: #fff;
+  background-image: linear-gradient(rgba(2, 6, 23, 0.92) 0%, rgba(2, 6, 23, 0.6) 35%, rgba(2, 6, 23, 0.3) 100%), url(/banner.avif);
+  background-position: 50%;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  position: relative;
+  padding: 0;
+  min-height: calc(100vh - var(--navH, 80px));
+  padding-top: 50px;
+}
 .seccion {
   min-height: 100vh;
   display: flex;

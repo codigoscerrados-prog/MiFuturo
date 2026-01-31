@@ -53,6 +53,29 @@
   -webkit-backdrop-filter: blur(18px) saturate(135%);
 }
 
+:global(body.lv-nav-hero) .header,
+:global(body.lv-nav-hero) .header[data-scrolled="false"] {
+  --nav-bg: transparent;
+  --nav-border: transparent;
+  --nav-shadow: none;
+  --nav-text: rgba(248, 250, 252, 0.96);
+  --nav-muted: rgba(226, 232, 240, 0.8);
+  background: transparent;
+  border-bottom-color: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+:global(body.lv-nav-hero) .brand {
+  color: var(--nav-text);
+  --brand-logo-color: #fff;
+}
+
+:global(body.lv-nav-hero) .btnGhost {
+  color: var(--nav-text);
+}
+
 :global(body.lv-nav-solid) .brand {
   color: var(--nav-text);
   --brand-logo-color: #0b162f;

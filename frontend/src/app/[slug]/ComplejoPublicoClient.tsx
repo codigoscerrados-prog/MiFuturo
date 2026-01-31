@@ -101,9 +101,9 @@ function buildDescDoc(raw?: string | null) {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
-      html, body { margin: 0; padding: 0; height: auto; overflow: visible; }
-      body { min-height: 0; }
-      img, video { max-width: 100%; height: auto; }
+      html, body { margin: 0 !important; padding: 0 !important; height: auto !important; overflow: visible !important; }
+      body { min-height: 0 !important; color: #0b162f; }
+      img, video { max-width: 100% !important; height: auto !important; }
       * { box-sizing: border-box; }
     </style>
   </head>
@@ -231,9 +231,9 @@ export default function ComplejoPublicoPage() {
 
     useEffect(() => {
         if (typeof document === "undefined") return;
-        document.body.classList.add("lv-nav-solid");
+        document.body.classList.add("lv-nav-hero");
         return () => {
-            document.body.classList.remove("lv-nav-solid");
+            document.body.classList.remove("lv-nav-hero");
         };
     }, []);
 

@@ -181,7 +181,7 @@ export default function SeccionRegistrarse({
         <section className={seccionClass}>
             <div className={`contenedor ${styles.grid}`}>
                 <div className={styles.brandHero}>
-                    <BrandLogo href="/" variant="compact" size="lg" className={styles.brandHeroLogo} />
+                    <BrandLogo href="/" variant="compact" size="lg" />
                 </div>
 
                 <section className={`tarjeta ${styles.panel}`}>

@@ -467,29 +467,6 @@ export default function SeccionPanel({
                     </aside>
 
                     <div className={styles.main}>
-                        <div className={styles.topbar}>
-                            <div className={styles.topbarLeft}>
-                                <div className={styles.searchBox}>
-                                    <i className={`bi bi-search ${styles.searchIcon}`} aria-hidden="true"></i>
-                                    <input
-                                        type="text"
-                                        className={styles.searchInput}
-                                        placeholder="Buscar en tu panel..."
-                                        aria-label="Buscar en el panel"
-                                    />
-                                </div>
-                            </div>
-                            <div className={styles.topbarRight}>
-                                <button type="button" className={styles.iconBtn} aria-label="Notificaciones">
-                                    <i className="bi bi-bell" aria-hidden="true"></i>
-                                </button>
-                                <div className={styles.userPill}>
-                                    <span className={styles.userPillName}>{displayName}</span>
-                                    <span className={styles.userPillRole}>{role}</span>
-                                </div>
-                            </div>
-                        </div>
-
                         <div className={styles.header}>
                             
 
@@ -512,7 +489,7 @@ export default function SeccionPanel({
                                 </div>
 
                                 {role === "propietario" && !planLoading && !isPro ? (
-                                    <Link href="/plan-premium" className="boton botonPrimario">
+                                    <Link href="/plan-premium" className={`boton botonPrimario ${styles.upgradeBtn}`}>
                                         Subir a PRO
                                     </Link>
                                 ) : null}

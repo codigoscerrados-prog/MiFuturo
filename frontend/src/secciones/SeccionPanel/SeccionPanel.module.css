@@ -7,8 +7,8 @@
     --panel-border: #dde3ea;
     --panel-text: #0f172a;
     --panel-muted: #6b7280;
-    --panel-accent: #16a34a;
-    --panel-accent-soft: #ecfdf3;
+    --panel-accent: #111827;
+    --panel-accent-soft: #f3f4f6;
     --panel-danger: #ef4444;
     --panel-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
     --panel-shadow-soft: 0 6px 18px rgba(15, 23, 42, 0.06);
@@ -120,13 +120,15 @@
 
 .userCard {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 12px;
-    padding: 12px;
+    gap: 8px;
+    padding: 14px 12px;
     border-radius: 14px;
     border: 1px solid var(--panel-border);
     background: var(--panel-surface);
     box-shadow: var(--panel-shadow-soft);
+    text-align: center;
 }
 
 .avatar {
@@ -172,12 +174,12 @@
 }
 
 .userLogout {
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
     border-radius: 10px;
-    border: 1px solid rgba(239, 68, 68, 0.25);
-    background: rgba(239, 68, 68, 0.08);
-    color: #b91c1c;
+    border: 1px solid var(--panel-border);
+    background: #ffffff;
+    color: var(--panel-text);
     display: grid;
     place-items: center;
     cursor: pointer;
@@ -186,8 +188,8 @@
 
 .userLogout:hover {
     transform: translateY(-1px);
-    box-shadow: 0 10px 22px rgba(239, 68, 68, 0.18);
-    border-color: rgba(239, 68, 68, 0.45);
+    box-shadow: var(--panel-shadow-soft);
+    border-color: #cfd6de;
 }
 
 .userLogout:focus-visible {
@@ -504,13 +506,15 @@
     padding: 10px 12px;
     border-radius: 12px;
     font-weight: 700;
+    font-size: 13px;
     color: var(--panel-text);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+    gap: 10px;
+    white-space: nowrap;
+    transition: border-color 0.16s ease, background 0.16s ease;
     position: relative;
 }
 
@@ -521,20 +525,25 @@
     min-width: 0;
 }
 
+.tabLeft span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .tabIcon {
     font-size: 1rem;
     color: var(--panel-muted);
 }
 
 .tab:hover {
-    transform: translateY(-1px);
-    border-color: rgba(22, 163, 74, 0.35);
-    box-shadow: var(--panel-shadow-soft);
+    border-color: #cfd6de;
+    background: var(--panel-surface);
 }
 
 .tabActiva {
-    border-color: rgba(22, 163, 74, 0.55);
-    background: var(--panel-accent-soft);
+    border-color: #cfd6de;
+    background: var(--panel-surface-2);
 }
 
 .tabActiva::before {
@@ -549,7 +558,7 @@
 }
 
 .tabActiva .tabIcon {
-    color: var(--panel-accent);
+    color: var(--panel-text);
 }
 
 .tab:focus-visible {
@@ -570,9 +579,9 @@
     border-radius: 999px;
     font-size: 11px;
     font-weight: 800;
-    border: 1px solid rgba(16, 185, 129, 0.35);
-    background: rgba(16, 185, 129, 0.12);
-    color: #0f766e;
+    border: 1px solid var(--panel-border);
+    background: var(--panel-surface-2);
+    color: var(--panel-text);
 }
 
 .historialCard {
@@ -744,23 +753,27 @@
     height: 44px;
     font-weight: 700;
     transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, filter 0.16s ease;
+    background: #ffffff !important;
+    color: var(--panel-text) !important;
+    border: 1px solid var(--panel-border) !important;
+    box-shadow: none;
 }
 
 .seccion :global(.boton:hover) {
     transform: translateY(-1px);
-    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+    box-shadow: var(--panel-shadow-soft);
 }
 
 .seccion :global(.botonPrimario) {
-    background: var(--panel-accent) !important;
-    color: #ffffff !important;
-    border: none !important;
-    box-shadow: 0 10px 22px rgba(22, 163, 74, 0.2);
+    background: #ffffff !important;
+    color: var(--panel-text) !important;
+    border: 1px solid var(--panel-border) !important;
+    box-shadow: none;
 }
 
 .seccion :global(.botonPrimario:hover) {
-    filter: brightness(0.98);
-    box-shadow: 0 14px 26px rgba(22, 163, 74, 0.26);
+    filter: none;
+    box-shadow: var(--panel-shadow-soft);
 }
 
 .seccion :global(.botonSecundario),
@@ -768,6 +781,18 @@
     background: transparent !important;
     border: 1px solid var(--panel-border) !important;
     color: var(--panel-text) !important;
+}
+
+.upgradeBtn {
+    background: #111827 !important;
+    color: #ffffff !important;
+    border-color: #111827 !important;
+    box-shadow: 0 12px 24px rgba(17, 24, 39, 0.2);
+}
+
+.upgradeBtn:hover {
+    filter: brightness(1.05);
+    box-shadow: 0 16px 28px rgba(17, 24, 39, 0.24);
 }
 
 .seccion :global(input),

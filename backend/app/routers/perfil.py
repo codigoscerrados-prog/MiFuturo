@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+﻿from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from sqlalchemy.orm import Session
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -12,7 +12,7 @@ from app.esquemas.panel import PerfilOut, PerfilUpdate, PlanActualOut
 
 router = APIRouter(prefix="/perfil", tags=["perfil"])
 
-MAX_BYTES = 5 * 1024 * 1024
+MAX_BYTES = 2 * 1024 * 1024
 ALLOWED = {
     "image/jpeg": ".jpg",
     "image/png": ".png",
@@ -52,7 +52,7 @@ async def subir_avatar(
 
     data = await archivo.read()
     if len(data) > MAX_BYTES:
-        raise HTTPException(413, "Archivo muy pesado (máx 5MB)")
+        raise HTTPException(413, "Archivo muy pesado (max 2MB)")
 
     ext = ALLOWED[archivo.content_type]
     name = f"{uuid.uuid4().hex}{ext}"
@@ -204,3 +204,7 @@ def activar_pro_trial(db: Session = Depends(get_db), u: User = Depends(get_usuar
         fin=s.fin,
         dias_restantes=dias,
     )
+
+
+
+

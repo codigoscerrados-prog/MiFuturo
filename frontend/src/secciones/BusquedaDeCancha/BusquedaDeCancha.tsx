@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
@@ -738,14 +738,14 @@ export default function BusquedaDeCancha({
                             href={buildClaimUrl()}
                             target="_blank"
                             rel="noreferrer"
-                            className={`btn btn-success btn-sm rounded-pill px-3 ${styles.claimBtn}`}
+                            className={`btn btn-sm rounded-pill px-3 ${styles.claimBtn} ${styles.ctaGreen}`}
                         >
                             <i className="bi bi-whatsapp me-2" aria-hidden="true"></i>
                             Reclamar perfil
                         </a>
                     ) : (
                         <button
-                            className="btn btn-success btn-sm rounded-pill px-3"
+                            className={`btn btn-sm rounded-pill px-3 ${styles.ctaGreen}`}
                             type="button"
                             onClick={() => abrirModalReservaComplejo(cx)}
                             disabled={cx.verificado && cx.canchasCount == 0}
@@ -1066,7 +1066,7 @@ export default function BusquedaDeCancha({
                                 Cerrar
                             </button>
                             <button
-                                className="btn btn-success rounded-pill px-3"
+                                className={`btn rounded-pill px-3 ${styles.ctaGreen}`}
                                 type="button"
                                 onClick={() => abrirModalReservaComplejo(detalleComplejo)}
                             >
@@ -1092,7 +1092,7 @@ export default function BusquedaDeCancha({
                         if (e.target === e.currentTarget) cerrarModalReserva();
                     }}
                 >
-                    <div className={`card border-0 shadow-lg ${styles.modalCard}`}>
+                    <div className={`card border-0 shadow-lg ${styles.modalCard} ${styles.modalCardLarge}`}>
                         <div className={`d-flex gap-3 justify-content-between align-items-start ${styles.modalHeader}`}>
                             <div>
                                 <p className={styles.modalKicker}>Reservar por WhatsApp</p>
@@ -1116,80 +1116,85 @@ export default function BusquedaDeCancha({
                             </div>
                         ) : null}
 
-                        <div className={styles.modalGrid}>
-                            {reservaComplejo.verificado && (
+                        <div className={styles.reservaLayout}>
+                            <div className={styles.modalGrid}>
+                                {reservaComplejo.verificado && (
+                                    <label className={styles.modalField}>
+                                        <span className={styles.modalLabel}>
+                                            <i className="bi bi-grid-3x3-gap me-2" aria-hidden="true"></i>
+                                            Cancha
+                                        </span>
+                                        <select
+                                            className="form-select form-select-sm rounded-3"
+                                            value={String(reservaCanchaId ?? "")}
+                                            onChange={(e) => setReservaCanchaId(Number(e.target.value))}
+                                        >
+                                            {reservaComplejo.canchas.map((c) => (
+                                                <option key={c.id} value={String(c.id)}>
+                                                    {c.nombre} • {c.tipo} • {moneyPE(c.precioHora)}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </label>
+                                )}
+
                                 <label className={styles.modalField}>
                                     <span className={styles.modalLabel}>
-                                        <i className="bi bi-grid-3x3-gap me-2" aria-hidden="true"></i>
-                                        Cancha
+                                        <i className="bi bi-calendar-event me-2" aria-hidden="true"></i>
+                                        Fecha
                                     </span>
-                                    <select
-                                        className="form-select form-select-sm rounded-3"
-                                        value={String(reservaCanchaId ?? "")}
-                                        onChange={(e) => setReservaCanchaId(Number(e.target.value))}
-                                    >
-                                        {reservaComplejo.canchas.map((c) => (
-                                            <option key={c.id} value={String(c.id)}>
-                                                {c.nombre} • {c.tipo} • {moneyPE(c.precioHora)}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    <input
+                                        className="form-control form-control-sm rounded-3"
+                                        type="date"
+                                        value={reservaFecha}
+                                        onChange={(e) => setReservaFecha(e.target.value)}
+                                    />
                                 </label>
-                            )}
 
-                            <label className={styles.modalField}>
-                                <span className={styles.modalLabel}>
-                                    <i className="bi bi-calendar-event me-2" aria-hidden="true"></i>
-                                    Fecha
-                                </span>
-                                <input
-                                    className="form-control form-control-sm rounded-3"
-                                    type="date"
-                                    value={reservaFecha}
-                                    onChange={(e) => setReservaFecha(e.target.value)}
-                                />
-                            </label>
+                                <div className={styles.modalField}>
+                                    <span className={styles.modalLabel}>Hora seleccionada</span>
+                                    <div className={styles.modalStatic}>
+                                        {selectedSlots[0] ? `${selectedSlots[0]} hrs` : "Selecciona en la agenda"}
+                                    </div>
+                                </div>
+                                {horariosError ? <p className={styles.modalTiny}>{horariosError}</p> : null}
+                            </div>
 
-                            <div className={styles.modalField}>
-                                <span className={styles.modalLabel}>Horarios disponibles</span>
+                            <div className={styles.agendaPanel}>
+                                <h4 className={styles.agendaTitle}>Agenda del complejo</h4>
                                 {horariosLoading ? (
                                     <div className="d-flex align-items-center gap-2">
                                         <span className="spinner-border spinner-border-sm" aria-hidden="true"></span>
-                                        Cargando horario…
+                                        Cargando agenda…
                                     </div>
                                 ) : (
-                                <div className={`${styles.horariosGrid}`}>
-                                    {horariosSlots.map((slot) => {
-                                        const isSelected = selectedSlots.includes(slot.hora);
-                                        return (
-                                            <button
-                                                key={slot.hora}
-                                                type="button"
-                                                className={`btn btn-sm rounded-pill ${
-                                                    isSelected
-                                                        ? "btn-success"
-                                                        : slot.ocupado
-                                                        ? "btn-outline-danger"
-                                                        : "btn-outline-secondary"
-                                                }`}
-                                                onClick={() => {
-                                                    if (slot.ocupado) return;
-                                                    setSelectedSlots((prev) =>
-                                                        prev.includes(slot.hora)
-                                                            ? prev.filter((h) => h !== slot.hora)
-                                                            : [...prev, slot.hora]
-                                                    );
-                                                }}
-                                                disabled={slot.ocupado}
-                                            >
-                                                {slot.hora}
-                                                {slot.ocupado ? " • ocupado" : ""}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
+                                    <div className={styles.agendaList}>
+                                        {horariosSlots.map((slot) => {
+                                            const isSelected = selectedSlots.includes(slot.hora);
+                                            return (
+                                                <button
+                                                    key={slot.hora}
+                                                    type="button"
+                                                    className={`${styles.agendaSlot} ${
+                                                        slot.ocupado
+                                                            ? styles.agendaSlotBusy
+                                                            : isSelected
+                                                            ? styles.agendaSlotActive
+                                                            : ""
+                                                    }`}
+                                                    onClick={() => {
+                                                        if (slot.ocupado) return;
+                                                        setSelectedSlots([slot.hora]);
+                                                    }}
+                                                    disabled={slot.ocupado}
+                                                >
+                                                    <span>{slot.hora}</span>
+                                                    <span className={styles.agendaState}>{slot.ocupado ? "Ocupado" : "Disponible"}</span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
                                 )}
-                                {horariosError ? <p className={styles.modalTiny}>{horariosError}</p> : null}
                             </div>
                         </div>
 
@@ -1197,7 +1202,7 @@ export default function BusquedaDeCancha({
                             <button className="btn btn-outline-secondary rounded-pill px-3" type="button" onClick={cerrarModalReserva}>
                                 Cancelar
                             </button>
-                            <button className="btn btn-success rounded-pill px-3" type="button" onClick={confirmarReservaWhatsApp}>
+                            <button className={`btn rounded-pill px-3 ${styles.ctaGreen}`} type="button" onClick={confirmarReservaWhatsApp}>
                                 <i className="bi bi-whatsapp me-2" aria-hidden="true"></i>
                                 Enviar WhatsApp
                             </button>
@@ -1210,3 +1215,6 @@ export default function BusquedaDeCancha({
         </section>
     );
 }
+
+
+

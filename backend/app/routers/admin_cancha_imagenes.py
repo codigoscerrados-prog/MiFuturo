@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+﻿from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from sqlalchemy.orm import Session
 import uuid
 
@@ -8,7 +8,7 @@ from app.modelos.modelos import Cancha, CanchaImagen
 
 router = APIRouter(prefix="/admin/canchas", tags=["admin-canchas-imagenes"])
 
-MAX_BYTES = 5 * 1024 * 1024
+MAX_BYTES = 2 * 1024 * 1024
 ALLOWED = {
     "image/jpeg": ".jpg",
     "image/png": ".png",
@@ -27,7 +27,7 @@ async def subir_imagen(cancha_id: int, archivo: UploadFile = File(...), db: Sess
 
     data = await archivo.read()
     if len(data) > MAX_BYTES:
-        raise HTTPException(413, "Archivo muy pesado (máx 5MB)")
+        raise HTTPException(413, "Archivo muy pesado (max 2MB)")
 
     ext = ALLOWED[archivo.content_type]
     name = f"{uuid.uuid4().hex}{ext}"
@@ -73,3 +73,7 @@ def eliminar_imagen(imagen_id: int, db: Session = Depends(get_db)):
     if url:
         safe_unlink_upload(url)
     return {"ok": True}
+
+
+
+

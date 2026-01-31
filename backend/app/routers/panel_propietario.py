@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
+﻿from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
 from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 import uuid
@@ -30,7 +30,7 @@ from app.esquemas.esquemas import (
 
 router = APIRouter(prefix="/panel", tags=["panel"])
 
-MAX_BYTES = 5 * 1024 * 1024
+MAX_BYTES = 2 * 1024 * 1024
 ALLOWED = {
     "image/jpeg": ".jpg",
     "image/png": ".png",
@@ -282,7 +282,7 @@ async def subir_foto_complejo(
 
     data = await archivo.read()
     if len(data) > MAX_BYTES:
-        raise HTTPException(413, "Archivo muy pesado (máx 5MB)")
+        raise HTTPException(413, "Archivo muy pesado (max 2MB)")
 
     ext = ALLOWED[archivo.content_type]
     try:
@@ -373,7 +373,7 @@ async def subir_imagen_cancha(
 
     data = await archivo.read()
     if len(data) > MAX_BYTES:
-        raise HTTPException(413, "Archivo muy pesado (máx 5MB)")
+        raise HTTPException(413, "Archivo muy pesado (max 2MB)")
 
     ext = ALLOWED[archivo.content_type]
     name = f"{uuid.uuid4().hex}{ext}"
@@ -821,3 +821,7 @@ def listar_reservas_rango(
 
     rows = q.order_by(Reserva.start_at.asc()).all()
     return [reserva_dict(r) for r in rows]
+
+
+
+

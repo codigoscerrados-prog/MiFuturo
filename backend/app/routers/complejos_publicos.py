@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+﻿from datetime import date, datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
 from fastapi.security import OAuth2PasswordBearer
@@ -16,7 +16,7 @@ router = APIRouter(prefix="", tags=["public-complejos"])
 
 oauth2_optional = OAuth2PasswordBearer(tokenUrl="/auth/login", auto_error=False)
 
-MAX_BYTES = 5 * 1024 * 1024
+MAX_BYTES = 2 * 1024 * 1024
 ALLOWED = {
     "image/jpeg": ".jpg",
     "image/png": ".png",
@@ -200,7 +200,7 @@ async def subir_imagenes_complejo(
 
         data = await archivo.read()
         if len(data) > MAX_BYTES:
-            raise HTTPException(413, "Archivo muy pesado (max 5MB)")
+            raise HTTPException(413, "Archivo muy pesado (max 2MB)")
 
         ext = ALLOWED[archivo.content_type]
         try:
@@ -361,3 +361,8 @@ def horarios_cancha_publica(
         slots.append({"hora": f"{hour:02d}:00", "ocupado": ocupado})
 
     return {"cancha_id": cancha_id, "fecha": target_date.isoformat(), "slots": slots}
+
+
+
+
+

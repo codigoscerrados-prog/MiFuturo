@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { FileText, LayoutDashboard, LogOut, MessageCircle, Search, UserRound, X } from "lucide-react";
+import { FileText, LayoutDashboard, LogOut, Menu, MessageCircle, Search, UserRound, X } from "lucide-react";
 import styles from "./BarraNavegacion.module.css";
 
 import BrandLogo from "@/components/BrandLogo";
@@ -220,10 +220,8 @@ export default function BarraNavegacion() {
                         setMenuOpen((v) => !v);
                     }}
                 >
-                    <span className={`${styles.hamburger} ${menuOpen ? styles.hamburgerActivo : ""}`} aria-hidden="true">
-                        <span className={styles.hamburgerLine} />
-                        <span className={styles.hamburgerLine} />
-                        <span className={styles.hamburgerLine} />
+                    <span className={styles.menuIcon} aria-hidden="true">
+                        {menuOpen ? <X size={16} /> : <Menu size={16} />}
                     </span>
                 </button>
             </div>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CheckCircle2, Minus, Sparkles } from "lucide-react";
 import styles from "./ComparativaPlanes.module.css";
 
 const RUTA_CTA = "/registrarse/propietario";
@@ -16,16 +17,12 @@ const FILAS = [
 ];
 
 function iconoEstado(incluido: boolean) {
-    const clase = incluido ? "bi bi-check-circle-fill" : "bi bi-dash-lg";
     const etiqueta = incluido ? "Incluido" : "No incluido";
-
-    return (
-        <i
-            className={`${clase} ${styles.icon} ${incluido ? styles.iconOk : styles.iconNo
-                }`}
-            aria-label={etiqueta}
-            role="img"
-        />
+    const clase = `${styles.icon} ${incluido ? styles.iconOk : styles.iconNo}`;
+    return incluido ? (
+        <CheckCircle2 size={18} className={clase} aria-label={etiqueta} role="img" />
+    ) : (
+        <Minus size={18} className={clase} aria-label={etiqueta} role="img" />
     );
 }
 
@@ -58,10 +55,7 @@ export default function ComparativaPlanes() {
                                             <div className={styles.premiumHeadInner}>
                                                 <div className={styles.premiumTitleRow}>
                                                     <span className={styles.premiumTitle}>
-                                                        <i
-                                                            className={`bi bi-stars ${styles.premiumIcon}`}
-                                                            aria-hidden="true"
-                                                        />
+                                                        <Sparkles size={16} className={styles.premiumIcon} aria-hidden="true" />
                                                         Pro
                                                     </span>
 
@@ -121,7 +115,7 @@ export default function ComparativaPlanes() {
                             <div className={styles.cardHead}>
                                 <div className={styles.premiumTitleRow}>
                                     <h3 className={styles.cardTitle}>
-                                        <i className={`bi bi-stars ${styles.premiumIcon}`} aria-hidden="true" />
+                                        <Sparkles size={16} className={styles.premiumIcon} aria-hidden="true" />
                                         Pro
                                     </h3>
 

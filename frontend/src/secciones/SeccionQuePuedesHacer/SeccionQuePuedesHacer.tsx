@@ -1,4 +1,16 @@
 import Link from "next/link";
+import {
+    Building2,
+    CalendarCheck,
+    Camera,
+    FileText,
+    Filter,
+    Map,
+    MapPin,
+    MessageCircle,
+    MessageSquareText,
+    TrendingUp,
+} from "lucide-react";
 import styles from "./SeccionQuePuedesHacer.module.css";
 
 export default function SeccionQuePuedesHacer() {
@@ -22,31 +34,31 @@ export default function SeccionQuePuedesHacer() {
                                 <ul className={styles.lista}>
                                     <li className={styles.item}>
                                         <span className={styles.icono}>
-                                            <i className="bi bi-geo-alt" aria-hidden="true"></i>
+                                            <MapPin size={18} aria-hidden="true" />
                                         </span>
                                         Buscar canchas por distrito y provincia
                                     </li>
                                     <li className={styles.item}>
                                         <span className={styles.icono}>
-                                            <i className="bi bi-funnel" aria-hidden="true"></i>
+                                            <Filter size={18} aria-hidden="true" />
                                         </span>
                                         Filtrar por precio, tipo y disponibilidad
                                     </li>
                                     <li className={styles.item}>
                                         <span className={styles.icono}>
-                                            <i className="bi bi-map" aria-hidden="true"></i>
+                                            <Map size={18} aria-hidden="true" />
                                         </span>
                                         Ver complejos en mapa y comparar opciones
                                     </li>
                                     <li className={styles.item}>
                                         <span className={styles.icono}>
-                                            <i className="bi bi-card-text" aria-hidden="true"></i>
+                                            <FileText size={18} aria-hidden="true" />
                                         </span>
                                         Revisar fotos, detalles y reseñas
                                     </li>
                                     <li className={styles.item}>
                                         <span className={styles.icono}>
-                                            <i className="bi bi-whatsapp" aria-hidden="true"></i>
+                                            <MessageCircle size={18} aria-hidden="true" />
                                         </span>
                                         Reservar rapido desde el panel o WhatsApp
                                     </li>
@@ -60,31 +72,31 @@ export default function SeccionQuePuedesHacer() {
                                 <ul className={styles.lista}>
                                     <li className={styles.item}>
                                         <span className={styles.icono}>
-                                            <i className="bi bi-building" aria-hidden="true"></i>
+                                            <Building2 size={18} aria-hidden="true" />
                                         </span>
                                         Publicar complejos y canchas en minutos
                                     </li>
                                     <li className={styles.item}>
                                         <span className={styles.icono}>
-                                            <i className="bi bi-camera" aria-hidden="true"></i>
+                                            <Camera size={18} aria-hidden="true" />
                                         </span>
                                         Mostrar fotos y caracteristicas destacadas
                                     </li>
                                     <li className={styles.item}>
                                         <span className={styles.icono}>
-                                            <i className="bi bi-calendar-check" aria-hidden="true"></i>
+                                            <CalendarCheck size={18} aria-hidden="true" />
                                         </span>
                                         Gestionar horarios y precios desde el panel
                                     </li>
                                     <li className={styles.item}>
                                         <span className={styles.icono}>
-                                            <i className="bi bi-chat-square-text" aria-hidden="true"></i>
+                                            <MessageSquareText size={18} aria-hidden="true" />
                                         </span>
                                         Recibir solicitudes y mensajes de clientes
                                     </li>
                                     <li className={styles.item}>
                                         <span className={styles.icono}>
-                                            <i className="bi bi-graph-up" aria-hidden="true"></i>
+                                            <TrendingUp size={18} aria-hidden="true" />
                                         </span>
                                         Mejorar tu visibilidad y conversiones
                                     </li>

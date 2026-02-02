@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowRight, Building2, CalendarCheck, CheckCircle2 } from "lucide-react";
 import styles from "./CTAPropietarios.module.css";
 
 const RUTA_CTA = "/registrarse/propietario";
@@ -12,7 +13,7 @@ export default function CTAPropietarios() {
                     <div className="col-12 col-lg-7">
                         <div className={styles.info}>
                             <div className={styles.kicker}>
-                                <i className="bi bi-building-check" aria-hidden="true"></i>
+                                <Building2 size={18} aria-hidden="true" />
                                 <span>Propietarios</span>
                             </div>
                             <h2 className={styles.titulo}>
@@ -25,22 +26,22 @@ export default function CTAPropietarios() {
                             </p>
                             <ul className={styles.lista}>
                                 <li className={styles.item}>
-                                    <i className="bi bi-check-circle-fill" aria-hidden="true"></i>
+                                    <CheckCircle2 size={18} aria-hidden="true" />
                                     {"Perfil profesional con fotos y ubicaci\u00f3n"}
                                 </li>
                                 <li className={styles.item}>
-                                    <i className="bi bi-check-circle-fill" aria-hidden="true"></i>
+                                    <CheckCircle2 size={18} aria-hidden="true" />
                                     {"Gesti\u00f3n de reservas sin complicarte"}
                                 </li>
                                 <li className={styles.item}>
-                                    <i className="bi bi-check-circle-fill" aria-hidden="true"></i>
+                                    <CheckCircle2 size={18} aria-hidden="true" />
                                     {"M\u00e1s confianza para que te elijan"}
                                 </li>
                             </ul>
 
                             <Link className={`btn btn-primary ${styles.ctaBtn}`} href={RUTA_CTA}>
                                 {"Registrar mi complejo"}
-                                <i className="bi bi-arrow-right" aria-hidden="true"></i>
+                                <ArrowRight size={18} aria-hidden="true" />
                             </Link>
                         </div>
                     </div>
@@ -48,7 +49,7 @@ export default function CTAPropietarios() {
                     <div className="col-12 col-lg-5">
                         <div className={`card border-0 rounded-4 ${styles.sideCard}`}>
                             <div className={styles.sideHead}>
-                                <i className="bi bi-calendar2-check" aria-hidden="true"></i>
+                                <CalendarCheck size={18} aria-hidden="true" />
                                 <span>Panel para propietarios</span>
                             </div>
                             <div className={styles.badges}>

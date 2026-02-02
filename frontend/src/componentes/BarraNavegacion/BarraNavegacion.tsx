@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { FileText, LayoutDashboard, LogOut, MessageCircle, Search, UserRound, X } from "lucide-react";
 import styles from "./BarraNavegacion.module.css";
 
 import BrandLogo from "@/components/BrandLogo";
@@ -181,7 +182,7 @@ export default function BarraNavegacion() {
                                     {iniciales}
                                 </span>
                                 <span className={styles.userName} aria-hidden={!nombreUsuario} data-empty={!nombreUsuario}>
-                                    <i className={`bi bi-person-lines-fill ${styles.userBi}`} aria-hidden="true"></i>
+                                    <UserRound size={16} className={styles.userBi} aria-hidden="true" />
                                     {nombreUsuario ? `Hola, ${nombreUsuario}` : "Hola"}
                                 </span>
                             </div>
@@ -191,7 +192,7 @@ export default function BarraNavegacion() {
                                     }`}
                                 href={rutaPanel}
                             >
-                                <i className={`bi bi-speedometer2 ${styles.btnIcon}`} aria-hidden="true"></i>
+                                <LayoutDashboard size={16} className={styles.btnIcon} aria-hidden="true" />
                                 Ir a mi panel
                             </Link>
 
@@ -200,7 +201,7 @@ export default function BarraNavegacion() {
                                 className={`boton ${styles.btnDanger} ${styles.desktopOnly} d-inline-flex align-items-center gap-2`}
                                 onClick={cerrarSesion}
                             >
-                                <i className={`bi bi-box-arrow-right ${styles.btnIcon}`} aria-hidden="true"></i>
+                                <LogOut size={16} className={styles.btnIcon} aria-hidden="true" />
                                 Cerrar sesión
                             </button>
                         </>
@@ -238,7 +239,7 @@ export default function BarraNavegacion() {
 
                     <button type="button" className={styles.movilClose} onClick={() => setMenuOpen(false)} aria-label="Cerrar menú">
                         <IconoCerrar className={`${styles.iconoClose} ${styles.iconoLegacy}`} />
-                        <i className={`bi bi-x-lg ${styles.biClose}`} aria-hidden="true"></i>
+                        <X size={18} className={styles.biClose} aria-hidden="true" />
                     </button>
                 </div>
 
@@ -259,7 +260,7 @@ export default function BarraNavegacion() {
                         ) : (
                             <>
                                 <Link className={`boton ${styles.botonFull} ${styles.btnGhost}`} href={rutaPanel}>
-                                    <i className={`bi bi-speedometer2 ${styles.btnIcon}`} aria-hidden="true"></i>
+                                    <LayoutDashboard size={16} className={styles.btnIcon} aria-hidden="true" />
                                     Ir a mi panel
                                 </Link>
                                 <button
@@ -267,7 +268,7 @@ export default function BarraNavegacion() {
                                     className={`boton ${styles.botonFull} ${styles.btnDanger}`}
                                     onClick={cerrarSesion}
                                 >
-                                    <i className={`bi bi-box-arrow-right ${styles.btnIcon}`} aria-hidden="true"></i>
+                                    <LogOut size={16} className={styles.btnIcon} aria-hidden="true" />
                                     Cerrar sesión
                                 </button>
                             </>
@@ -276,15 +277,15 @@ export default function BarraNavegacion() {
 
                     <div className={styles.movilNav}>
                         <Link className={styles.movilLink} href="/buscar">
-                            <i className="bi bi-search" aria-hidden="true"></i>
+                            <Search size={16} aria-hidden="true" />
                             Buscar canchas
                         </Link>
                         <Link className={styles.movilLink} href="/contactanos">
-                            <i className="bi bi-chat-dots" aria-hidden="true"></i>
+                            <MessageCircle size={16} aria-hidden="true" />
                             Contacto
                         </Link>
                         <Link className={styles.movilLink} href="/terminos">
-                            <i className="bi bi-file-text" aria-hidden="true"></i>
+                            <FileText size={16} aria-hidden="true" />
                             Términos & privacidad
                         </Link>
                     </div>

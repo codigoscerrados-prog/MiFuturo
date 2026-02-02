@@ -243,3 +243,27 @@
     transition: none;
   }
 }
+
+@media (max-width: 420px) {
+  .footer {
+    padding: 28px 0;
+  }
+
+  .grid {
+    gap: 18px;
+  }
+
+  .block {
+    padding: 16px;
+    min-height: 200px;
+  }
+
+  .linkIcon {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .bottom {
+    padding: 14px 0;
+  }
+}

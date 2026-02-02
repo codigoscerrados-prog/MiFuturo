@@ -4,6 +4,21 @@
   margin-inline: auto;
 }
 
+@media (max-width: 420px){
+  .contenedor{
+    width: calc(100% - 28px);
+  }
+}
+
+@media (max-width: 420px){
+  .boton i,
+  .btn i,
+  .btn-primary i,
+  .btn-sm i {
+    font-size: 0.95rem;
+  }
+}
+
 /* Secciones (alternando blancos/grises para diferencia visual) */
 .fondoSeccion{
   border-top: 1px solid var(--borde);
@@ -68,6 +83,7 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
+  text-decoration: none;
 
   height: 44px;
   padding: 0 16px;
@@ -83,6 +99,14 @@
 
   box-shadow: var(--sombra-sm);
   transition: transform var(--transicion-fast), box-shadow var(--transicion-fast), background var(--transicion-fast), border-color var(--transicion-fast);
+}
+
+.boton i,
+.btn i,
+.btn-primary i,
+.btn-sm i {
+  font-size: 1rem;
+  line-height: 1;
 }
 
 .boton:hover{
@@ -104,6 +128,7 @@
   overflow: hidden;
   box-shadow: 0 10px 26px rgba(37, 99, 235, 0.24), 0 2px 10px rgba(37, 99, 235, 0.14);
   transition: transform 220ms ease, box-shadow 240ms ease, filter 240ms ease;
+  text-decoration: none;
 }
 .botonPrimario:hover{
   transform: translateY(-2px);
@@ -124,6 +149,7 @@
   overflow: hidden;
   box-shadow: 0 10px 26px rgba(37, 99, 235, 0.24), 0 2px 10px rgba(37, 99, 235, 0.14);
   transition: transform 220ms ease, box-shadow 240ms ease, filter 240ms ease;
+  text-decoration: none;
 }
 
 .btn.btn-primary::before,
@@ -170,6 +196,14 @@
 .botonNeon:hover{
   background: var(--superficie2);
   border-color: var(--bordeFuerte);
+}
+
+.botonNeon,
+.btn,
+.btn:hover,
+.btn:focus-visible,
+.btn:active {
+  text-decoration: none;
 }
 
 /* Inputs globales por si los reutilizas */

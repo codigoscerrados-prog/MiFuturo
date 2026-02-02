@@ -2,6 +2,18 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+    CalendarDays,
+    ChevronLeft,
+    ChevronRight,
+    Hourglass,
+    Info,
+    LayoutGrid,
+    MessageCircle,
+    Smile,
+    TriangleAlert,
+    X,
+} from "lucide-react";
 import styles from "./SeccionLoNuevo.module.css";
 import { apiFetch, mediaUrl } from "@/lib/api";
 import { haversineDistanceKm } from "@/utils/distance";
@@ -759,7 +771,7 @@ export default function SeccionLoNuevo() {
                             }}
                             aria-label="Mostrar complejos anteriores"
                         >
-                            <i className="bi bi-chevron-left" aria-hidden="true"></i>
+                            <ChevronLeft size={18} aria-hidden="true" />
                         </button>
                         <button
                             type="button"
@@ -770,7 +782,7 @@ export default function SeccionLoNuevo() {
                             }}
                             aria-label="Mostrar siguientes complejos"
                         >
-                            <i className="bi bi-chevron-right" aria-hidden="true"></i>
+                            <ChevronRight size={18} aria-hidden="true" />
                         </button>
                     </div>
                 </div>
@@ -890,7 +902,7 @@ export default function SeccionLoNuevo() {
                                                         href={`/${card.slug}`}
                                                         className={`btn btn-outline-secondary btn-sm rounded-pill px-3 ${styles.btnDetalle}`}
                                                     >
-                                                        <i className="bi bi-info-circle me-2" aria-hidden="true"></i>
+                                                        <Info size={16} className="me-2" aria-hidden="true" />
                                                         Ver detalles
                                                     </Link>
                                                     {mostrarReservar ? (
@@ -899,7 +911,7 @@ export default function SeccionLoNuevo() {
                                                             className={`btn btn-success btn-sm rounded-pill px-3 ${styles.btnReservar}`}
                                                             onClick={() => abrirReserva(card)}
                                                         >
-                                                            <i className="bi bi-whatsapp me-2" aria-hidden="true"></i>
+                                                            <MessageCircle size={16} className="me-2" aria-hidden="true" />
                                                             Reservar por WhatsApp
                                                         </button>
                                                     ) : esSinOwner && esEstandar ? (
@@ -909,7 +921,7 @@ export default function SeccionLoNuevo() {
                                                             rel="noreferrer"
                                                             className={`btn btn-success btn-sm rounded-pill px-3 ${styles.btnReservar}`}
                                                         >
-                                                            <i className="bi bi-emoji-smile me-2" aria-hidden="true"></i>
+                                                            <Smile size={16} className="me-2" aria-hidden="true" />
                                                             Reclamar perfil
                                                         </a>
                                                     ) : mostrarMensajeVerificado ? (
@@ -962,7 +974,7 @@ export default function SeccionLoNuevo() {
                                 onClick={cerrarModales}
                                 aria-label="Cerrar"
                             >
-                                <i className="bi bi-x-lg" aria-hidden="true"></i>
+                                <X size={18} aria-hidden="true" />
                             </button>
                         </div>
 
@@ -998,7 +1010,7 @@ export default function SeccionLoNuevo() {
                             <>
                                 {reservaError ? (
                                     <div className={`alert alert-danger d-flex align-items-start gap-2 rounded-4 ${styles.modalError}`}>
-                                        <i className="bi bi-exclamation-triangle-fill mt-1" aria-hidden="true"></i>
+                                        <TriangleAlert size={18} className="mt-1" aria-hidden="true" />
                                         <span>{reservaError}</span>
                                     </div>
                                 ) : null}
@@ -1008,7 +1020,7 @@ export default function SeccionLoNuevo() {
                                         {activo.verificado && (
                                             <label className={styles.modalField}>
                                                 <span className={styles.modalLabel}>
-                                                    <i className="bi bi-grid-3x3-gap me-2" aria-hidden="true"></i>
+                                                    <LayoutGrid size={16} className="me-2" aria-hidden="true" />
                                                     Cancha
                                                 </span>
                                                 <select
@@ -1030,7 +1042,7 @@ export default function SeccionLoNuevo() {
 
                                         <label className={styles.modalField}>
                                             <span className={styles.modalLabel}>
-                                                <i className="bi bi-calendar-event me-2" aria-hidden="true"></i>
+                                                <CalendarDays size={16} className="me-2" aria-hidden="true" />
                                                 Fecha
                                             </span>
                                             <input
@@ -1043,7 +1055,7 @@ export default function SeccionLoNuevo() {
 
                                         <label className={styles.modalField}>
                                             <span className={styles.modalLabel}>
-                                                <i className="bi bi-hourglass-split me-2" aria-hidden="true"></i>
+                                                <Hourglass size={16} className="me-2" aria-hidden="true" />
                                                 Duracion
                                             </span>
                                             <select
@@ -1126,7 +1138,7 @@ export default function SeccionLoNuevo() {
                                         Cancelar
                                     </button>
                                     <button className={`btn rounded-pill px-3 ${styles.ctaGreen}`} type="button" onClick={confirmarReservaWhatsApp}>
-                                        <i className="bi bi-whatsapp me-2" aria-hidden="true"></i>
+                                        <MessageCircle size={16} className="me-2" aria-hidden="true" />
                                         Enviar WhatsApp
                                     </button>
                                 </div>

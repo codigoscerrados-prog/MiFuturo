@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Mail, MessageCircle } from "lucide-react";
 import BrandLogo from "@/components/BrandLogo";
 import styles from "./PiePagina.module.css";
 
@@ -47,12 +48,12 @@ export default function PiePagina() {
               <p className={styles.soporte}>Soporte: Lun-Dom | 8am-10pm</p>
               <div className={styles.contactos}>
                 <a className={styles.linkIcon} href={SOPORTE_WA_URL} aria-label="WhatsApp soporte">
-                  <i className="bi bi-whatsapp" aria-hidden="true"></i>
+                  <MessageCircle size={18} aria-hidden="true" />
                   WhatsApp soporte
                 </a>
                 {SOPORTE_EMAIL ? (
                   <a className={styles.linkIcon} href={`mailto:${SOPORTE_EMAIL}`} aria-label="Correo soporte">
-                    <i className="bi bi-envelope" aria-hidden="true"></i>
+                    <Mail size={18} aria-hidden="true" />
                     {SOPORTE_EMAIL}
                   </a>
                 ) : null}

@@ -344,7 +344,7 @@
   text-decoration: none;
   position: relative;
   color: #fff;
-  font-family: "Montserrat", "Inter", var(--font-sans);
+  font-family: var(--font-display);
   transition: transform 160ms ease, color 160ms ease, box-shadow 160ms ease;
 }
 

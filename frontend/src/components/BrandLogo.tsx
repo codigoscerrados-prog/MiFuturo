@@ -1,17 +1,17 @@
 import Link from "next/link";
-import { Inter, Montserrat } from "next/font/google";
+import { Manrope, Sora } from "next/font/google";
 
 import styles from "./BrandLogo.module.css";
 
-const montserrat = Montserrat({
+const sora = Sora({
   subsets: ["latin"],
-  weight: ["700", "900"],
+  weight: ["700", "800"],
   display: "swap",
 });
 
-const inter = Inter({
+const manrope = Manrope({
   subsets: ["latin"],
-  weight: ["400"],
+  weight: ["400", "500"],
   display: "swap",
 });
 
@@ -80,7 +80,7 @@ export default function BrandLogo({
       {variant !== "icon" ? (
         <span className={`${styles.textStack} leading-none`}>
           <span
-            className={`${styles.companyName} ${styles.textShadow} ${montserrat.className}`}
+            className={`${styles.companyName} ${styles.textShadow} ${sora.className}`}
             style={{ fontSize: `${metrics.company}px` }}
           >
             Lateral Verde
@@ -88,7 +88,7 @@ export default function BrandLogo({
 
           {variant === "full" ? (
             <span
-              className={`${styles.tagline} ${inter.className}`}
+              className={`${styles.tagline} ${manrope.className}`}
               style={{ fontSize: `${metrics.tagline}px` }}
             >
               Crecimiento Sostenible

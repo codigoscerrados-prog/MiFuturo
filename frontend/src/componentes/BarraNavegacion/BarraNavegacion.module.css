@@ -488,6 +488,10 @@
   transition: transform 180ms ease;
 }
 
+.menuIcon svg {
+  stroke: #ffffff;
+}
+
 @media (max-width: 450px) {
   .botonMenu[aria-expanded="true"] .menuIcon {
     transform: rotate(90deg) scale(1.05);

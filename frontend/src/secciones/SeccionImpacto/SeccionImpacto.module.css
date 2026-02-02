@@ -136,7 +136,7 @@
 
 @media (max-width: 420px) {
   .seccion {
-    padding: 20px 0;
+    padding: 16px 0 12px;
   }
 
   .head {

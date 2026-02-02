@@ -11,11 +11,31 @@
 }
 
 @media (max-width: 420px){
+  main > section,
+  section {
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+}
+
+@media (max-width: 420px){
   .boton i,
   .btn i,
   .btn-primary i,
   .btn-sm i {
     font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 420px){
+  .boton,
+  .btn,
+  .btn-primary,
+  .btn-sm {
+    height: 40px;
+    padding: 0 12px;
+    font-size: 12px;
+    letter-spacing: 0.12em;
   }
 }
 

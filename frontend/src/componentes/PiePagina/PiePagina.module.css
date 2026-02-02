@@ -246,24 +246,50 @@
 
 @media (max-width: 420px) {
   .footer {
-    padding: 28px 0;
+    padding: 22px 0;
   }
 
   .grid {
-    gap: 18px;
+    gap: 14px;
   }
 
   .block {
-    padding: 16px;
-    min-height: 200px;
+    padding: 14px;
+    min-height: 180px;
   }
 
   .linkIcon {
     width: 100%;
     justify-content: center;
+    padding: 8px 12px;
+    gap: 8px;
   }
 
   .bottom {
-    padding: 14px 0;
+    padding: 12px 0;
+  }
+
+  .legal {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .copy {
+    font-size: 11px;
+  }
+
+  .texto,
+  .textoSmall,
+  .soporte {
+    font-size: 0.9rem;
+  }
+
+  .link {
+    font-size: 0.95rem;
+  }
+
+  .titulo {
+    letter-spacing: 0.35px;
   }
 }

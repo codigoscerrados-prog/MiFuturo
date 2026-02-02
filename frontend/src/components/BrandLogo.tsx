@@ -16,10 +16,10 @@ const manrope = Manrope({
 });
 
 const sizeMap = {
-  xs: { icon: 48, company: 18, tagline: 12, gap: 0.35 },
-  sm: { icon: 62, company: 22, tagline: 13, gap: 0.5 },
-  md: { icon: 80, company: 26, tagline: 15, gap: 0.65 },
-  lg: { icon: 96, company: 30, tagline: 17, gap: 0.8 },
+  xs: { icon: 44, company: 16, tagline: 10, gap: 0.32 },
+  sm: { icon: 58, company: 20, tagline: 11, gap: 0.46 },
+  md: { icon: 74, company: 24, tagline: 13, gap: 0.6 },
+  lg: { icon: 90, company: 28, tagline: 15, gap: 0.74 },
 } as const;
 
 type SizeVariant = keyof typeof sizeMap;

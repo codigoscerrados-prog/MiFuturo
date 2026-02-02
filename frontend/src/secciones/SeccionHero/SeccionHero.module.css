@@ -183,6 +183,11 @@
 }
 
 @media (max-width: 420px) {
+    .hero {
+        min-height: 88vh;
+        min-height: 88dvh;
+    }
+
     .bannerContenido {
         padding: 20px;
         padding-top: calc(20px + var(--navH));

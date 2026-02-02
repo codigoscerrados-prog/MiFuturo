@@ -202,6 +202,15 @@
 }
 
 @media (max-width: 420px) {
+  .header,
+  .header[data-scrolled="true"],
+  .header[data-scrolled="false"] {
+    --nav-bg: rgba(4, 26, 55, 0.95);
+    --nav-border: rgba(255, 255, 255, 0.12);
+    --nav-shadow: 0 12px 40px -26px rgba(2, 6, 23, 0.45);
+    background: linear-gradient(180deg, rgba(4, 26, 55, 0.95), rgba(7, 12, 28, 0.97));
+  }
+
   .contenido {
     gap: 6px;
     padding: 8px 10px;
@@ -216,6 +225,10 @@
     transform: scale(0.78);
     transform-origin: left center;
     white-space: nowrap;
+  }
+
+  .hamburgerLine {
+    background: #f8fafc;
   }
 }
 
@@ -678,6 +691,34 @@
 .movilActivo {
   background: rgba(37, 99, 235, 0.14);
   color: rgba(11, 22, 48, 0.92);
+}
+
+@media (max-width: 420px) {
+  .movilAcciones .boton,
+  .movilLink {
+    font-size: 12px;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+    padding: 10px 12px;
+    gap: 6px;
+  }
+
+  .movilLink svg,
+  .movilAcciones .boton svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .botonMenu {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+
+  .hamburger {
+    width: 16px;
+    height: 12px;
+  }
 }
 
 @media (prefers-color-scheme: dark) {

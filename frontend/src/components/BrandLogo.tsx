@@ -80,10 +80,10 @@ export default function BrandLogo({
       {variant !== "icon" ? (
         <span className={`${styles.textStack} leading-none`}>
           <span
-            className={`${styles.companyName} ${styles.textShadow} ${sora.className}`}
+            className={`${styles.companyName} ${styles.companyNameMedium} ${styles.textShadow} ${sora.className}`}
             style={{ fontSize: `${metrics.company}px` }}
           >
-            LV
+            Lateral Verde
           </span>
 
           {variant === "full" ? (

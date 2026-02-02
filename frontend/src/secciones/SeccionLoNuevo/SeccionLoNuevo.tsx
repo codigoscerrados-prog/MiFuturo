@@ -1007,7 +1007,7 @@ export default function SeccionLoNuevo() {
                         )}
 
                         {activo && reservaOpen && (
-                            <>
+                            <div className={styles.modalScroll}>
                                 {reservaError ? (
                                     <div className={`alert alert-danger d-flex align-items-start gap-2 rounded-4 ${styles.modalError}`}>
                                         <TriangleAlert size={18} className="mt-1" aria-hidden="true" />
@@ -1144,7 +1144,7 @@ export default function SeccionLoNuevo() {
                                 </div>
 
                                 <p className={styles.modalTiny}>Tip: puedes editar el texto antes de enviarlo en WhatsApp.</p>
-                            </>
+                            </div>
                         )}
                     </div>
                 </div>

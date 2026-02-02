@@ -45,6 +45,10 @@
   letter-spacing: 0.18em;
 }
 
+.companyNameMedium {
+  font-weight: 600;
+}
+
 .textShadow {
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
 }

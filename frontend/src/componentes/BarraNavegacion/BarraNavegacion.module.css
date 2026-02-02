@@ -721,13 +721,23 @@
   }
 
   .movil {
-    background: linear-gradient(180deg, rgba(4, 26, 55, 0.95), rgba(7, 12, 28, 0.97));
+    background: linear-gradient(180deg, #041a37, #070c1c) !important;
+    background-color: #041a37 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
     border-left-color: rgba(255, 255, 255, 0.12);
   }
 
   .movilLink,
   .movilClose {
     background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.16);
+    color: rgba(248, 250, 252, 0.92);
+  }
+
+  .movilLink:hover {
+    background: rgba(56, 189, 248, 0.18);
+    border-color: rgba(56, 189, 248, 0.35);
   }
 }
 

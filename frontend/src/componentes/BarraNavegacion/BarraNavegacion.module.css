@@ -719,6 +719,16 @@
     width: 16px;
     height: 12px;
   }
+
+  .movil {
+    background: linear-gradient(180deg, rgba(4, 26, 55, 0.95), rgba(7, 12, 28, 0.97));
+    border-left-color: rgba(255, 255, 255, 0.12);
+  }
+
+  .movilLink,
+  .movilClose {
+    background: rgba(255, 255, 255, 0.08);
+  }
 }
 
 @media (prefers-color-scheme: dark) {

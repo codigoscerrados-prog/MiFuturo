@@ -83,7 +83,7 @@ export default function BrandLogo({
             className={`${styles.companyName} ${styles.textShadow} ${sora.className}`}
             style={{ fontSize: `${metrics.company}px` }}
           >
-            Lateral Verde
+            LV
           </span>
 
           {variant === "full" ? (

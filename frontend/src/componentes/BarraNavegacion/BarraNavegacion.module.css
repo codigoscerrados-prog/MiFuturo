@@ -201,6 +201,24 @@
   }
 }
 
+@media (max-width: 420px) {
+  .contenido {
+    gap: 6px;
+    padding: 8px 10px;
+    border-radius: 16px;
+    background: rgba(11, 18, 32, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 26px -22px rgba(2, 6, 23, 0.55);
+    grid-template-columns: auto auto;
+  }
+
+  .brand {
+    transform: scale(0.78);
+    transform-origin: left center;
+    white-space: nowrap;
+  }
+}
+
 .logoImage {
   width: 100%;
   height: auto;

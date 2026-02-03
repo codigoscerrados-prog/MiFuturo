@@ -106,6 +106,14 @@ function formatDuracion(duracionHoras: number) {
     return duracionHoras === 1 ? "1 hora" : `${duracionHoras} horas`;
 }
 
+function moneyPE(n: number) {
+    try {
+        return new Intl.NumberFormat("es-PE", { style: "currency", currency: "PEN" }).format(n);
+    } catch {
+        return `S/ ${n.toFixed(0)}`;
+    }
+}
+
 function parseHora(hora: string) {
     const [h, m] = hora.split(":").map((p) => Number(p));
     if (Number.isFinite(h) && Number.isFinite(m)) return { h, m };
@@ -159,6 +167,7 @@ function buildMensajeReserva(complejo: ComplejoPerfil, cancha: Cancha, fechaISO:
     const precio = Number(cancha.precio_hora || 0).toFixed(0);
     const duracionTxt = formatDuracion(duracionHoras);
     const rango = formatRango(horaInicio, duracionHoras);
+    const total = Number(cancha.precio_hora || 0) * duracionHoras;
     return (
         "Hola! Quisiera reservar una cancha.\n\n" +
         `Complejo: ${complejo.nombre}\n` +
@@ -166,7 +175,8 @@ function buildMensajeReserva(complejo: ComplejoPerfil, cancha: Cancha, fechaISO:
         `Fecha: ${fechaISO}\n` +
         `Hora: ${rango}\n` +
         (duracionTxt ? `Duracion: ${duracionTxt}\n` : "") +
-        `Precio: S/ ${precio} /h\n`
+        `Precio: S/ ${precio} /h\n` +
+        `Total: S/ ${total.toFixed(0)}\n`
     );
 }
 
@@ -354,6 +364,12 @@ export default function ComplejoPublicoPage() {
         }
         return data.canchas[0] || null;
     }, [data, reserveCanchaId]);
+    const totalReserva = useMemo(() => {
+        if (!canchaSeleccionada) return null;
+        const horas = selectedSlots.length || reserveDuracion;
+        if (!horas) return null;
+        return Number(canchaSeleccionada.precio_hora || 0) * horas;
+    }, [canchaSeleccionada, selectedSlots, reserveDuracion]);
 
     useEffect(() => {
         if (!reserveOpen) return;
@@ -888,6 +904,12 @@ export default function ComplejoPublicoPage() {
                                 <div className={styles.reserveField}>
                                     <span className={styles.reserveLabel}>Hora seleccionada</span>
                                     <div className={styles.reserveStatic}>{formatSelectedRange()}</div>
+                                </div>
+                                <div className={styles.reserveField}>
+                                    <span className={styles.reserveLabel}>Total</span>
+                                    <div className={styles.reserveStatic}>
+                                        {totalReserva != null ? moneyPE(totalReserva) : "S/ --"}
+                                    </div>
                                 </div>
                                 {horariosError ? <p className={styles.reserveTiny}>{horariosError}</p> : null}
                             </div>

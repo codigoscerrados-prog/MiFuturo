@@ -259,6 +259,7 @@ function construirMensajeWhatsApp(c: CanchaCard, fechaISO: string, horaInicio: s
     const duracionTxt = formatDuracion(duracionHoras);
 
     const rango = formatRango(horaInicio, duracionHoras);
+    const total = c.precioHora * duracionHoras;
     return (
         `${wave} Hola! Quisiera reservar una cancha.\n\n` +
         `${stadium} Complejo: *${c.zona}*\n` +
@@ -267,7 +268,8 @@ function construirMensajeWhatsApp(c: CanchaCard, fechaISO: string, horaInicio: s
         `${target} Fecha: *${fechaHumana}*\n` +
         `${target} Hora: *${rango}*\n` +
         (duracionTxt ? `${target} Duracion: *${duracionTxt}*\n` : "") +
-        `${money} Precio: *S/ ${c.precioHora.toFixed(0)} /h*\n\n` +
+        `${money} Precio: *S/ ${c.precioHora.toFixed(0)} /h*\n` +
+        `${money} Total: *S/ ${total.toFixed(0)}*\n\n` +
         `${check} ¿Está disponible? ${sparkles}\n\n` +
         `${fire} Gracias! ${thanks}`
     );
@@ -459,6 +461,10 @@ export default function BusquedaDeCancha({
         }
         return reservaComplejo.canchas[0] || null;
     }, [reservaComplejo, reservaCanchaId]);
+    const totalReserva = useMemo(() => {
+        if (!canchaSeleccionada) return null;
+        return canchaSeleccionada.precioHora * reservaDuracion;
+    }, [canchaSeleccionada, reservaDuracion]);
 
     useEffect(() => {
         if (!canchaSeleccionada) return;
@@ -1235,6 +1241,14 @@ export default function BusquedaDeCancha({
                                         {formatSelectedRange()}
                                     </div>
                                 </div>
+                                {reservaComplejo.verificado ? (
+                                    <div className={styles.modalField}>
+                                        <span className={styles.modalLabel}>Total</span>
+                                        <div className={styles.modalStatic}>
+                                            {totalReserva != null ? moneyPE(totalReserva) : "S/ --"}
+                                        </div>
+                                    </div>
+                                ) : null}
                                 {horariosError ? <p className={styles.modalTiny}>{horariosError}</p> : null}
                             </div>
 

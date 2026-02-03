@@ -209,6 +209,7 @@ function construirMensajeWhatsApp(
     const duracionTxt = formatDuracion(duracionHoras);
     const zona = lugar || "Lima";
     const precio = `S/ ${Number(c.precioHora || 0).toFixed(0)}/h`;
+    const total = typeof c.precioHora === "number" ? `S/ ${(c.precioHora * duracionHoras).toFixed(0)}` : "";
     const tipo = c.tipo ? `${c.tipo} \u2022 ${c.pasto || ""}`.trim() : "Por confirmar";
     const wave = "\uD83D\uDC4B";
     const sparkles = "\u2728";
@@ -229,7 +230,8 @@ function construirMensajeWhatsApp(
         `${stadium} *Cancha:* ${c.nombre}\n` +
         `${pin} *Zona:* ${zona}\n` +
         `${target} *Tipo:* ${tipo}\n` +
-        `${money} *Precio:* ${precio}\n\n` +
+        `${money} *Precio:* ${precio}\n` +
+        (total ? `${money} *Total:* ${total}\n\n` : "\n") +
         `${calendar} *Fecha:* ${fechaHumana}\n` +
         `${clock} *Hora:* ${hora}\n` +
         (duracionTxt ? `${target} *Duracion:* ${duracionTxt}\n\n` : "\n") +
@@ -488,6 +490,10 @@ export default function SeccionLoNuevo() {
         }
         return activo.canchas[0] || null;
     }, [activo, reservaCanchaId]);
+    const totalReserva = useMemo(() => {
+        if (!canchaSeleccionada || typeof canchaSeleccionada.precioHora !== "number") return null;
+        return canchaSeleccionada.precioHora * reservaDuracion;
+    }, [canchaSeleccionada, reservaDuracion]);
 
     useEffect(() => {
         if (!reservaOpen) return;
@@ -1112,6 +1118,12 @@ export default function SeccionLoNuevo() {
                                         <div className={styles.modalField}>
                                             <span className={styles.modalLabel}>Hora seleccionada</span>
                                             <div className={styles.modalStatic}>{formatSelectedRange()}</div>
+                                        </div>
+                                        <div className={styles.modalField}>
+                                            <span className={styles.modalLabel}>Total</span>
+                                            <div className={styles.modalStatic}>
+                                                {totalReserva != null ? moneyPE(totalReserva) : "S/ --"}
+                                            </div>
                                         </div>
                                         {horariosError ? <p className={styles.modalTiny}>{horariosError}</p> : null}
                                     </div>

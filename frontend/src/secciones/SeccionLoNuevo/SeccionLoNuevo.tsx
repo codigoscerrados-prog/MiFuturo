@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -365,7 +365,7 @@ export default function SeccionLoNuevo() {
 
     const showGeoStatus = ubicacionCargando || Boolean(geoError);
     const showGeoRetryButton = !ubicacionCargando && (Boolean(geoError) || permissionDenied);
-    const geoStatusTexto = ubicacionCargando ? "Buscando canchas cercaâ€¦" : geoError;
+    const geoStatusTexto = ubicacionCargando ? "Buscando canchas cerca…" : geoError;
 
     useEffect(() => {
         const prefersReduced =
@@ -446,7 +446,9 @@ export default function SeccionLoNuevo() {
             document.body.style.overflow = prev;
             window.removeEventListener("keydown", onKey);
         };
-    }, [detalleOpen, reservaOpen]);\n\n    return (
+    }, [detalleOpen, reservaOpen]);
+
+    return (
         <section className={styles.seccion}>
             <div className="container-xl">
                 <div className={styles.head}>
@@ -489,7 +491,7 @@ export default function SeccionLoNuevo() {
                                 className={`btn btn-sm btn-outline-primary ${styles.geoRetry}`}
                                 onClick={requestLocation}
                             >
-                                Usar mi ubicaciÃ³n
+                                Usar mi ubicación
                             </button>
                         )}
                     </div>
@@ -618,7 +620,7 @@ export default function SeccionLoNuevo() {
                                                             Reclamar perfil
                                                         </a>
                                                     ) : mostrarMensajeVerificado ? (
-                                                        <span className={styles.reservaInfo}>AdministraciÃ³n no verificada</span>
+                                                        <span className={styles.reservaInfo}>Administración no verificada</span>
                                                     ) : null}
                                                 </div>
 

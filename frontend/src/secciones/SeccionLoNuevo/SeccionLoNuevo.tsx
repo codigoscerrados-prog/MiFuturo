@@ -368,6 +368,30 @@ export default function SeccionLoNuevo() {
     const geoStatusTexto = ubicacionCargando ? "Buscando canchas cerca…" : geoError;
 
     useEffect(() => {
+        const ac = new AbortController();
+
+        async function load() {
+            setCargando(true);
+            setError("");
+            try {
+                const data = await apiFetch<ComplejoApi[]>("/complejos", {
+                    signal: ac.signal,
+                    cache: "no-store",
+                });
+                setItems(mapComplejosFromApi(data));
+            } catch (e: any) {
+                if (e?.name === "AbortError") return;
+                setError(e?.message || "Error al cargar complejos");
+            } finally {
+                setCargando(false);
+            }
+        }
+
+        load();
+        return () => ac.abort();
+    }, []);
+
+    useEffect(() => {
         const prefersReduced =
             typeof window !== "undefined" &&
             window.matchMedia &&
@@ -454,7 +478,7 @@ export default function SeccionLoNuevo() {
                 <div className={styles.head}>
                     <div>
                         <h2 className={styles.titulo}>Lo nuevo en tu zona</h2>
-                        <p className={styles.subtitulo}>Descubre complejos recien publicados y reserva en minutos.</p>
+                        <p className={styles.subtitulo}>Descubre complejos recién publicados y reserva en minutos.</p>
                     </div>
                     <div className={styles.controles} aria-label="Control del carrusel">
                         <button
@@ -498,7 +522,7 @@ export default function SeccionLoNuevo() {
                 )}
 
                 {error && <div className={styles.error}>{error}</div>}
-                {vacio && !error && <div className={styles.empty}>Aun no hay complejos recientes, vuelve pronto.</div>}
+                {vacio && !error && <div className={styles.empty}>Aún no hay complejos recientes, vuelve pronto.</div>}
 
                 <div
                     ref={carruselRef}
@@ -652,7 +676,7 @@ export default function SeccionLoNuevo() {
                 <div>
                     <p className={styles.modalKicker}>Detalles del complejo</p>
                     <h3 className={styles.modalTitle}>{activo?.nombre || "Complejo"}</h3>
-                    <p className={styles.modalSub}>{activo?.zona || "Ubicacion no disponible"}</p>
+                    <p className={styles.modalSub}>{activo?.zona || "Ubicación no disponible"}</p>
                 </div>
 
                 <button
@@ -672,7 +696,7 @@ export default function SeccionLoNuevo() {
                     </div>
                     <div className={styles.modalInfo}>
                         <h4>{activo.nombre}</h4>
-                        <p>{activo.zona || "Ubicacion no disponible"}</p>
+                        <p>{activo.zona || "Ubicación no disponible"}</p>
                         {formatPrecio(activo) && <p className={styles.modalPrecio}>{formatPrecio(activo)}</p>}
                     </div>
                     <div className={styles.modalChips}>

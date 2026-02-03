@@ -292,14 +292,18 @@ function construirMensajeWhatsAppEstandar(complejo: ComplejoCard, fechaISO: stri
     const tienePrecio = complejo.canchasCount > 0;
     const precio = tienePrecio
         ? `S/ ${complejo.precioMin.toFixed(0)} - ${complejo.precioMax.toFixed(0)} /h`
-        : "";
+        : "S/ --";
+    const total = tienePrecio
+        ? `S/ ${(complejo.precioMin * Math.max(1, duracionHoras)).toFixed(0)}`
+        : "S/ --";
 
     const rango = formatRango(hora, duracionHoras);
     return (
         `${wave} Hola! Quisiera reservar.\n\n` +
         `${stadium} Complejo: *${complejo.nombre}*\n` +
         `${pin} Ubicación: *${lugar || "-"}*\n` +
-        (precio ? `${money} Precio: *${precio}*\n\n` : "\n") +
+        `${money} Precio: *${precio}*\n` +
+        `${money} Total: *${total}*\n\n` +
         `${target} Fecha: *${fechaHumana}*\n` +
         `${target} Hora: *${rango}*\n` +
         (duracionTxt ? `${target} Duracion: *${duracionTxt}*\n\n` : "\n") +
@@ -463,8 +467,9 @@ export default function BusquedaDeCancha({
     }, [reservaComplejo, reservaCanchaId]);
     const totalReserva = useMemo(() => {
         if (!canchaSeleccionada) return null;
-        return canchaSeleccionada.precioHora * reservaDuracion;
-    }, [canchaSeleccionada, reservaDuracion]);
+        const horas = selectedSlots.length || reservaDuracion;
+        return canchaSeleccionada.precioHora * horas;
+    }, [canchaSeleccionada, reservaDuracion, selectedSlots]);
 
     useEffect(() => {
         if (!canchaSeleccionada) return;

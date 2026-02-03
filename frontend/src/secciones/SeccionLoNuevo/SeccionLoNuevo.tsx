@@ -209,7 +209,7 @@ function construirMensajeWhatsApp(
     const duracionTxt = formatDuracion(duracionHoras);
     const zona = lugar || "Lima";
     const precio = `S/ ${Number(c.precioHora || 0).toFixed(0)}/h`;
-    const total = typeof c.precioHora === "number" ? `S/ ${(c.precioHora * duracionHoras).toFixed(0)}` : "";
+    const total = typeof c.precioHora === "number" ? `S/ ${(c.precioHora * duracionHoras).toFixed(0)}` : "S/ --";
     const tipo = c.tipo ? `${c.tipo} \u2022 ${c.pasto || ""}`.trim() : "Por confirmar";
     const wave = "\uD83D\uDC4B";
     const sparkles = "\u2728";
@@ -231,7 +231,7 @@ function construirMensajeWhatsApp(
         `${pin} *Zona:* ${zona}\n` +
         `${target} *Tipo:* ${tipo}\n` +
         `${money} *Precio:* ${precio}\n` +
-        (total ? `${money} *Total:* ${total}\n\n` : "\n") +
+        `${money} *Total:* ${total}\n\n` +
         `${calendar} *Fecha:* ${fechaHumana}\n` +
         `${clock} *Hora:* ${hora}\n` +
         (duracionTxt ? `${target} *Duracion:* ${duracionTxt}\n\n` : "\n") +
@@ -251,7 +251,11 @@ function construirMensajeWhatsAppEstandar(complejo: Complejo, fechaISO: string, 
             ? `S/ ${Math.round(complejo.precioMin)} - ${Math.round(complejo.precioMax)}/h`
             : typeof complejo.precioMin === "number"
             ? `S/ ${Math.round(complejo.precioMin)}/h`
-            : "";
+            : "S/ --";
+    const total =
+        typeof complejo.precioMin === "number"
+            ? `S/ ${Math.round(complejo.precioMin * Math.max(1, duracionHoras))}`
+            : "S/ --";
     const wave = "\uD83D\uDC4B";
     const sparkles = "\u2728";
     const soccer = "\u26BD";
@@ -270,7 +274,8 @@ function construirMensajeWhatsAppEstandar(complejo: Complejo, fechaISO: string, 
         `Vengo de *CanchaPro* ${soccer} y vi su publicaci\u00f3n para reservar ${fire}\n\n` +
         `${stadium} *Complejo:* ${complejo.nombre}\n` +
         `${pin} *Zona:* ${zona}\n` +
-        (precio ? `${money} *Precio:* ${precio}\n\n` : "\n") +
+        `${money} *Precio:* ${precio}\n` +
+        `${money} *Total:* ${total}\n\n` +
         `${calendar} *Fecha:* ${fechaHumana}\n` +
         `${clock} *Hora:* ${hora}\n` +
         (duracionTxt ? `${target} *Duracion:* ${duracionTxt}\n\n` : "\n") +
@@ -492,8 +497,9 @@ export default function SeccionLoNuevo() {
     }, [activo, reservaCanchaId]);
     const totalReserva = useMemo(() => {
         if (!canchaSeleccionada || typeof canchaSeleccionada.precioHora !== "number") return null;
-        return canchaSeleccionada.precioHora * reservaDuracion;
-    }, [canchaSeleccionada, reservaDuracion]);
+        const horas = selectedSlots.length || reservaDuracion;
+        return canchaSeleccionada.precioHora * horas;
+    }, [canchaSeleccionada, reservaDuracion, selectedSlots]);
 
     useEffect(() => {
         if (!reservaOpen) return;
@@ -773,10 +779,11 @@ export default function SeccionLoNuevo() {
             return;
         }
 
-        const horaRango = buildHoraRango(horaSeleccionada, reservaDuracion, horariosSlots);
+        const horasSeleccionadas = selectedSlots.length || reservaDuracion;
+        const horaRango = buildHoraRango(horaSeleccionada, horasSeleccionadas, horariosSlots);
         const msg = esEstandar
-            ? construirMensajeWhatsAppEstandar(activo, reservaFecha, horaRango, reservaDuracion)
-            : construirMensajeWhatsApp(cancha as CanchaMini, activo, reservaFecha, horaRango, reservaDuracion);
+            ? construirMensajeWhatsAppEstandar(activo, reservaFecha, horaRango, horasSeleccionadas)
+            : construirMensajeWhatsApp(cancha as CanchaMini, activo, reservaFecha, horaRango, horasSeleccionadas);
         const url = buildWhatsAppUrl(phone, msg);
         if (process.env.NODE_ENV !== "production") {
             console.log("[whatsapp] mensaje:", msg);

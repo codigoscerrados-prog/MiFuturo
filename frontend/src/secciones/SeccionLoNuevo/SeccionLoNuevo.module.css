@@ -558,6 +558,14 @@
   border: none;
   color: #fff;
   font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .ctaGreen:hover {
@@ -780,6 +788,14 @@
 
 .modalBtns {
   margin-top: 14px;
+  gap: 6px;
+}
+
+.modalBtns :global(.btn) {
+  padding: 6px 12px;
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .modalTiny {

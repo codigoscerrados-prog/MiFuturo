@@ -39,9 +39,9 @@
 .statBadge {
     padding: 6px 10px;
     border-radius: 999px;
-    border: 1px solid var(--borde);
-    background: rgba(15, 23, 42, .04);
-    color: var(--azulMarino);
+    border: 1px solid rgba(255, 255, 255, .35);
+    background: rgba(255, 255, 255, .08);
+    color: rgba(255, 255, 255, .8);
     font-weight: 900;
     font-size: 12px;
 }
@@ -440,6 +440,13 @@
     margin-top: 10px;
 }
 
+.reserveLayout {
+    display: grid;
+    grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
+    gap: 16px;
+    margin-top: 10px;
+}
+
 .reserveField {
     display: grid;
     gap: 6px;
@@ -469,6 +476,22 @@
     box-shadow: var(--sombra-glow);
 }
 
+.reserveStatic {
+    border-radius: 12px;
+    border: 1px solid var(--borde);
+    background: var(--blanco);
+    padding: 10px 12px;
+    color: var(--azulMarino);
+    font-weight: 800;
+}
+
+.reserveTiny {
+    margin: 0;
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 700;
+}
+
 .reserveActions {
     display: flex;
     justify-content: flex-end;
@@ -484,6 +507,64 @@
     font-weight: 900;
     color: var(--muted);
     background: linear-gradient(180deg, var(--blanco), var(--superficie));
+}
+
+.agendaPanel {
+    border-radius: 16px;
+    border: 1px solid var(--borde);
+    background: linear-gradient(180deg, var(--blanco), var(--superficie));
+    padding: 12px;
+    display: grid;
+    gap: 10px;
+    min-height: 220px;
+    max-height: 360px;
+    overflow: auto;
+}
+
+.agendaTitle {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--azulMarino);
+}
+
+.agendaList {
+    display: grid;
+    gap: 8px;
+}
+
+.agendaSlot {
+    border-radius: 12px;
+    border: 1px solid var(--borde);
+    background: rgba(15, 23, 42, .04);
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    color: var(--azulMarino);
+    font-weight: 800;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.agendaSlotActive {
+    border-color: rgba(32, 209, 124, .45);
+    background: rgba(16, 185, 129, .18);
+    color: #064e3b;
+}
+
+.agendaSlotBusy {
+    border-color: rgba(239, 68, 68, .35);
+    background: rgba(239, 68, 68, .12);
+    color: #7f1d1d;
+    cursor: not-allowed;
+}
+
+.agendaState {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 700;
 }
 
 .modalHeader {
@@ -616,5 +697,15 @@
         font-weight: 900;
         color: var(--azulMarino);
         cursor: pointer;
+    }
+}
+
+@media (max-width: 720px) {
+    .reserveLayout {
+        grid-template-columns: 1fr;
+    }
+
+    .agendaPanel {
+        max-height: 260px;
     }
 }

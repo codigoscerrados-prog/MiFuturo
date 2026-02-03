@@ -118,13 +118,16 @@
     gap: 10px;
     flex-wrap: wrap;
     align-items: center;
+    justify-content: center;
 }
 
 .btnPrincipal {
-    flex: 1;
-    min-width: 180px;
+    min-width: 150px;
     border-radius: 16px;
-    padding: 12px 20px;
+    padding: 11px 20px;
+    font-size: 13px;
+    line-height: 1;
+    white-space: nowrap;
     background: linear-gradient(135deg, #20d17c, #10b981);
     border: none;
     color: #0b1220;
@@ -132,13 +135,16 @@
 }
 
 .btnSec {
-    flex: 1;
-    min-width: 160px;
+    min-width: 150px;
     border-radius: 16px;
+    padding: 11px 20px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     background: rgba(255, 255, 255, 0.04);
     color: #f8fafc;
     font-weight: 600;
+    font-size: 13px;
+    line-height: 1;
+    white-space: nowrap;
 }
 
 .btnSec:hover,

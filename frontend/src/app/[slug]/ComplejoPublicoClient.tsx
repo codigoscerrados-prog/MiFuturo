@@ -59,6 +59,30 @@ type LikeResp = {
     liked_by_me: boolean;
 };
 
+type HorarioSlot = {
+    hora: string;
+    ocupado: boolean;
+};
+
+const DEFAULT_HORARIOS = [
+    "06:00",
+    "07:00",
+    "08:00",
+    "09:00",
+    "10:00",
+    "11:00",
+    "12:00",
+    "13:00",
+    "14:00",
+    "15:00",
+    "16:00",
+    "17:00",
+    "18:00",
+    "19:00",
+    "20:00",
+    "21:00",
+];
+
 function normalizarTelefono(raw: string | null | undefined) {
     const t = (raw || "").trim();
     if (!t) return null;
@@ -80,6 +104,26 @@ function buildWhatsAppUrl(phone: string, message: string) {
 function formatDuracion(duracionHoras: number) {
     if (!duracionHoras || duracionHoras <= 0) return "";
     return duracionHoras === 1 ? "1 hora" : `${duracionHoras} horas`;
+}
+
+function parseHora(hora: string) {
+    const [h, m] = hora.split(":").map((p) => Number(p));
+    if (Number.isFinite(h) && Number.isFinite(m)) return { h, m };
+    return { h: 0, m: 0 };
+}
+
+function sumarHoras(hora: string, delta: number) {
+    const parsed = parseHora(hora);
+    const totalMinutes = parsed.h * 60 + parsed.m + delta * 60;
+    const newHour = Math.floor(totalMinutes / 60) % 24;
+    return `${String(newHour).padStart(2, "0")}:${String(totalMinutes % 60).padStart(2, "0")}`;
+}
+
+function formatRango(horaInicio: string, duracionHoras: number) {
+    if (!horaInicio) return "—";
+    if (duracionHoras <= 1) return horaInicio;
+    const horaFinal = sumarHoras(horaInicio, duracionHoras);
+    return `${horaInicio} - ${horaFinal}`;
 }
 
 function sanitizeHtml(value?: string | null) {
@@ -111,15 +155,16 @@ function buildDescDoc(raw?: string | null) {
 </html>`;
 }
 
-function buildMensajeReserva(complejo: ComplejoPerfil, cancha: Cancha, fechaISO: string, hora: string, duracionHoras: number) {
+function buildMensajeReserva(complejo: ComplejoPerfil, cancha: Cancha, fechaISO: string, horaInicio: string, duracionHoras: number) {
     const precio = Number(cancha.precio_hora || 0).toFixed(0);
     const duracionTxt = formatDuracion(duracionHoras);
+    const rango = formatRango(horaInicio, duracionHoras);
     return (
         "Hola! Quisiera reservar una cancha.\n\n" +
         `Complejo: ${complejo.nombre}\n` +
         `Cancha: ${cancha.nombre} (${cancha.tipo}, ${cancha.pasto})\n` +
         `Fecha: ${fechaISO}\n` +
-        `Hora: ${hora}\n` +
+        `Hora: ${rango}\n` +
         (duracionTxt ? `Duracion: ${duracionTxt}\n` : "") +
         `Precio: S/ ${precio} /h\n`
     );
@@ -140,9 +185,14 @@ export default function ComplejoPublicoPage() {
     const [reserveOpen, setReserveOpen] = useState(false);
     const [reserveCanchaId, setReserveCanchaId] = useState<number | null>(null);
     const [reserveFecha, setReserveFecha] = useState("");
-    const [reserveHora, setReserveHora] = useState("");
     const [reserveDuracion, setReserveDuracion] = useState(1);
     const [reserveError, setReserveError] = useState<string | null>(null);
+    const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
+    const [horariosSlots, setHorariosSlots] = useState<HorarioSlot[]>(() =>
+        DEFAULT_HORARIOS.map((hora) => ({ hora, ocupado: false }))
+    );
+    const [horariosLoading, setHorariosLoading] = useState(false);
+    const [horariosError, setHorariosError] = useState("");
     const [token, setToken] = useState<string | null>(null);
     const [likes, setLikes] = useState(0);
     const [liked, setLiked] = useState(false);
@@ -296,6 +346,58 @@ export default function ComplejoPublicoPage() {
         return { min: Math.min(...precios), max: Math.max(...precios) };
     }, [data]);
 
+    const canchaSeleccionada = useMemo(() => {
+        if (!data?.canchas?.length) return null;
+        if (reserveCanchaId) {
+            const match = data.canchas.find((c) => c.id === reserveCanchaId);
+            if (match) return match;
+        }
+        return data.canchas[0] || null;
+    }, [data, reserveCanchaId]);
+
+    useEffect(() => {
+        if (!reserveOpen) return;
+        if (!canchaSeleccionada) {
+            setHorariosSlots(DEFAULT_HORARIOS.map((hora) => ({ hora, ocupado: false })));
+            setSelectedSlots(DEFAULT_HORARIOS.slice(0, 1));
+            setHorariosError("");
+            setHorariosLoading(false);
+            return;
+        }
+        const fechaParam = reserveFecha || new Date().toISOString().slice(0, 10);
+        const ac = new AbortController();
+        setHorariosLoading(true);
+        setHorariosError("");
+
+        apiFetch<{ slots: HorarioSlot[] }>(`/public/canchas/${canchaSeleccionada.id}/horarios?fecha=${fechaParam}`, {
+            signal: ac.signal,
+            cache: "no-store",
+        })
+            .then((data) => {
+                if (data?.slots?.length) {
+                    const normalized = data.slots.map((slot) => ({
+                        hora: slot.hora,
+                        ocupado: Boolean(slot.ocupado),
+                    }));
+                    setHorariosSlots(normalized);
+                    const free = normalized.find((slot) => !slot.ocupado);
+                    setSelectedSlots(free ? [free.hora] : normalized.map((slot) => slot.hora).slice(0, 1));
+                } else {
+                    setHorariosSlots(DEFAULT_HORARIOS.map((hora) => ({ hora, ocupado: false })));
+                    setSelectedSlots(DEFAULT_HORARIOS.slice(0, 1));
+                }
+            })
+            .catch((err) => {
+                if (err?.name === "AbortError") return;
+                setHorariosSlots(DEFAULT_HORARIOS.map((hora) => ({ hora, ocupado: false })));
+                setSelectedSlots(DEFAULT_HORARIOS.slice(0, 1));
+                setHorariosError("No se pudieron cargar los horarios, usa los valores sugeridos.");
+            })
+            .finally(() => setHorariosLoading(false));
+
+        return () => ac.abort();
+    }, [canchaSeleccionada, reserveFecha, reserveOpen]);
+
     const structuredData = useMemo(() => {
         if (!data) return null;
         const phoneRaw = normalizarTelefono(data.owner_phone);
@@ -406,8 +508,11 @@ export default function ComplejoPublicoPage() {
         const today = new Date();
         const iso = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
         setReserveFecha(iso);
-        setReserveHora("19:00");
         setReserveDuracion(1);
+        setHorariosSlots(DEFAULT_HORARIOS.map((hora) => ({ hora, ocupado: false })));
+        setSelectedSlots(DEFAULT_HORARIOS.slice(0, 1));
+        setHorariosError("");
+        setHorariosLoading(false);
     }
 
     function cerrarReserva() {
@@ -426,8 +531,8 @@ export default function ComplejoPublicoPage() {
             setReserveError("Selecciona una fecha.");
             return;
         }
-        if (!reserveHora) {
-            setReserveError("Selecciona una hora.");
+        if (!selectedSlots.length) {
+            setReserveError("Selecciona al menos una hora.");
             return;
         }
         const phone = normalizarTelefono(data.owner_phone);
@@ -435,11 +540,60 @@ export default function ComplejoPublicoPage() {
             setReserveError("Este complejo no tiene WhatsApp configurado.");
             return;
         }
-        const msg = buildMensajeReserva(data, cancha, reserveFecha, reserveHora, reserveDuracion);
+        const slotsSorted = [...selectedSlots].sort();
+        const horaInicio = slotsSorted[0];
+        const duracion = slotsSorted.length;
+        const msg = buildMensajeReserva(data, cancha, reserveFecha, horaInicio, duracion);
         const url = buildWhatsAppUrl(phone, msg);
         window.open(url, "_blank", "noopener,noreferrer");
         cerrarReserva();
     }
+
+    function buildSelection(startHora: string, duracionHoras: number, slots: HorarioSlot[]) {
+        const startIndex = slots.findIndex((slot) => slot.hora === startHora);
+        if (startIndex < 0) return null;
+        const chunk = slots.slice(startIndex, startIndex + duracionHoras);
+        if (chunk.length < duracionHoras) return null;
+        if (chunk.some((slot) => slot.ocupado)) return null;
+        return chunk.map((slot) => slot.hora);
+    }
+
+    function formatSelectedRange() {
+        const start = selectedSlots[0];
+        if (!start) return "Selecciona en la agenda";
+        const startIndex = horariosSlots.findIndex((slot) => slot.hora === start);
+        if (startIndex < 0) return start;
+        const endIndex = startIndex + reserveDuracion;
+        const end = horariosSlots[endIndex]?.hora;
+        return end ? `${start} - ${end}` : `${start} + ${reserveDuracion}h`;
+    }
+
+    const maxDuracionDisponible = useMemo(() => {
+        const start = selectedSlots[0];
+        if (!start) return 1;
+        const startIndex = horariosSlots.findIndex((slot) => slot.hora === start);
+        if (startIndex < 0) return 1;
+        let max = 0;
+        for (let i = startIndex; i < horariosSlots.length; i += 1) {
+            if (horariosSlots[i].ocupado) break;
+            max += 1;
+            if (max >= 4) break;
+        }
+        return Math.max(1, max);
+    }, [selectedSlots, horariosSlots]);
+
+    useEffect(() => {
+        const start = selectedSlots[0];
+        if (!start) return;
+        const nextDur = Math.min(reserveDuracion, maxDuracionDisponible);
+        if (nextDur !== reserveDuracion) {
+            setReserveDuracion(nextDur);
+        }
+        const nextSelection = buildSelection(start, nextDur, horariosSlots);
+        if (nextSelection && nextSelection.join("|") !== selectedSlots.join("|")) {
+            setSelectedSlots(nextSelection);
+        }
+    }, [maxDuracionDisponible, reserveDuracion, horariosSlots, selectedSlots]);
 
     if (loading) {
         return <div className={styles.page}>Cargando...</div>;
@@ -674,59 +828,110 @@ export default function ComplejoPublicoPage() {
 
                         {reserveError ? <div className={styles.reserveError}>{reserveError}</div> : null}
 
-                        <div className={styles.reserveGrid}>
-                            {data.canchas.length > 0 ? (
+                        <div className={styles.reserveLayout}>
+                            <div className={styles.reserveGrid}>
+                                {data.canchas.length > 0 ? (
+                                    <label className={styles.reserveField}>
+                                        <span className={styles.reserveLabel}>Cancha</span>
+                                        <select
+                                            className={styles.reserveInput}
+                                            value={reserveCanchaId ?? ""}
+                                            onChange={(e) => setReserveCanchaId(Number(e.target.value))}
+                                        >
+                                            {data.canchas.map((c) => (
+                                                <option key={c.id} value={c.id}>
+                                                    {c.nombre} - {c.tipo} - S/ {Number(c.precio_hora || 0).toFixed(0)}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </label>
+                                ) : (
+                                    <div className={styles.reserveEmpty}>No hay canchas disponibles.</div>
+                                )}
+
                                 <label className={styles.reserveField}>
-                                    <span className={styles.reserveLabel}>Cancha</span>
+                                    <span className={styles.reserveLabel}>Fecha</span>
+                                    <input
+                                        className={styles.reserveInput}
+                                        type="date"
+                                        value={reserveFecha}
+                                        onChange={(e) => setReserveFecha(e.target.value)}
+                                    />
+                                </label>
+
+                                <label className={styles.reserveField}>
+                                    <span className={styles.reserveLabel}>Duracion</span>
                                     <select
                                         className={styles.reserveInput}
-                                        value={reserveCanchaId ?? ""}
-                                        onChange={(e) => setReserveCanchaId(Number(e.target.value))}
+                                        value={reserveDuracion}
+                                        onChange={(e) => {
+                                            const next = Math.max(1, Number(e.target.value) || 1);
+                                            setReserveDuracion(next);
+                                            if (!selectedSlots[0]) return;
+                                            const nextSelection = buildSelection(selectedSlots[0], next, horariosSlots);
+                                            if (!nextSelection) {
+                                                setReserveError("Ese rango no esta disponible.");
+                                                return;
+                                            }
+                                            setReserveError(null);
+                                            setSelectedSlots(nextSelection);
+                                        }}
                                     >
-                                        {data.canchas.map((c) => (
-                                            <option key={c.id} value={c.id}>
-                                                {c.nombre} - {c.tipo} - S/ {Number(c.precio_hora || 0).toFixed(0)}
+                                        {[1, 2, 3, 4].map((h) => (
+                                            <option key={h} value={String(h)} disabled={h > maxDuracionDisponible}>
+                                                {h} hora{h > 1 ? "s" : ""}
                                             </option>
                                         ))}
                                     </select>
                                 </label>
-                            ) : (
-                                <div className={styles.reserveEmpty}>No hay canchas disponibles.</div>
-                            )}
 
-                            <label className={styles.reserveField}>
-                                <span className={styles.reserveLabel}>Fecha</span>
-                                <input
-                                    className={styles.reserveInput}
-                                    type="date"
-                                    value={reserveFecha}
-                                    onChange={(e) => setReserveFecha(e.target.value)}
-                                />
-                            </label>
+                                <div className={styles.reserveField}>
+                                    <span className={styles.reserveLabel}>Hora seleccionada</span>
+                                    <div className={styles.reserveStatic}>{formatSelectedRange()}</div>
+                                </div>
+                                {horariosError ? <p className={styles.reserveTiny}>{horariosError}</p> : null}
+                            </div>
 
-                            <label className={styles.reserveField}>
-                                <span className={styles.reserveLabel}>Hora</span>
-                                <input
-                                    className={styles.reserveInput}
-                                    type="time"
-                                    value={reserveHora}
-                                    onChange={(e) => setReserveHora(e.target.value)}
-                                />
-                            </label>
-
-                            <label className={styles.reserveField}>
-                                <span className={styles.reserveLabel}>Duracion</span>
-                                <select
-                                    className={styles.reserveInput}
-                                    value={reserveDuracion}
-                                    onChange={(e) => setReserveDuracion(Number(e.target.value))}
-                                >
-                                    <option value="1">1 hora</option>
-                                    <option value="2">2 horas</option>
-                                    <option value="3">3 horas</option>
-                                    <option value="4">4 horas</option>
-                                </select>
-                            </label>
+                            <div className={styles.agendaPanel}>
+                                <h4 className={styles.agendaTitle}>Agenda del complejo</h4>
+                                {horariosLoading ? (
+                                    <div className={styles.agendaState}>Cargando agenda…</div>
+                                ) : (
+                                    <div className={styles.agendaList}>
+                                        {horariosSlots.map((slot) => {
+                                            const isSelected = selectedSlots.includes(slot.hora);
+                                            return (
+                                                <button
+                                                    key={slot.hora}
+                                                    type="button"
+                                                    className={`${styles.agendaSlot} ${
+                                                        slot.ocupado
+                                                            ? styles.agendaSlotBusy
+                                                            : isSelected
+                                                            ? styles.agendaSlotActive
+                                                            : ""
+                                                    }`}
+                                                    onClick={() => {
+                                                        if (slot.ocupado) return;
+                                                        const nextSelection = buildSelection(slot.hora, reserveDuracion, horariosSlots);
+                                                        if (!nextSelection) {
+                                                            setReserveError("Ese rango no esta disponible.");
+                                                            return;
+                                                        }
+                                                        setReserveError(null);
+                                                        setSelectedSlots(nextSelection);
+                                                    }}
+                                                >
+                                                    <span>{slot.hora}</span>
+                                                    <span className={styles.agendaState}>
+                                                        {slot.ocupado ? "Ocupado" : isSelected ? "Seleccionado" : "Libre"}
+                                                    </span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         <div className={styles.reserveActions}>

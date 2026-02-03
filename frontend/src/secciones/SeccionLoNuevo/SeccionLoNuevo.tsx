@@ -377,7 +377,7 @@ function mapComplejosFromApi(complejos: ComplejoApi[]) {
         };
     });
 
-    return items.slice(0, 15);
+    return items;
 }
 
 type ComplejoConCoordenadas = Complejo & {
@@ -555,17 +555,44 @@ export default function SeccionLoNuevo() {
     }, []);
 
     const itemsOrdenados = useMemo(() => ordenarPorDistancia(items, position), [items, position]);
+    const itemsPriorizados = useMemo(() => {
+        if (!position) {
+            return [...itemsOrdenados].sort((a, b) => Number(b.verificado) - Number(a.verificado));
+        }
+        const enriched = itemsOrdenados.map((item, index) => {
+            const coords = obtenerCoordenadasDelItem(item);
+            const distancia =
+                coords ? haversineDistanceKm(position.lat, position.lng, coords.lat, coords.lng) : null;
+            const enRango = distancia != null && distancia <= 10;
+            return { item, distancia, enRango, index };
+        });
+
+        enriched.sort((a, b) => {
+            if (a.item.verificado !== b.item.verificado) {
+                return Number(b.item.verificado) - Number(a.item.verificado);
+            }
+            if (a.enRango !== b.enRango) {
+                return Number(b.enRango) - Number(a.enRango);
+            }
+            if (a.distancia != null && b.distancia != null && a.distancia !== b.distancia) {
+                return a.distancia - b.distancia;
+            }
+            return a.index - b.index;
+        });
+
+        return enriched.map((entry) => entry.item);
+    }, [itemsOrdenados, position]);
 
     const cards = useMemo<ComplejoCard[]>(() => {
         if (cargando || vacio) {
             return Array.from({ length: 9 }, (_, i) => ({ id: `s-${i}`, placeholder: true }));
         }
-        const base: ComplejoCard[] = [...itemsOrdenados];
+        const base: ComplejoCard[] = [...itemsPriorizados];
         while (base.length < 15) {
             base.push({ id: `p-${base.length}`, placeholder: true });
         }
         return base.slice(0, 15);
-    }, [cargando, itemsOrdenados, vacio]);
+    }, [cargando, itemsPriorizados, vacio]);
 
     const showGeoStatus = ubicacionCargando || Boolean(geoError);
     const showGeoRetryButton = !ubicacionCargando && (Boolean(geoError) || permissionDenied);
@@ -902,7 +929,7 @@ export default function SeccionLoNuevo() {
                                                         href={`/${card.slug}`}
                                                         className={`btn btn-outline-secondary btn-sm rounded-pill px-3 ${styles.btnDetalle}`}
                                                     >
-                                                        <Info size={16} className="me-2" aria-hidden="true" />
+                                                        <Info size={14} aria-hidden="true" />
                                                         Ver detalles
                                                     </Link>
                                                     {mostrarReservar ? (

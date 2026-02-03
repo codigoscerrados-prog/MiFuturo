@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styles from "./SeccionReservas.module.css";
@@ -319,7 +319,7 @@ export default function PanelReservasPropietario({ token }: { token: string }) {
         if (!selectedCourtId && activas.length) setSelectedCourtId(activas[0].id);
     }, [token, selectedCourtId]);
 
-    // ✅ día puntual (fallback/refresh)
+    // âœ… dÃ­a puntual (fallback/refresh)
     const fetchDay = useCallback(
         async (dateStr: string) => {
             const data = await apiFetch<Reserva[]>(
@@ -345,7 +345,7 @@ export default function PanelReservasPropietario({ token }: { token: string }) {
         [fetchDay]
     );
 
-    // ✅ mes completo en 1 request
+    // âœ… mes completo en 1 request
     const fetchMonthRange = useCallback(
         async (fromStr: string, toStr: string) => {
             const data = await apiFetch<Reserva[]>(
@@ -372,7 +372,7 @@ export default function PanelReservasPropietario({ token }: { token: string }) {
         setCurrentMonth(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1));
     }, [selectedDate]);
 
-    // ✅ carga mes (1 llamada) y llena dayCache por fecha
+    // âœ… carga mes (1 llamada) y llena dayCache por fecha
     useEffect(() => {
         (async () => {
             setLoadingMonth(true);
@@ -392,7 +392,7 @@ export default function PanelReservasPropietario({ token }: { token: string }) {
                     grouped[ds].push(r);
                 }
 
-                // asegúrate que todos los días del mes existan (aunque sea vacío)
+                // asegÃºrate que todos los dÃ­as del mes existan (aunque sea vacÃ­o)
                 for (let d = 1; d <= lastDay; d++) {
                     const ds = `${y}-${pad2(m + 1)}-${pad2(d)}`;
                     if (!grouped[ds]) grouped[ds] = [];
@@ -407,7 +407,7 @@ export default function PanelReservasPropietario({ token }: { token: string }) {
         })();
     }, [currentMonth, fetchMonthRange]);
 
-    // ✅ si el día seleccionado no está (ej. cambio rápido), fallback a fetch puntual
+    // âœ… si el dÃ­a seleccionado no estÃ¡ (ej. cambio rÃ¡pido), fallback a fetch puntual
     useEffect(() => {
         (async () => {
             try {
@@ -606,7 +606,7 @@ function moveWeek(delta: number) {
         if (!selectedOption || selectedOption.disabled) {
             return showToast("Horario no disponible. Elige otro horario.", "error");
         }
-        if (!formName.trim() || !formPhone.trim()) return showToast("Completa Nombre y Teléfono", "error");
+        if (!formName.trim() || !formPhone.trim()) return showToast("Completa Nombre y TelÃ©fono", "error");
 
         const cancha = canchaById.get(formCourtId);
         const total = cancha ? Number(cancha.precio_hora || 0) * (formDuration / 60) : 0;
@@ -652,7 +652,7 @@ function moveWeek(delta: number) {
                 await apiFetch(`/panel/reservas/${original.id}/cancelar`, { token, method: "PUT" });
                 await apiFetch("/panel/reservas", { token, method: "POST", body: JSON.stringify(payload) });
                 await fetchDaySafe(ymd(new Date(start_at)));
-                showToast("Reserva actualizada ✅", "success");
+                showToast("Reserva actualizada âœ…", "success");
                 openWhatsAppConfirmation({
                     name: formName,
                     phone: formPhone,
@@ -768,7 +768,7 @@ function moveWeek(delta: number) {
                 <div>
                     <p className={styles.kicker}>Panel propietario</p>
                     <h1 className={styles.titulo}>Sistema de Reservas</h1>
-                    <p className={styles.muted}>Agenda por cancha • calendario + horarios + reservas del día</p>
+                    <p className={styles.muted}>Agenda por cancha â€¢ calendario + horarios + reservas del dÃ­a</p>
                 </div>
 
                 <div className={styles.headerBtns}>
@@ -795,10 +795,10 @@ function moveWeek(delta: number) {
             {/* Main Grid */}
             <div className={styles.mainGrid}>
 
-                {/* Lista del dÇða */}
+                {/* Lista del dÃ‡Ã°a */}
                 <section className={cn(styles.card, styles.cardList)}>
                     <div className={styles.listTop}>
-                        <h2 className={styles.cardTitle}>Reservas del día</h2>
+                        <h2 className={styles.cardTitle}>Reservas del dÃ­a</h2>
                         <span className={styles.counter}>{reservationsForList.length}</span>
                     </div>
 
@@ -1096,133 +1096,156 @@ function moveWeek(delta: number) {
                         <div className={styles.modalHeader}>
                             <h3 className={styles.modalTitle}>{editReserva ? "Editar reserva" : "Nueva reserva"}</h3>
                             <button type="button" className={styles.modalClose} onClick={() => setModalOpen(false)} aria-label="Cerrar">
-                                ✕
+                                âœ•
                             </button>
                         </div>
 
                         <div className={styles.modalBody}>
-                            <div className={styles.field}>
-                                <label className={styles.label}>Cancha</label>
-                                <select
-                                    value={String(formCourtId ?? "")}
-                                    onChange={(e) => setFormCourtId(Number(e.target.value))}
-                                    className={styles.select}
-                                >
-                                    {canchasActivas.map((c) => (
-                                        <option key={c.id} value={String(c.id)}>
-                                            {c.nombre}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+    <div className={styles.modalLayout}>
+        <div className={styles.modalForm}>
+            <div className={styles.field}>
+                <label className={styles.label}>Cancha</label>
+                <select
+                    value={String(formCourtId ?? "")}
+                    onChange={(e) => setFormCourtId(Number(e.target.value))}
+                    className={styles.select}
+                >
+                    {canchasActivas.map((c) => (
+                        <option key={c.id} value={String(c.id)}>
+                            {c.nombre}
+                        </option>
+                    ))}
+                </select>
+            </div>
 
-                            <div className={styles.field}>
-                                <label className={styles.label}>Fecha</label>
-                                <input
-                                    type="date"
-                                    value={formDate}
-                                    onChange={(e) => setFormDate(e.target.value)}
-                                    className={styles.input}
-                                />
-                            </div>
+            <div className={styles.field}>
+                <label className={styles.label}>Fecha</label>
+                <input
+                    type="date"
+                    value={formDate}
+                    onChange={(e) => setFormDate(e.target.value)}
+                    className={styles.input}
+                />
+            </div>
 
-                            <div className={styles.field}>
-                                <label className={styles.label}>Horario</label>
-                                <select
-                                    value={formTime}
-                                    onChange={(e) => setFormTime(e.target.value)}
-                                    className={styles.select}
-                                >
-                                    {timeOptions.map((t) => (
-                                        <option key={t.slot} value={t.slot} disabled={t.disabled}>
-                                            {t.slot} {t.disabled ? "(Ocupado)" : ""}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+            <div className={styles.field}>
+                <label className={styles.label}>Duracion</label>
+                <select
+                    value={String(formDuration)}
+                    onChange={(e) => setFormDuration(Number(e.target.value))}
+                    className={styles.select}
+                >
+                    {DURATION_OPTIONS.map((minutes) => (
+                        <option key={minutes} value={String(minutes)}>
+                            {formatDurationLabel(minutes)}
+                        </option>
+                    ))}
+                </select>
+            </div>
 
-                            <div className={styles.field}>
-                                <label className={styles.label}>Duracion</label>
-                                <select
-                                    value={String(formDuration)}
-                                    onChange={(e) => setFormDuration(Number(e.target.value))}
-                                    className={styles.select}
-                                >
-                                    {DURATION_OPTIONS.map((minutes) => (
-                                        <option key={minutes} value={String(minutes)}>
-                                            {formatDurationLabel(minutes)}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+            <div className={styles.field}>
+                <label className={styles.label}>Horario seleccionado</label>
+                <div className={styles.staticField}>
+                    {formTime} - {addMinutesHHMM(formTime, formDuration)}
+                </div>
+            </div>
 
-                            <div className={styles.field}>
-                                <label className={styles.label}>Nombre del cliente</label>
-                                <input
-                                    type="text"
-                                    value={formName}
-                                    onChange={(e) => setFormName(e.target.value)}
-                                    placeholder="Nombre completo"
-                                    className={styles.input}
-                                />
-                            </div>
+            <div className={styles.field}>
+                <label className={styles.label}>Nombre del cliente</label>
+                <input
+                    type="text"
+                    value={formName}
+                    onChange={(e) => setFormName(e.target.value)}
+                    placeholder="Nombre completo"
+                    className={styles.input}
+                />
+            </div>
 
-                            <div className={styles.field}>
-                                <label className={styles.label}>Teléfono</label>
-                                <input
-                                    type="tel"
-                                    value={formPhone}
-                                    onChange={(e) => setFormPhone(e.target.value)}
-                                    placeholder="Número de contacto"
-                                    className={styles.input}
-                                />
-                            </div>
+            <div className={styles.field}>
+                <label className={styles.label}>TelÃ©fono</label>
+                <input
+                    type="tel"
+                    value={formPhone}
+                    onChange={(e) => setFormPhone(e.target.value)}
+                    placeholder="NÃºmero de contacto"
+                    className={styles.input}
+                />
+            </div>
 
-                            <div className={styles.field}>
-                                <label className={styles.label}>Notas (opcional)</label>
-                                <textarea
-                                    rows={3}
-                                    value={formNotes}
-                                    onChange={(e) => setFormNotes(e.target.value)}
-                                    placeholder="Información adicional…"
-                                    className={styles.textarea}
-                                />
-                            </div>
+            <div className={styles.field}>
+                <label className={styles.label}>Notas (opcional)</label>
+                <textarea
+                    rows={3}
+                    value={formNotes}
+                    onChange={(e) => setFormNotes(e.target.value)}
+                    placeholder="InformaciÃ³n adicionalâ€¦"
+                    className={styles.textarea}
+                />
+            </div>
+        </div>
 
-                            <div className={styles.modalActions}>
-                                <button type="button" className={styles.btnGhost} onClick={() => setModalOpen(false)}>
-                                    Cancelar
-                                </button>
+        <div className={styles.agendaPanel}>
+            <h4 className={styles.agendaTitle}>Agenda del dÃ­a</h4>
+            <div className={styles.agendaList}>
+                {timeOptions.map((t) => {
+                    const isSelected = t.slot === formTime;
+                    return (
+                        <button
+                            key={t.slot}
+                            type="button"
+                            className={`${styles.agendaSlot} ${
+                                t.disabled ? styles.agendaSlotBusy : isSelected ? styles.agendaSlotActive : ""
+                            }`}
+                            onClick={() => {
+                                if (t.disabled) return;
+                                setFormTime(t.slot);
+                            }}
+                        >
+                            <span>{t.slot}</span>
+                            <span className={styles.agendaState}>
+                                {t.disabled ? "Ocupado" : isSelected ? "Seleccionado" : "Libre"}
+                            </span>
+                        </button>
+                    );
+                })}
+            </div>
+        </div>
+    </div>
 
-                                <button
-                                    type="button"
-                                    className={styles.btnPrimary}
-                                    onClick={async () => {
-                                        try {
-                                            await submitReservation();
-                                        } catch (e: any) {
-                                            showToast(e?.message || "Error al guardar", "error");
-                                        }
-                                    }}
-                                >
-                                    Guardar
-                                </button>
-                            </div>
+    <div className={styles.modalActions}>
+        <button type="button" className={styles.btnGhost} onClick={() => setModalOpen(false)}>
+            Cancelar
+        </button>
 
-                            <p className={styles.help}>* Se reserva por el tiempo elegido. (Luego lo hacemos configurable si quieres)</p>
+        <button
+            type="button"
+            className={styles.btnPrimary}
+            onClick={async () => {
+                try {
+                    await submitReservation();
+                } catch (e: any) {
+                    showToast(e?.message || "Error al guardar", "error");
+                }
+            }}
+        >
+            Guardar
+        </button>
+    </div>
+
+    <p className={styles.help}>* Se reserva por el tiempo elegido. (Luego lo hacemos configurable si quieres)</p>
                         </div>
                     </div>
                 </div>
             ) : null}
 
-            {/* Confirmación cancelar */}
+            {/* ConfirmaciÃ³n cancelar */}
             {deleteOpen && deleteTarget ? (
                 <div className={styles.overlay} role="dialog" aria-modal="true">
                     <div className={styles.backdrop} onClick={() => setDeleteOpen(false)} />
                     <div className={styles.confirm}>
                         <div className={styles.confirmIcon}>!</div>
-                        <h3 className={styles.confirmTitle}>¿Cancelar reserva?</h3>
-                        <p className={styles.confirmText}>Esta acción no se puede deshacer.</p>
+                        <h3 className={styles.confirmTitle}>Â¿Cancelar reserva?</h3>
+                        <p className={styles.confirmText}>Esta acciÃ³n no se puede deshacer.</p>
 
                         <div className={styles.modalActions}>
                             <button type="button" className={styles.btnGhost} onClick={() => setDeleteOpen(false)}>
@@ -1252,10 +1275,11 @@ function moveWeek(delta: number) {
             {/* Toast */}
             {toast ? (
                 <div className={cn(styles.toastWrap, toast.type === "error" ? styles.toastError : styles.toastOk)}>
-                    <div className={styles.toastIcon}>{toast.type === "error" ? "✕" : "✓"}</div>
+                    <div className={styles.toastIcon}>{toast.type === "error" ? "âœ•" : "âœ“"}</div>
                     <div className={styles.toastText}>{toast.msg}</div>
                 </div>
             ) : null}
         </div>
     );
 }
+

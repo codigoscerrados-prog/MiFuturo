@@ -323,6 +323,14 @@
   font-size: 11px;
 }
 
+.btnDetalle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  line-height: 1;
+}
+
 .btnDetalle:hover {
   box-shadow: var(--sombra-sm);
 }

@@ -36,8 +36,8 @@ const TIME_SLOTS = [
     "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00",
     "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00",
 ] as const;
-const SLOT_MINUTES = 30;
-const DURATION_OPTIONS = [30, 60, 90, 120] as const;
+const SLOT_MINUTES = 60;
+const DURATION_OPTIONS = [60, 120, 180, 240, 300, 360] as const;
 const DEFAULT_DURATION_MINUTES = 60;
 
 
@@ -124,10 +124,13 @@ function colorFromString(input: string) {
 }
 
 function formatDurationLabel(minutes: number) {
-    if (minutes === 30) return "30 min";
-    if (minutes === 60) return "1 h";
-    if (minutes === 90) return "1 h 30 min";
-    if (minutes === 120) return "2 h";
+    if (minutes === 60) return "1 hora";
+    if (minutes === 90) return "1 hora 30 min";
+    if (minutes === 120) return "2 horas";
+    if (minutes === 180) return "3 horas";
+    if (minutes === 240) return "4 horas";
+    if (minutes === 300) return "5 horas";
+    if (minutes === 360) return "6 horas";
     return `${minutes} min`;
 }
 
@@ -192,17 +195,14 @@ function buildWhatsAppConfirmMessage(params: {
     );
 }
 
-const HALF_HOUR_SLOTS = TIME_SLOTS.flatMap((slot) => [
-    slot,
-    addMinutesHHMM(slot, SLOT_MINUTES),
-]);
+const HOUR_SLOTS = TIME_SLOTS;
 const HOUR_GROUPS = TIME_SLOTS;
 
 function formatSlotRange(slot: string) {
-    return `${slot} a ${addMinutesHHMM(slot, SLOT_MINUTES)}`;
+    return `${slot} - ${addMinutesHHMM(slot, SLOT_MINUTES)}`;
 }
 const DAY_END_MINUTES =
-    hhmmToMinutes(HALF_HOUR_SLOTS[HALF_HOUR_SLOTS.length - 1]) + SLOT_MINUTES;
+    hhmmToMinutes(HOUR_SLOTS[HOUR_SLOTS.length - 1]) + SLOT_MINUTES;
 
 function parseNotas(notas?: string | null) {
     const raw = (notas || "").trim();
@@ -279,7 +279,7 @@ export default function PanelReservasPropietario({ token }: { token: string }) {
 
     const [formCourtId, setFormCourtId] = useState<number | null>(null);
     const [formDate, setFormDate] = useState<string>("");
-    const [formTime, setFormTime] = useState<string>(HALF_HOUR_SLOTS[0]);
+    const [formTime, setFormTime] = useState<string>(HOUR_SLOTS[0]);
     const [formDuration, setFormDuration] = useState<number>(DEFAULT_DURATION_MINUTES);
     const [formName, setFormName] = useState("");
     const [formPhone, setFormPhone] = useState("");
@@ -515,7 +515,7 @@ function moveWeek(delta: number) {
         setEditReserva(null);
         setFormCourtId(selectedCourtId || (canchasActivas[0]?.id ?? null));
         setFormDate(selectedDateStr);
-        setFormTime(slot || HALF_HOUR_SLOTS[0]);
+        setFormTime(slot || HOUR_SLOTS[0]);
         setFormDuration(DEFAULT_DURATION_MINUTES);
         setFormName("");
         setFormPhone("");
@@ -704,7 +704,7 @@ function moveWeek(delta: number) {
             }
         }
 
-        return HALF_HOUR_SLOTS.map((slot) => {
+        return HOUR_SLOTS.map((slot) => {
             const startMin = hhmmToMinutes(slot);
             const endMin = startMin + formDuration;
             if (endMin > DAY_END_MINUTES) return { slot, disabled: true, hidden: true };
@@ -742,7 +742,7 @@ function moveWeek(delta: number) {
     const now = new Date();
     const nowMinutes = now.getHours() * 60 + now.getMinutes();
     const nowMs = now.getTime();
-    const agendaSlotCount = HALF_HOUR_SLOTS.length;
+    const agendaSlotCount = HOUR_SLOTS.length;
     const agendaGridStyle = {
         gridTemplateColumns: `210px repeat(${agendaSlotCount}, minmax(120px, 1fr))`,
     };
@@ -975,7 +975,7 @@ function moveWeek(delta: number) {
                         <div className={styles.agendaScroll} style={agendaScrollStyle}>
                             <div className={styles.agendaGrid} style={agendaGridStyle}>
                                 <div className={styles.gridCorner}>Cancha</div>
-                                {HALF_HOUR_SLOTS.map((slot) => (
+                                {HOUR_SLOTS.map((slot) => (
                                     <div key={slot} className={styles.gridTime}>
                                         {formatSlotRange(slot)}
                                     </div>
@@ -993,7 +993,7 @@ function moveWeek(delta: number) {
                                                 <span className={styles.gridCourtDot} style={{ backgroundColor: cs.dot }} />
                                                 <span className={styles.gridCourtName}>{c.nombre}</span>
                                             </div>
-                                            {HALF_HOUR_SLOTS.map((slot) => {
+                                            {HOUR_SLOTS.map((slot) => {
                                                 const slotState = occupiedSlotsByCourt.get(c.id)?.get(slot);
                                                 const slotStartMin = hhmmToMinutes(slot);
                                                 const slotEndMin = slotStartMin + SLOT_MINUTES;

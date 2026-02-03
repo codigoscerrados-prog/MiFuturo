@@ -592,6 +592,8 @@
   width: min(960px, 100%);
   max-height: min(85vh, 860px);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .modalHeader {
@@ -632,7 +634,7 @@
 }
 
 .modalScroll {
-  max-height: calc(85vh - 160px);
+  flex: 1;
   overflow-y: auto;
   padding-right: 4px;
 }

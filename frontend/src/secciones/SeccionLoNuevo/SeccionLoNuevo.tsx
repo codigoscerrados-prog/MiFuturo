@@ -1,23 +1,13 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-    CalendarDays,
-    ChevronLeft,
-    ChevronRight,
-    Hourglass,
-    Info,
-    LayoutGrid,
-    MessageCircle,
-    Smile,
-    TriangleAlert,
-    X,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Info, MessageCircle, Smile, X } from "lucide-react";
 import styles from "./SeccionLoNuevo.module.css";
 import { apiFetch, mediaUrl } from "@/lib/api";
 import { haversineDistanceKm } from "@/utils/distance";
 import { LatLng, useGeolocation } from "@/utils/hooks/useGeolocation";
+import ReservaWhatsappModal from "@/components/ReservaWhatsappModal";
 
 type ComplejoFeatures = {
     techada?: boolean;
@@ -103,30 +93,7 @@ type CanchaMini = {
     isActive?: boolean;
 };
 
-type HorarioSlot = {
-    hora: string;
-    ocupado: boolean;
-};
-
 const DEFAULT_FOTO = "/canchas/sintetico-marconi.avif";
-const DEFAULT_HORARIOS = [
-    "06:00",
-    "07:00",
-    "08:00",
-    "09:00",
-    "10:00",
-    "11:00",
-    "12:00",
-    "13:00",
-    "14:00",
-    "15:00",
-    "16:00",
-    "17:00",
-    "18:00",
-    "19:00",
-    "20:00",
-    "21:00",
-];
 const PRECIO_MAX_VISIBLE = 300;
 
 const FEATURES: Array<{ key: keyof ComplejoFeatures; label: string }> = [
@@ -163,126 +130,6 @@ function moneyPE(n?: number | null) {
     } catch {
         return `S/ ${n.toFixed(0)}`;
     }
-}
-
-function normalizarTelefonoWhatsApp(raw: string | null | undefined) {
-    const t = (raw || "").trim();
-    if (!t) return null;
-
-    const digits = t.replace(/[^\d]/g, "");
-    if (!digits) return null;
-
-    if (digits.length === 9 && digits.startsWith("9")) return `51${digits}`;
-    if (digits.length >= 10) return digits;
-    return null;
-}
-
-function formatoFechaHumana(fechaISO: string) {
-    try {
-        const d = new Date(`${fechaISO}T00:00:00`);
-        const txt = d.toLocaleDateString("es-PE", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "2-digit",
-        });
-        return txt.charAt(0).toUpperCase() + txt.slice(1);
-    } catch {
-        return fechaISO;
-    }
-}
-
-function formatDuracion(duracionHoras: number) {
-    if (!duracionHoras || duracionHoras <= 0) return "";
-    return duracionHoras === 1 ? "1 hora" : `${duracionHoras} horas`;
-}
-
-function construirMensajeWhatsApp(
-    c: CanchaMini,
-    complejo: Complejo,
-    fechaISO: string,
-    hora: string,
-    duracionHoras: number
-) {
-    const lugar = [complejo.distrito, complejo.provincia, complejo.departamento].filter(Boolean).join(", ");
-    const fechaHumana = formatoFechaHumana(fechaISO);
-    const duracionTxt = formatDuracion(duracionHoras);
-    const zona = lugar || "Lima";
-    const precio = `S/ ${Number(c.precioHora || 0).toFixed(0)}/h`;
-    const total = typeof c.precioHora === "number" ? `S/ ${(c.precioHora * duracionHoras).toFixed(0)}` : "S/ --";
-    const tipo = c.tipo ? `${c.tipo} \u2022 ${c.pasto || ""}`.trim() : "Por confirmar";
-    const wave = "\uD83D\uDC4B";
-    const sparkles = "\u2728";
-    const soccer = "\u26BD";
-    const stadium = "\uD83C\uDFDF\uFE0F";
-    const pin = "\uD83D\uDCCD";
-    const target = "\uD83C\uDFAF";
-    const money = "\uD83D\uDCB8";
-    const check = "\u2705";
-    const fire = "\uD83D\uDD25";
-    const thanks = "\uD83D\uDE4F";
-    const calendar = "\uD83D\uDCC5";
-    const clock = "\u23F0";
-    const chat = "\uD83D\uDCAC";
-    return (
-        `Hola ${wave}${sparkles}\n` +
-        `Vengo de *CanchaPro* ${soccer} y vi su publicaci\u00f3n para reservar ${fire}\n\n` +
-        `${stadium} *Cancha:* ${c.nombre}\n` +
-        `${pin} *Zona:* ${zona}\n` +
-        `${target} *Tipo:* ${tipo}\n` +
-        `${money} *Precio:* ${precio}\n` +
-        `${money} *Total:* ${total}\n\n` +
-        `${calendar} *Fecha:* ${fechaHumana}\n` +
-        `${clock} *Hora:* ${hora}\n` +
-        (duracionTxt ? `${target} *Duracion:* ${duracionTxt}\n\n` : "\n") +
-        `${check} \u00bfEst\u00e1 disponible en ese horario?\n` +
-        `${chat} Si me confirmas, lo reservo de inmediato.\n\n` +
-        `${thanks} \u00a1Gracias! Quedo atento(a).`
-    );
-}
-
-function construirMensajeWhatsAppEstandar(complejo: Complejo, fechaISO: string, hora: string, duracionHoras: number) {
-    const lugar = [complejo.distrito, complejo.provincia, complejo.departamento].filter(Boolean).join(", ");
-    const fechaHumana = formatoFechaHumana(fechaISO);
-    const duracionTxt = formatDuracion(duracionHoras);
-    const zona = lugar || "Lima";
-    const precio =
-        typeof complejo.precioMin === "number" && typeof complejo.precioMax === "number"
-            ? `S/ ${Math.round(complejo.precioMin)} - ${Math.round(complejo.precioMax)}/h`
-            : typeof complejo.precioMin === "number"
-            ? `S/ ${Math.round(complejo.precioMin)}/h`
-            : "S/ --";
-    const total =
-        typeof complejo.precioMin === "number"
-            ? `S/ ${Math.round(complejo.precioMin * Math.max(1, duracionHoras))}`
-            : "S/ --";
-    const wave = "\uD83D\uDC4B";
-    const sparkles = "\u2728";
-    const soccer = "\u26BD";
-    const stadium = "\uD83C\uDFDF\uFE0F";
-    const pin = "\uD83D\uDCCD";
-    const target = "\uD83C\uDFAF";
-    const money = "\uD83D\uDCB8";
-    const check = "\u2705";
-    const fire = "\uD83D\uDD25";
-    const thanks = "\uD83D\uDE4F";
-    const calendar = "\uD83D\uDCC5";
-    const clock = "\u23F0";
-    const chat = "\uD83D\uDCAC";
-    return (
-        `Hola ${wave}${sparkles}\n` +
-        `Vengo de *CanchaPro* ${soccer} y vi su publicaci\u00f3n para reservar ${fire}\n\n` +
-        `${stadium} *Complejo:* ${complejo.nombre}\n` +
-        `${pin} *Zona:* ${zona}\n` +
-        `${money} *Precio:* ${precio}\n` +
-        `${money} *Total:* ${total}\n\n` +
-        `${calendar} *Fecha:* ${fechaHumana}\n` +
-        `${clock} *Hora:* ${hora}\n` +
-        (duracionTxt ? `${target} *Duracion:* ${duracionTxt}\n\n` : "\n") +
-        `${check} \u00bfEst\u00e1 disponible en ese horario?\n` +
-        `${chat} Si me confirmas, lo reservo de inmediato.\n\n` +
-        `${thanks} \u00a1Gracias! Quedo atento(a).`
-    );
 }
 
 function buildWhatsAppUrl(phone: string, message: string) {
@@ -476,96 +323,6 @@ export default function SeccionLoNuevo() {
     const [detalleOpen, setDetalleOpen] = useState(false);
     const [reservaOpen, setReservaOpen] = useState(false);
     const [activo, setActivo] = useState<Complejo | null>(null);
-    const [reservaCanchaId, setReservaCanchaId] = useState<number | null>(null);
-    const [reservaFecha, setReservaFecha] = useState("");
-    const [reservaDuracion, setReservaDuracion] = useState(1);
-    const [reservaError, setReservaError] = useState<string | null>(null);
-    const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
-    const [horariosSlots, setHorariosSlots] = useState<HorarioSlot[]>(() =>
-        DEFAULT_HORARIOS.map((hora) => ({ hora, ocupado: false }))
-    );
-    const [horariosLoading, setHorariosLoading] = useState(false);
-    const [horariosError, setHorariosError] = useState("");
-
-    const canchaSeleccionada = useMemo(() => {
-        if (!activo || !activo.verificado) return null;
-        if (reservaCanchaId) {
-            const match = activo.canchas.find((c) => c.id === reservaCanchaId);
-            if (match) return match;
-        }
-        return activo.canchas[0] || null;
-    }, [activo, reservaCanchaId]);
-    const totalReserva = useMemo(() => {
-        if (!canchaSeleccionada || typeof canchaSeleccionada.precioHora !== "number") return null;
-        const horas = selectedSlots.length || reservaDuracion;
-        return canchaSeleccionada.precioHora * horas;
-    }, [canchaSeleccionada, reservaDuracion, selectedSlots]);
-
-    useEffect(() => {
-        if (!reservaOpen) return;
-        if (!canchaSeleccionada) {
-            setHorariosSlots(DEFAULT_HORARIOS.map((hora) => ({ hora, ocupado: false })));
-            setSelectedSlots(DEFAULT_HORARIOS.slice(0, 1));
-            setHorariosError("");
-            setHorariosLoading(false);
-            return;
-        }
-        const fechaParam = reservaFecha || new Date().toISOString().slice(0, 10);
-        const ac = new AbortController();
-        setHorariosLoading(true);
-        setHorariosError("");
-
-        apiFetch<{ slots: HorarioSlot[] }>(`/public/canchas/${canchaSeleccionada.id}/horarios?fecha=${fechaParam}`, {
-            signal: ac.signal,
-            cache: "no-store",
-        })
-            .then((data) => {
-                if (data?.slots?.length) {
-                    const normalized = data.slots.map((slot) => ({
-                        hora: slot.hora,
-                        ocupado: Boolean(slot.ocupado),
-                    }));
-                    setHorariosSlots(normalized);
-                    const free = normalized.find((slot) => !slot.ocupado);
-                    setSelectedSlots(free ? [free.hora] : normalized.map((slot) => slot.hora).slice(0, 1));
-                } else {
-                    setHorariosSlots(DEFAULT_HORARIOS.map((hora) => ({ hora, ocupado: false })));
-                    setSelectedSlots(DEFAULT_HORARIOS.slice(0, 1));
-                }
-            })
-            .catch((err) => {
-                if (err?.name === "AbortError") return;
-                setHorariosSlots(DEFAULT_HORARIOS.map((hora) => ({ hora, ocupado: false })));
-                setSelectedSlots(DEFAULT_HORARIOS.slice(0, 1));
-                setHorariosError("No se pudieron cargar los horarios, usa los valores sugeridos.");
-            })
-            .finally(() => setHorariosLoading(false));
-
-        return () => ac.abort();
-    }, [canchaSeleccionada, reservaFecha, reservaOpen]);
-
-    useEffect(() => {
-        let activo = true;
-        (async () => {
-            try {
-                setCargando(true);
-                setError("");
-                const data = await apiFetch<any>("/complejos");
-                const lista = Array.isArray(data) ? data : data?.items ?? data?.data ?? [];
-                const normalizados = mapComplejosFromApi(lista as ComplejoApi[]);
-                if (activo) setItems(normalizados);
-            } catch (err: any) {
-                if (activo) setError(err?.message || "No se pudo cargar lo nuevo.");
-            } finally {
-                if (activo) setCargando(false);
-            }
-        })();
-
-        return () => {
-            activo = false;
-        };
-    }, []);
-
     const itemsOrdenados = useMemo(() => ordenarPorDistancia(items, position), [items, position]);
     const itemsPriorizados = useMemo(() => {
         if (!position) {
@@ -608,7 +365,7 @@ export default function SeccionLoNuevo() {
 
     const showGeoStatus = ubicacionCargando || Boolean(geoError);
     const showGeoRetryButton = !ubicacionCargando && (Boolean(geoError) || permissionDenied);
-    const geoStatusTexto = ubicacionCargando ? "Buscando canchas cerca…" : geoError;
+    const geoStatusTexto = ubicacionCargando ? "Buscando canchas cercaâ€¦" : geoError;
 
     useEffect(() => {
         const prefersReduced =
@@ -668,22 +425,12 @@ export default function SeccionLoNuevo() {
         setActivo(card);
         setDetalleOpen(false);
         setReservaOpen(true);
-        setReservaError(null);
-        const first = card.canchas[0];
-        setReservaCanchaId(card.verificado ? (first?.id ?? null) : null);
-        const today = new Date();
-        const iso = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
-        setReservaFecha(iso);
-        setReservaDuracion(1);
-        setHorariosSlots(DEFAULT_HORARIOS.map((hora) => ({ hora, ocupado: false })));
-        setSelectedSlots(DEFAULT_HORARIOS.slice(0, 1));
     }
 
     function cerrarModales() {
         setDetalleOpen(false);
         setReservaOpen(false);
         setActivo(null);
-        setReservaError(null);
     }
 
     useEffect(() => {
@@ -699,101 +446,7 @@ export default function SeccionLoNuevo() {
             document.body.style.overflow = prev;
             window.removeEventListener("keydown", onKey);
         };
-    }, [detalleOpen, reservaOpen]);
-
-    function buildSelection(startHora: string, duracionHoras: number, slots: HorarioSlot[]) {
-        const startIndex = slots.findIndex((slot) => slot.hora === startHora);
-        if (startIndex < 0) return null;
-        const chunk = slots.slice(startIndex, startIndex + duracionHoras);
-        if (chunk.length < duracionHoras) return null;
-        if (chunk.some((slot) => slot.ocupado)) return null;
-        return chunk.map((slot) => slot.hora);
-    }
-
-    function buildHoraRango(start: string, duracionHoras: number, slots: HorarioSlot[]) {
-        const startIndex = slots.findIndex((slot) => slot.hora === start);
-        if (startIndex < 0) return start;
-        const endIndex = startIndex + duracionHoras;
-        const end = slots[endIndex]?.hora;
-        return end ? `${start} - ${end}` : `${start} + ${duracionHoras}h`;
-    }
-
-    function formatSelectedRange() {
-        const start = selectedSlots[0];
-        if (!start) return "Selecciona en la agenda";
-        return buildHoraRango(start, reservaDuracion, horariosSlots);
-    }
-
-    const maxDuracionDisponible = useMemo(() => {
-        const start = selectedSlots[0];
-        if (!start) return 1;
-        const startIndex = horariosSlots.findIndex((slot) => slot.hora === start);
-        if (startIndex < 0) return 1;
-        let max = 0;
-        for (let i = startIndex; i < horariosSlots.length; i += 1) {
-            if (horariosSlots[i].ocupado) break;
-            max += 1;
-            if (max >= 4) break;
-        }
-        return Math.max(1, max);
-    }, [selectedSlots, horariosSlots]);
-
-    useEffect(() => {
-        const start = selectedSlots[0];
-        if (!start) return;
-        const nextDur = Math.min(reservaDuracion, maxDuracionDisponible);
-        if (nextDur !== reservaDuracion) {
-            setReservaDuracion(nextDur);
-        }
-        const nextSelection = buildSelection(start, nextDur, horariosSlots);
-        if (nextSelection && nextSelection.join("|") !== selectedSlots.join("|")) {
-            setSelectedSlots(nextSelection);
-        }
-    }, [maxDuracionDisponible, reservaDuracion, horariosSlots, selectedSlots]);
-
-    function confirmarReservaWhatsApp() {
-        if (!activo) return;
-        const esEstandar = !activo.verificado;
-        let cancha: CanchaMini | null = null;
-
-        if (!esEstandar) {
-            cancha = activo.canchas.find((c) => c.id === reservaCanchaId) || activo.canchas[0] || null;
-            if (!cancha) {
-                setReservaError("No se encontro la cancha seleccionada.");
-                return;
-            }
-        }
-        if (!reservaFecha) {
-            setReservaError("Selecciona una fecha.");
-            return;
-        }
-        const horaSeleccionada = selectedSlots[0];
-        if (!horaSeleccionada) {
-            setReservaError("Selecciona una hora en la agenda.");
-            return;
-        }
-
-        const phone = normalizarTelefonoWhatsApp(activo.propietarioPhone);
-        if (!phone) {
-            setReservaError("Este complejo no tiene WhatsApp configurado.");
-            return;
-        }
-
-        const horasSeleccionadas = selectedSlots.length || reservaDuracion;
-        const horaRango = buildHoraRango(horaSeleccionada, horasSeleccionadas, horariosSlots);
-        const msg = esEstandar
-            ? construirMensajeWhatsAppEstandar(activo, reservaFecha, horaRango, horasSeleccionadas)
-            : construirMensajeWhatsApp(cancha as CanchaMini, activo, reservaFecha, horaRango, horasSeleccionadas);
-        const url = buildWhatsAppUrl(phone, msg);
-        if (process.env.NODE_ENV !== "production") {
-            console.log("[whatsapp] mensaje:", msg);
-            console.log("[whatsapp] url:", url);
-        }
-        window.open(url, "_blank", "noopener,noreferrer");
-        cerrarModales();
-    }
-
-    return (
+    }, [detalleOpen, reservaOpen]);\n\n    return (
         <section className={styles.seccion}>
             <div className="container-xl">
                 <div className={styles.head}>
@@ -836,7 +489,7 @@ export default function SeccionLoNuevo() {
                                 className={`btn btn-sm btn-outline-primary ${styles.geoRetry}`}
                                 onClick={requestLocation}
                             >
-                                Usar mi ubicación
+                                Usar mi ubicaciÃ³n
                             </button>
                         )}
                     </div>
@@ -965,7 +618,7 @@ export default function SeccionLoNuevo() {
                                                             Reclamar perfil
                                                         </a>
                                                     ) : mostrarMensajeVerificado ? (
-                                                        <span className={styles.reservaInfo}>Administración no verificada</span>
+                                                        <span className={styles.reservaInfo}>AdministraciÃ³n no verificada</span>
                                                     ) : null}
                                                 </div>
 
@@ -979,222 +632,97 @@ export default function SeccionLoNuevo() {
 
             </div>
 
-            {(detalleOpen || reservaOpen) && (
-                <div
-                    className={styles.modalOverlay}
-                    role="dialog"
-                    aria-modal="true"
-                    aria-label={reservaOpen ? "Reservar por WhatsApp" : "Detalles del complejo"}
-                    onMouseDown={(e) => {
-                        if (e.target === e.currentTarget) cerrarModales();
-                    }}
+            {detalleOpen && (
+    <div
+        className={styles.modalOverlay}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Detalles del complejo"
+        onMouseDown={(e) => {
+            if (e.target === e.currentTarget) cerrarModales();
+        }}
+    >
+        <div
+            className={`card border-0 shadow-lg ${styles.modalCard}`}
+            onMouseDown={(e) => e.stopPropagation()}
+        >
+            <div className={`d-flex gap-3 justify-content-between align-items-start ${styles.modalHeader}`}>
+                <div>
+                    <p className={styles.modalKicker}>Detalles del complejo</p>
+                    <h3 className={styles.modalTitle}>{activo?.nombre || "Complejo"}</h3>
+                    <p className={styles.modalSub}>{activo?.zona || "Ubicacion no disponible"}</p>
+                </div>
+
+                <button
+                    className={`btn btn-sm btn-light border ${styles.modalClose}`}
+                    type="button"
+                    onClick={cerrarModales}
+                    aria-label="Cerrar"
                 >
-                    <div
-                        className={`card border-0 shadow-lg ${styles.modalCard} ${reservaOpen ? styles.modalCardLarge : ""}`}
-                        onMouseDown={(e) => e.stopPropagation()}
-                    >
-                        <div className={`d-flex gap-3 justify-content-between align-items-start ${styles.modalHeader}`}>
-                            <div>
-                                <p className={styles.modalKicker}>
-                                    {reservaOpen ? "Reservar por WhatsApp" : "Detalles del complejo"}
-                                </p>
-                                <h3 className={styles.modalTitle}>{activo?.nombre || "Complejo"}</h3>
-                                <p className={styles.modalSub}>
-                                    {reservaOpen
-                                        ? activo?.verificado
-                                            ? "Elige la cancha, fecha, hora y duracion. Se enviara en el mensaje al propietario."
-                                            : "Elige fecha, hora y duracion. Se enviara en el mensaje al propietario."
-                                        : activo?.zona || "Ubicacion no disponible"}
-                                </p>
+                    <X size={18} aria-hidden="true" />
+                </button>
+            </div>
+
+            {activo && (
+                <div className={styles.modalBody}>
+                    <div className={styles.modalHero}>
+                        <img src={activo.fotoUrl || DEFAULT_FOTO} alt={activo.nombre} />
+                    </div>
+                    <div className={styles.modalInfo}>
+                        <h4>{activo.nombre}</h4>
+                        <p>{activo.zona || "Ubicacion no disponible"}</p>
+                        {formatPrecio(activo) && <p className={styles.modalPrecio}>{formatPrecio(activo)}</p>}
+                    </div>
+                    <div className={styles.modalChips}>
+                        {FEATURES.filter((f) => activo.features?.[f.key]).map((f) => (
+                            <span key={f.key} className={styles.modalChip}>
+                                {f.label}
+                            </span>
+                        ))}
+                    </div>
+                    <div className={styles.modalLista}>
+                        {activo.canchas.map((c) => (
+                            <div key={c.id} className={styles.modalFila}>
+                                <span>{c.nombre}</span>
+                                {typeof c.precioHora === "number" && <span>{moneyPE(c.precioHora)} /h</span>}
                             </div>
-
-                            <button
-                                className={`btn btn-sm btn-light border ${styles.modalClose}`}
-                                type="button"
-                                onClick={cerrarModales}
-                                aria-label="Cerrar"
-                            >
-                                <X size={18} aria-hidden="true" />
-                            </button>
-                        </div>
-
-                        {activo && !reservaOpen && (
-                            <div className={styles.modalBody}>
-                                <div className={styles.modalHero}>
-                                    <img src={activo.fotoUrl || DEFAULT_FOTO} alt={activo.nombre} />
-                                </div>
-                                <div className={styles.modalInfo}>
-                                    <h4>{activo.nombre}</h4>
-                                    <p>{activo.zona || "Ubicacion no disponible"}</p>
-                                    {formatPrecio(activo) && <p className={styles.modalPrecio}>{formatPrecio(activo)}</p>}
-                                </div>
-                                <div className={styles.modalChips}>
-                                    {FEATURES.filter((f) => activo.features?.[f.key]).map((f) => (
-                                        <span key={f.key} className={styles.modalChip}>
-                                            {f.label}
-                                        </span>
-                                    ))}
-                                </div>
-                                <div className={styles.modalLista}>
-                                    {activo.canchas.map((c) => (
-                                        <div key={c.id} className={styles.modalFila}>
-                                            <span>{c.nombre}</span>
-                                            {typeof c.precioHora === "number" && <span>{moneyPE(c.precioHora)} /h</span>}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {activo && reservaOpen && (
-                            <div className={styles.modalScroll}>
-                                {reservaError ? (
-                                    <div className={`alert alert-danger d-flex align-items-start gap-2 rounded-4 ${styles.modalError}`}>
-                                        <TriangleAlert size={18} className="mt-1" aria-hidden="true" />
-                                        <span>{reservaError}</span>
-                                    </div>
-                                ) : null}
-
-                                <div className={styles.reservaLayout}>
-                                    <div className={styles.modalGrid}>
-                                        {activo.verificado && (
-                                            <label className={styles.modalField}>
-                                                <span className={styles.modalLabel}>
-                                                    <LayoutGrid size={16} className="me-2" aria-hidden="true" />
-                                                    Cancha
-                                                </span>
-                                                <select
-                                                    className="form-select form-select-sm rounded-3"
-                                                    value={String(reservaCanchaId ?? "")}
-                                                    onChange={(e) => {
-                                                        const v = e.target.value;
-                                                        setReservaCanchaId(v ? Number(v) : null);
-                                                    }}
-                                                >
-                                                    {activo.canchas.map((c) => (
-                                                        <option key={c.id} value={String(c.id)}>
-                                                            {c.nombre} • {c.tipo || "Cancha"} • {moneyPE(c.precioHora)}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </label>
-                                        )}
-
-                                        <label className={styles.modalField}>
-                                            <span className={styles.modalLabel}>
-                                                <CalendarDays size={16} className="me-2" aria-hidden="true" />
-                                                Fecha
-                                            </span>
-                                            <input
-                                                className="form-control form-control-sm rounded-3"
-                                                type="date"
-                                                value={reservaFecha}
-                                                onChange={(e) => setReservaFecha(e.target.value)}
-                                            />
-                                        </label>
-
-                                        <label className={styles.modalField}>
-                                            <span className={styles.modalLabel}>
-                                                <Hourglass size={16} className="me-2" aria-hidden="true" />
-                                                Duracion
-                                            </span>
-                                            <select
-                                                className="form-select form-select-sm rounded-3"
-                                                value={String(reservaDuracion)}
-                                                onChange={(e) => {
-                                                    const next = Math.max(1, Number(e.target.value) || 1);
-                                                    setReservaDuracion(next);
-                                                    if (!selectedSlots[0]) return;
-                                                    const nextSelection = buildSelection(selectedSlots[0], next, horariosSlots);
-                                                    if (!nextSelection) {
-                                                        setReservaError("Ese rango no esta disponible.");
-                                                        return;
-                                                    }
-                                                    setReservaError(null);
-                                                    setSelectedSlots(nextSelection);
-                                                }}
-                                            >
-                                                {[1, 2, 3, 4].map((h) => (
-                                                    <option key={h} value={String(h)} disabled={h > maxDuracionDisponible}>
-                                                        {h} hora{h > 1 ? "s" : ""}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </label>
-
-                                        <div className={styles.modalField}>
-                                            <span className={styles.modalLabel}>Hora seleccionada</span>
-                                            <div className={styles.modalStatic}>{formatSelectedRange()}</div>
-                                        </div>
-                                        <div className={styles.modalField}>
-                                            <span className={styles.modalLabel}>Total</span>
-                                            <div className={styles.modalStatic}>
-                                                {totalReserva != null ? moneyPE(totalReserva) : "S/ --"}
-                                            </div>
-                                        </div>
-                                        {horariosError ? <p className={styles.modalTiny}>{horariosError}</p> : null}
-                                    </div>
-
-                                    <div className={styles.agendaPanel}>
-                                        <h4 className={styles.agendaTitle}>Agenda del complejo</h4>
-                                        {horariosLoading ? (
-                                            <div className="d-flex align-items-center gap-2">
-                                                <span className="spinner-border spinner-border-sm" aria-hidden="true"></span>
-                                                Cargando agenda…
-                                            </div>
-                                        ) : (
-                                            <div className={styles.agendaList}>
-                                                {horariosSlots.map((slot) => {
-                                                    const isSelected = selectedSlots.includes(slot.hora);
-                                                    return (
-                                                        <button
-                                                            key={slot.hora}
-                                                            type="button"
-                                                            className={`${styles.agendaSlot} ${
-                                                                slot.ocupado
-                                                                    ? styles.agendaSlotBusy
-                                                                    : isSelected
-                                                                    ? styles.agendaSlotActive
-                                                                    : ""
-                                                            }`}
-                                                            onClick={() => {
-                                                                if (slot.ocupado) return;
-                                                                const nextSelection = buildSelection(slot.hora, reservaDuracion, horariosSlots);
-                                                                if (!nextSelection) {
-                                                                    setReservaError("Ese rango no esta disponible.");
-                                                                    return;
-                                                                }
-                                                                setReservaError(null);
-                                                                setSelectedSlots(nextSelection);
-                                                            }}
-                                                            disabled={slot.ocupado}
-                                                        >
-                                                            <span>{slot.hora}</span>
-                                                            <span className={styles.agendaState}>{slot.ocupado ? "Ocupado" : "Disponible"}</span>
-                                                        </button>
-                                                    );
-                                                })}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className={`d-flex justify-content-end gap-2 flex-wrap ${styles.modalBtns}`}>
-                                    <button className={`btn btn-outline-secondary rounded-pill px-3 ${styles.btnCancel}`} type="button" onClick={cerrarModales}>
-                                        Cancelar
-                                    </button>
-                                    <button className={`btn rounded-pill px-3 ${styles.ctaGreen}`} type="button" onClick={confirmarReservaWhatsApp}>
-                                        <MessageCircle size={16} className="me-2" aria-hidden="true" />
-                                        Enviar WhatsApp
-                                    </button>
-                                </div>
-
-                                <p className={styles.modalTiny}>Tip: puedes editar el texto antes de enviarlo en WhatsApp.</p>
-                            </div>
-                        )}
+                        ))}
                     </div>
                 </div>
             )}
-        </section>
+        </div>
+    </div>
+)}
+<ReservaWhatsappModal
+    open={reservaOpen}
+    onClose={() => setReservaOpen(false)}
+    complejo={
+        activo
+            ? {
+                  nombre: activo.nombre,
+                  distrito: activo.distrito ?? null,
+                  provincia: activo.provincia ?? null,
+                  departamento: activo.departamento ?? null,
+                  verificado: activo.verificado,
+                  propietarioPhone: activo.propietarioPhone ?? null,
+                  precioMin: activo.precioMin ?? null,
+                  precioMax: activo.precioMax ?? null,
+                  canchas: activo.canchas.map((c) => ({
+                      id: c.id,
+                      nombre: c.nombre,
+                      tipo: c.tipo ?? null,
+                      pasto: c.pasto ?? null,
+                      precioHora: c.precioHora ?? null,
+                  })),
+              }
+            : null
+    }
+/>
+</section>
     );
 }
+
+
+
+
+

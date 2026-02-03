@@ -349,6 +349,8 @@
   width: min(960px, 100%);
   max-height: min(85vh, 860px);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .modalHeader {
@@ -399,6 +401,12 @@
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 12px;
   margin-top: 16px;
+}
+
+.modalScroll {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .reservaLayout {

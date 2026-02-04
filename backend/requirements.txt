@@ -29,3 +29,6 @@ boto3==1.35.99
 # Exportar Excel / PDF
 openpyxl==3.1.5
 reportlab==4.4.7
+
+# Culqi pagos
+culqi==1.0.3

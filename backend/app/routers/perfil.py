@@ -79,7 +79,7 @@ def mi_plan(db: Session = Depends(get_db), u: User = Depends(get_usuario_actual)
     fila = (
         db.query(Suscripcion, Plan)
         .join(Plan, Plan.id == Suscripcion.plan_id)
-        .filter(Suscripcion.user_id == u.id)
+        .filter(Suscripcion.user_id == u.id, Suscripcion.estado == "activa")
         .order_by(Suscripcion.inicio.desc())
         .first()
     )

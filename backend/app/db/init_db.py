@@ -12,6 +12,15 @@ logger = logging.getLogger(__name__)
 def _ensure_plan(db_session, codigo: str, defaults: dict) -> Plan:
     plan = db_session.query(Plan).filter(Plan.codigo == codigo).first()
     if plan:
+        updated = False
+        for key, value in defaults.items():
+            if getattr(plan, key, None) != value:
+                setattr(plan, key, value)
+                updated = True
+        if updated:
+            db_session.add(plan)
+            db_session.commit()
+            db_session.refresh(plan)
         return plan
     plan = Plan(codigo=codigo, **defaults)
     db_session.add(plan)

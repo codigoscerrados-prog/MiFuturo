@@ -22,6 +22,9 @@ services:
       - key: GOOGLE_CLIENT_SECRET
       - key: GOOGLE_REDIRECT_URI
         value: https://miffuturo.onrender.com/api/auth/callback/google
+      - key: CULQI_PUBLIC_KEY
+      - key: CULQI_SECRET_KEY
+      - key: CULQI_PLAN_ID
   - name: miffuturo
     type: web
     env: node
@@ -38,6 +41,7 @@ services:
           property: hostport
       - key: API_ORIGIN
         value: https://miffuturo-backend.onrender.com
+      - key: NEXT_PUBLIC_CULQI_PUBLIC_KEY
       - key: NEXTAUTH_URL
         value: https://miffuturo.onrender.com
       - key: GOOGLE_CLIENT_ID

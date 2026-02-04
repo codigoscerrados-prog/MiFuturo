@@ -6,7 +6,7 @@ import io
 
 from pydantic import BaseModel
 from typing import Optional
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 
 from fastapi.responses import StreamingResponse
 from openpyxl import Workbook
@@ -48,10 +48,15 @@ def _slug_base(nombre: str) -> str:
     return base or "complejo"
 
 def _plan_actual(db: Session, user_id: int) -> Plan | None:
+    now = datetime.now(timezone.utc)
     fila = (
         db.query(Suscripcion, Plan)
         .join(Plan, Plan.id == Suscripcion.plan_id)
-        .filter(Suscripcion.user_id == user_id)
+        .filter(
+            Suscripcion.user_id == user_id,
+            Suscripcion.estado == "activa",
+            or_(Suscripcion.fin.is_(None), Suscripcion.fin > now),
+        )
         .order_by(Suscripcion.inicio.desc())
         .first()
     )

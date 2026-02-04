@@ -35,6 +35,11 @@ class Settings(BaseSettings):
     FRONTEND_ORIGIN: str = "http://localhost:3000"
     UBIGEO_SOURCE_URL: str = "https://raw.githubusercontent.com/pe-datos/ubigeo/master/ubigeo.csv"
 
+    # ---- Culqi ----
+    CULQI_PUBLIC_KEY: str = ""
+    CULQI_SECRET_KEY: str = ""
+    CULQI_PLAN_ID: str = ""
+
     # ✅ No crashea si aparecen variables extra en .env (por ejemplo NEXT_PUBLIC_*)
     model_config = SettingsConfigDict(
         env_file=(".env", ".env.local"),

@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import Script from "next/script";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import styles from "./SeccionPlanesPropietario.module.css";
@@ -22,6 +23,8 @@ type Cell = boolean | string;
 
 const SOPORTE_WA = "51922023667";
 const SOPORTE_WA_TEXT = "Hola CanchasPro, quiero el plan empresarial";
+const PRO_PRICE_TEXT = "S/ 69.90 / mes";
+const PRO_AMOUNT_CENTS = 6990;
 
 function waUrl() {
     return `https://wa.me/${SOPORTE_WA}?text=${encodeURIComponent(SOPORTE_WA_TEXT)}`;
@@ -56,6 +59,9 @@ export default function SeccionPlanesPropietario() {
     const [activando, setActivando] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [ok, setOk] = useState<string | null>(null);
+    const [pagando, setPagando] = useState(false);
+    const [culqiReady, setCulqiReady] = useState(false);
+    const culqiRef = useRef<any>(null);
 
     useEffect(() => setToken(getToken()), []);
 
@@ -83,6 +89,87 @@ export default function SeccionPlanesPropietario() {
         return plan?.plan_id === 2 || codigo.includes("pro");
     }, [plan]);
 
+    const handleCulqiAction = useCallback(async () => {
+        const culqi = culqiRef.current;
+        if (!culqi) return;
+
+        if (culqi.error) {
+            const msg = culqi.error.user_message || culqi.error.message || "No se pudo procesar el pago.";
+            setError(msg);
+            return;
+        }
+
+        if (culqi.token?.id) {
+            try {
+                setError(null);
+                setOk(null);
+                setPagando(true);
+                if (typeof culqi.close === "function") {
+                    culqi.close();
+                }
+
+                const t = token || getToken();
+                if (!t) {
+                    router.push("/iniciar-sesion");
+                    return;
+                }
+
+                await apiFetch("/payments/culqi/subscribe", {
+                    token: t,
+                    method: "POST",
+                    body: JSON.stringify({ token_id: culqi.token.id }),
+                });
+
+                setOk("SuscripciÃ³n PRO activada. âœ…");
+                router.push("/panel");
+            } catch (e: any) {
+                setError(e?.message || "No se pudo activar la suscripciÃ³n.");
+            } finally {
+                setPagando(false);
+            }
+        }
+    }, [router, token]);
+
+    useEffect(() => {
+        if (!culqiReady || typeof window === "undefined") return;
+
+        const pk = process.env.NEXT_PUBLIC_CULQI_PUBLIC_KEY || "";
+        if (!pk) {
+            setError("Falta configurar la llave pÃºblica de Culqi.");
+            return;
+        }
+
+        const CulqiCheckout = (window as any).CulqiCheckout;
+        if (!CulqiCheckout) {
+            setError("No se pudo cargar Culqi Checkout.");
+            return;
+        }
+
+        const config = {
+            settings: {
+                title: "Canchas PRO",
+                currency: "PEN",
+                amount: PRO_AMOUNT_CENTS,
+            },
+            options: {
+                lang: "es",
+                installments: false,
+                paymentMethods: {
+                    tarjeta: true,
+                    yape: false,
+                    bancaMovil: false,
+                    agente: false,
+                    billetera: false,
+                    cuotealo: false,
+                },
+            },
+        };
+
+        const instance = new CulqiCheckout(pk, config);
+        instance.culqi = handleCulqiAction;
+        culqiRef.current = instance;
+    }, [culqiReady, handleCulqiAction]);
+
     async function activarProTrial() {
         if (!token) return router.push("/iniciar-sesion");
         try {
@@ -99,8 +186,21 @@ export default function SeccionPlanesPropietario() {
         }
     }
 
+    function abrirCheckout() {
+        const t = token || getToken();
+        if (!t) return router.push("/iniciar-sesion");
+        if (!culqiRef.current) {
+            setError("Culqi no estÃ¡ listo aÃºn. Intenta otra vez.");
+            return;
+        }
+        setError(null);
+        setOk(null);
+        culqiRef.current.open();
+    }
+
     return (
         <section className={styles.seccion}>
+            <Script src="https://js.culqi.com/checkout-js" strategy="afterInteractive" onLoad={() => setCulqiReady(true)} />
             <div className="container-fluid px-3 px-lg-5">
                 <div className={styles.head}>
                     <p className={styles.kicker}>Planes para propietarios</p>
@@ -147,9 +247,16 @@ export default function SeccionPlanesPropietario() {
                                                     <i className={`bi bi-stars ${styles.planIcon}`} aria-hidden="true"></i>Pro
                                                 </span>
                                                 <span className={styles.planPrice}>S/ 0.00 <span className={styles.smallMuted}>• 30 días gratis</span></span>
-                                                <span className={styles.smallMuted}>Luego S/ 69.90 / mes</span>
+                                                <span className={styles.smallMuted}>Luego {PRO_PRICE_TEXT}</span>
                                                 <button className={`btn btn-primary btn-sm ${styles.ctaInline}`} onClick={activarProTrial} disabled={activando || isPro}>
                                                     {isPro ? "Ya activo" : activando ? "Activando…" : "30 días gratis"}
+                                                </button>
+                                                <button
+                                                    className={`btn btn-dark btn-sm ${styles.ctaInline}`}
+                                                    onClick={abrirCheckout}
+                                                    disabled={pagando || isPro}
+                                                >
+                                                    {isPro ? "Ya activo" : pagando ? "Procesando…" : `Suscribirme (${PRO_PRICE_TEXT})`}
                                                 </button>
                                             </div>
                                         </th>

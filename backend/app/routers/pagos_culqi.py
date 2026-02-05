@@ -3,11 +3,13 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, EmailStr, Field
-from sqlalchemy.orm import Session
+from sqlalchemy import or_
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.config import settings
+from app.core.crypto import decrypt_secret
 from app.core.deps import get_db, get_usuario_actual
-from app.modelos.modelos import Plan, Suscripcion, User
+from app.modelos.modelos import Cancha, Complejo, PaymentIntegration, Plan, Reserva, Suscripcion, User
 
 try:
     from culqi2.client import Culqi
@@ -32,6 +34,20 @@ class CulqiSubscribeOut(BaseModel):
     plan_id: int
 
 
+class CulqiChargeIn(BaseModel):
+    token_id: str = Field(..., min_length=10)
+    cancha_id: int
+    start_at: datetime
+    end_at: datetime
+    email: EmailStr
+
+
+class CulqiChargeOut(BaseModel):
+    charge_id: str
+    reserva_id: int
+    total_amount: float
+
+
 def _require_culqi() -> None:
     if Culqi is None:
         raise HTTPException(status_code=500, detail="Falta instalar la dependencia culqi en el backend")
@@ -42,6 +58,13 @@ def _culqi_client() -> "Culqi":
     if not settings.CULQI_PUBLIC_KEY or not settings.CULQI_SECRET_KEY:
         raise HTTPException(status_code=500, detail="Faltan llaves de Culqi en el backend")
     return Culqi(settings.CULQI_PUBLIC_KEY, settings.CULQI_SECRET_KEY)
+
+
+def _culqi_client_custom(public_key: str, secret_key: str) -> "Culqi":
+    _require_culqi()
+    if not public_key or not secret_key:
+        raise HTTPException(status_code=500, detail="Faltan llaves de Culqi del propietario")
+    return Culqi(public_key, secret_key)
 
 
 def _culqi_call(fn, *, data: dict):
@@ -82,6 +105,26 @@ def _has_active_pro(db: Session, user_id: int, pro_id: int) -> bool:
     if actual.plan_id != pro_id:
         return False
     return actual.fin is None or actual.fin > now
+
+
+def _require_owner_pro(db: Session, owner_id: int) -> None:
+    now = datetime.now(timezone.utc)
+    fila = (
+        db.query(Suscripcion, Plan)
+        .join(Plan, Plan.id == Suscripcion.plan_id)
+        .filter(
+            Suscripcion.user_id == owner_id,
+            Suscripcion.estado == "activa",
+            or_(Suscripcion.fin.is_(None), Suscripcion.fin > now),
+        )
+        .order_by(Suscripcion.inicio.desc())
+        .first()
+    )
+    if not fila:
+        raise HTTPException(status_code=403, detail="El propietario no tiene PRO activo")
+    _, plan = fila
+    if "pro" not in (plan.codigo or "").lower():
+        raise HTTPException(status_code=403, detail="El propietario no tiene PRO activo")
 
 
 @router.post("/subscribe", response_model=CulqiSubscribeOut)
@@ -163,3 +206,103 @@ def subscribe(
         proveedor_ref=s.proveedor_ref or "",
         plan_id=s.plan_id,
     )
+
+
+@router.post("/charge", response_model=CulqiChargeOut)
+def charge(payload: CulqiChargeIn, db: Session = Depends(get_db)):
+    cancha = (
+        db.query(Cancha)
+        .options(joinedload(Cancha.complejo))
+        .filter(Cancha.id == payload.cancha_id)
+        .first()
+    )
+    if not cancha:
+        raise HTTPException(status_code=404, detail="Cancha no encontrada")
+
+    owner_id = cancha.owner_id or (cancha.complejo.owner_id if cancha.complejo else None)
+    if not owner_id:
+        raise HTTPException(status_code=400, detail="Cancha sin propietario")
+
+    _require_owner_pro(db, owner_id)
+
+    integ = db.query(PaymentIntegration).filter(PaymentIntegration.user_id == owner_id).first()
+    if not integ or not integ.enabled:
+        raise HTTPException(status_code=403, detail="Culqi no activo para este propietario")
+
+    try:
+        sk = decrypt_secret(integ.culqi_sk_enc)
+    except Exception:
+        raise HTTPException(status_code=500, detail="No se pudo descifrar culqi_sk")
+
+    if not integ.culqi_pk:
+        raise HTTPException(status_code=400, detail="Falta culqi_pk del propietario")
+
+    # validar solape
+    solape = (
+        db.query(Reserva)
+        .filter(
+            Reserva.cancha_id == payload.cancha_id,
+            Reserva.payment_status != "cancelada",
+            Reserva.start_at < payload.end_at,
+            Reserva.end_at > payload.start_at,
+        )
+        .first()
+    )
+    if solape:
+        raise HTTPException(status_code=409, detail="Ya existe una reserva en ese horario.")
+
+    duration_hours = (payload.end_at - payload.start_at).total_seconds() / 3600
+    if duration_hours <= 0:
+        raise HTTPException(status_code=400, detail="Horario inválido")
+
+    precio_hora = float(cancha.precio_hora or 0)
+    if precio_hora <= 0:
+        raise HTTPException(status_code=400, detail="Precio inválido")
+
+    total_amount = round(precio_hora * duration_hours, 2)
+    amount_cents = int(round(total_amount * 100))
+    if amount_cents <= 0:
+        raise HTTPException(status_code=400, detail="Monto inválido")
+
+    culqi = _culqi_client_custom(integ.culqi_pk, sk)
+
+    charge = _culqi_call(
+        culqi.charge.create,
+        data={
+            "amount": amount_cents,
+            "currency_code": "PEN",
+            "email": payload.email,
+            "source_id": payload.token_id,
+            "description": f"Reserva cancha #{cancha.id}",
+            "metadata": {
+                "cancha_id": cancha.id,
+                "complejo_id": cancha.complejo_id,
+                "owner_id": owner_id,
+                "start_at": payload.start_at.isoformat(),
+                "end_at": payload.end_at.isoformat(),
+            },
+        },
+    )
+
+    charge_id = charge.get("id")
+    if not charge_id:
+        raise HTTPException(status_code=502, detail="Culqi no devolvió charge_id")
+
+    r = Reserva(
+        cancha_id=payload.cancha_id,
+        cliente_id=None,
+        start_at=payload.start_at,
+        end_at=payload.end_at,
+        total_amount=total_amount,
+        paid_amount=total_amount,
+        payment_method="culqi",
+        payment_status="pagada",
+        payment_ref=charge_id,
+        notas="Reserva pagada en línea",
+        created_by=None,
+    )
+    db.add(r)
+    db.commit()
+    db.refresh(r)
+
+    return CulqiChargeOut(charge_id=charge_id, reserva_id=r.id, total_amount=float(total_amount))

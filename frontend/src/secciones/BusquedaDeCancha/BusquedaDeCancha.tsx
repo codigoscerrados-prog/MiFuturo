@@ -49,6 +49,8 @@ type CanchaApi = {
 
     // ✅ recomendado desde backend (/canchas)
     complejo_foto_url?: string | null;
+    culqi_enabled?: boolean | null;
+    culqi_pk?: string | null;
 };
 
 type ComplejoApi = {
@@ -68,6 +70,8 @@ type ComplejoApi = {
     foto_url?: string | null;
     is_active: boolean;
     owner_phone?: string | null;
+    culqi_enabled?: boolean | null;
+    culqi_pk?: string | null;
     canchas: CanchaApi[];
 };
 
@@ -109,6 +113,8 @@ type CanchaCard = {
     complejoFotoUrl: string | null;
     isActive: boolean;
     horariosDisponibles?: string[];
+    culqiEnabled?: boolean;
+    culqiPk?: string | null;
 };
 
 type ComplejoCard = {
@@ -138,6 +144,8 @@ type ComplejoCard = {
 
     propietarioPhone: string | null;
     canchas: CanchaCard[];
+    culqiEnabled?: boolean;
+    culqiPk?: string | null;
 };
 
 const FALLBACK_IMG = "/canchas/sintetico-marconi.avif";
@@ -219,6 +227,8 @@ function mapComplejosFromApi(complejos: ComplejoApi[], fallbackImg: string): Com
                     complejoNombre: cx.nombre,
                     complejoFotoUrl: complejoFoto,
                     isActive: !!c.is_active,
+                    culqiEnabled: Boolean(c.culqi_enabled ?? cx.culqi_enabled),
+                    culqiPk: c.culqi_pk ?? cx.culqi_pk ?? null,
                 };
             });
 
@@ -251,6 +261,8 @@ function mapComplejosFromApi(complejos: ComplejoApi[], fallbackImg: string): Com
                 verificado,
                 propietarioPhone: cx.owner_phone ?? null,
                 canchas,
+                culqiEnabled: Boolean(cx.culqi_enabled),
+                culqiPk: cx.culqi_pk ?? null,
             };
         })
         .sort((a, b) => {
@@ -836,6 +848,8 @@ export default function BusquedaDeCancha({
                               propietarioPhone: reservaComplejo.propietarioPhone,
                               precioMin: reservaComplejo.precioMin,
                               precioMax: reservaComplejo.precioMax,
+                              culqiEnabled: reservaComplejo.culqiEnabled,
+                              culqiPk: reservaComplejo.culqiPk ?? null,
                               canchas: reservaComplejo.canchas.map((c) => ({
                                   id: c.id,
                                   nombre: c.nombre,

@@ -32,3 +32,6 @@ reportlab==4.4.7
 
 # Culqi pagos
 culqi==1.0.0
+
+# Cifrado (Culqi keys)
+cryptography==42.0.8

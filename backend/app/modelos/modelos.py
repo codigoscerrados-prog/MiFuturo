@@ -48,6 +48,34 @@ class User(Base):
     canchas = relationship("Cancha", back_populates="owner", foreign_keys="Cancha.owner_id")
 
     suscripciones = relationship("Suscripcion", back_populates="user", cascade="all, delete-orphan", passive_deletes=True)
+    payment_integration = relationship(
+        "PaymentIntegration",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+
+
+# =========================
+# Payment Integrations
+# =========================
+class PaymentIntegration(Base):
+    __tablename__ = "payment_integrations"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+
+    user_id = Column(BigInteger, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True)
+    provider = Column(String(20), nullable=False, default="culqi")
+    enabled = Column(Boolean, nullable=False, default=False)
+
+    culqi_pk = Column(Text, nullable=False)
+    culqi_sk_enc = Column(Text, nullable=False)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    user = relationship("User", back_populates="payment_integration")
 
 
 # =========================
@@ -328,6 +356,7 @@ class Reserva(Base):
 
     payment_method = Column(String(30))
     payment_status = Column(String(20), nullable=False, default="pendiente")  # pendiente|parcial|pagada|cancelada
+    payment_ref = Column(String(120))
 
     notas = Column(Text)
 

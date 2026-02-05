@@ -1,6 +1,7 @@
 import logging
 
 from app.db.conexion import SessionLocal, engine
+from sqlalchemy import text
 from app.modelos.base import Base
 import app.modelos.modelos  # noqa: F401
 from app.modelos.modelos import Plan
@@ -31,6 +32,11 @@ def _ensure_plan(db_session, codigo: str, defaults: dict) -> Plan:
 
 def init_db() -> None:
     Base.metadata.create_all(bind=engine)
+    try:
+        with engine.begin() as conn:
+            conn.execute(text("ALTER TABLE public.reservas ADD COLUMN IF NOT EXISTS payment_ref VARCHAR(120)"))
+    except Exception as exc:
+        logger.warning("Add payment_ref failed: %s", exc)
     try:
         bootstrap_ubigeo()
     except Exception as exc:

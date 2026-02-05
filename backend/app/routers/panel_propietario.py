@@ -26,6 +26,7 @@ from app.esquemas.esquemas import (
     ReservaCrear,
     ReservaOut,
     ReservaPago,
+    PagosPageOut,
 )
 
 router = APIRouter(prefix="/panel", tags=["panel"])
@@ -151,6 +152,7 @@ def reserva_dict(r: Reserva):
         "paid_amount": float(r.paid_amount or 0),
         "payment_method": r.payment_method,
         "payment_status": r.payment_status,
+        "payment_ref": r.payment_ref,
         "notas": r.notas,
         "created_by": int(r.created_by) if r.created_by is not None else None,
     }
@@ -490,6 +492,40 @@ def listar_reservas(
     return [reserva_dict(r) for r in rows]
 
 
+@router.get(
+    "/pagos",
+    response_model=PagosPageOut,
+    dependencies=[Depends(require_role("propietario", "admin"))],
+)
+def listar_pagos_culqi(
+    db: Session = Depends(get_db),
+    u=Depends(get_usuario_actual),
+    fecha: date | None = Query(default=None),
+    fecha_inicio: date | None = Query(default=None),
+    fecha_fin: date | None = Query(default=None),
+    search: str | None = Query(default=None),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
+):
+    q = db.query(Reserva).filter(Reserva.payment_method == "culqi")
+    q = owner_filter_reservas(q, u)
+    q = _apply_reserva_fecha(q, fecha, fecha_inicio, fecha_fin)
+    q = _apply_reserva_search(q, search)
+    total = q.count()
+    rows = (
+        q.order_by(Reserva.start_at.desc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+        .all()
+    )
+    return {
+        "items": [reserva_dict(r) for r in rows],
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+    }
+
+
 @router.post(
     "/reservas",
     response_model=ReservaOut,
@@ -732,6 +768,126 @@ def export_reservas_pdf(
     buffer.seek(0)
 
     filename = "reservas.pdf" if fecha is None else f"reservas_{fecha.isoformat()}.pdf"
+    return StreamingResponse(
+        buffer,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+# -------- EXPORT PAGOS (Culqi) --------
+@router.get(
+    "/pagos/export.xlsx",
+    dependencies=[Depends(require_role("propietario", "admin"))],
+)
+def export_pagos_excel(
+    db: Session = Depends(get_db),
+    u=Depends(get_usuario_actual),
+    fecha: date | None = Query(default=None),
+    fecha_inicio: date | None = Query(default=None),
+    fecha_fin: date | None = Query(default=None),
+    search: str | None = Query(default=None),
+):
+    q = db.query(Reserva).filter(Reserva.payment_method == "culqi")
+    q = owner_filter_reservas(q, u)
+    q = _apply_reserva_fecha(q, fecha, fecha_inicio, fecha_fin)
+    q = _apply_reserva_search(q, search)
+    rows = q.order_by(Reserva.start_at.desc()).all()
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Pagos Culqi"
+
+    headers = ["Cancha", "Fecha inicio", "Fecha fin", "Monto", "Pago", "Referencia", "Estado"]
+    ws.append(headers)
+
+    for r in rows:
+        ws.append([
+            r.cancha_nombre or f"#{r.cancha_id}",
+            r.start_at.strftime("%Y-%m-%d %H:%M"),
+            r.end_at.strftime("%Y-%m-%d %H:%M"),
+            float(r.total_amount or 0),
+            r.payment_method or "",
+            r.payment_ref or "",
+            r.payment_status or "",
+        ])
+
+    for col in ws.columns:
+        max_len = 0
+        col_letter = col[0].column_letter
+        for cell in col:
+            v = "" if cell.value is None else str(cell.value)
+            max_len = max(max_len, len(v))
+        ws.column_dimensions[col_letter].width = min(42, max(12, max_len + 2))
+
+    out = io.BytesIO()
+    wb.save(out)
+    out.seek(0)
+
+    filename = "pagos_culqi.xlsx" if fecha is None else f"pagos_culqi_{fecha.isoformat()}.xlsx"
+    return StreamingResponse(
+        out,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.get(
+    "/pagos/export.pdf",
+    dependencies=[Depends(require_role("propietario", "admin"))],
+)
+def export_pagos_pdf(
+    db: Session = Depends(get_db),
+    u=Depends(get_usuario_actual),
+    fecha: date | None = Query(default=None),
+    fecha_inicio: date | None = Query(default=None),
+    fecha_fin: date | None = Query(default=None),
+    search: str | None = Query(default=None),
+):
+    q = db.query(Reserva).filter(Reserva.payment_method == "culqi")
+    q = owner_filter_reservas(q, u)
+    q = _apply_reserva_fecha(q, fecha, fecha_inicio, fecha_fin)
+    q = _apply_reserva_search(q, search)
+    rows = q.order_by(Reserva.start_at.desc()).all()
+
+    buffer = io.BytesIO()
+    c = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
+
+    title = "Reporte de Pagos Culqi" if fecha is None else f"Reporte de Pagos Culqi - {fecha.isoformat()}"
+    c.setFont("Helvetica-Bold", 14)
+    c.drawString(40, height - 40, title)
+
+    c.setFont("Helvetica", 9)
+    y = height - 70
+
+    headers = ["Cancha", "Inicio", "Fin", "Monto", "Pago", "Ref", "Estado"]
+    c.drawString(40, y, " | ".join(headers))
+    y -= 14
+    c.line(40, y, width - 40, y)
+    y -= 14
+
+    for r in rows:
+        line = " | ".join([
+            (r.cancha_nombre or f"#{r.cancha_id}")[:18],
+            r.start_at.strftime("%m-%d %H:%M"),
+            r.end_at.strftime("%m-%d %H:%M"),
+            f"S/{float(r.total_amount or 0):.0f}",
+            (r.payment_method or "")[:8],
+            (r.payment_ref or "")[:10],
+            (r.payment_status or "")[:10],
+        ])
+        c.drawString(40, y, line)
+        y -= 12
+        if y < 60:
+            c.showPage()
+            c.setFont("Helvetica", 9)
+            y = height - 50
+
+    c.save()
+    buffer.seek(0)
+
+    filename = "pagos_culqi.pdf" if fecha is None else f"pagos_culqi_{fecha.isoformat()}.pdf"
     return StreamingResponse(
         buffer,
         media_type="application/pdf",

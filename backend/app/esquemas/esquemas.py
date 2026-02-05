@@ -133,6 +133,9 @@ class CanchaOut(BaseModel):
     imagen_principal: Optional[str] = None
     imagenes: list[CanchaImagenOut] = Field(default_factory=list)
 
+    culqi_enabled: Optional[bool] = None
+    culqi_pk: Optional[str] = None
+
 
 
 class CanchaAdminOut(BaseModel):
@@ -270,6 +273,8 @@ class ComplejoPublicOut(BaseModel):
     foto_url: Optional[str] = None
     is_active: bool
     owner_phone: Optional[str] = None
+    culqi_enabled: Optional[bool] = None
+    culqi_pk: Optional[str] = None
 
     canchas: list[CanchaOut] = Field(default_factory=list)
 
@@ -307,6 +312,8 @@ class ComplejoPerfilOut(BaseModel):
     is_active: bool
     owner_id: Optional[int] = None
     owner_phone: Optional[str] = None
+    culqi_enabled: Optional[bool] = None
+    culqi_pk: Optional[str] = None
 
     imagenes: list[ComplejoImagenOut] = Field(default_factory=list)
     canchas: list[CanchaOut] = Field(default_factory=list)
@@ -355,6 +362,7 @@ class ReservaOut(BaseModel):
     paid_amount: float
     payment_method: Optional[str] = None
     payment_status: PaymentStatus
+    payment_ref: Optional[str] = None
 
     notas: Optional[str] = None
     cliente_id: Optional[int] = None
@@ -363,6 +371,13 @@ class ReservaOut(BaseModel):
     estado: Optional[PaymentStatus] = None
     fecha_inicio: Optional[datetime] = None
     fecha_fin: Optional[datetime] = None
+
+
+class PagosPageOut(BaseModel):
+    items: list[ReservaOut] = Field(default_factory=list)
+    total: int
+    page: int
+    page_size: int
 
 class PlanActualOut(BaseModel):
     plan_id: int

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import Script from "next/script";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styles from "@/secciones/BusquedaDeCancha/BusquedaDeCancha.module.css";
 import { apiFetch } from "@/lib/api";
 
@@ -22,6 +23,8 @@ type ComplejoLite = {
     precioMin?: number | null;
     precioMax?: number | null;
     canchas: CanchaLite[];
+    culqiEnabled?: boolean;
+    culqiPk?: string | null;
 };
 
 type HorarioSlot = {
@@ -100,6 +103,10 @@ function buildHoraRango(start: string, duracionHoras: number, slots: HorarioSlot
     const endIndex = startIndex + duracionHoras;
     const end = slots[endIndex]?.hora;
     return end ? `${start} - ${end}` : `${start} + ${duracionHoras}h`;
+}
+
+function buildDateTimeISO(fechaISO: string, hora: string) {
+    return new Date(`${fechaISO}T${hora}:00`).toISOString();
 }
 
 function moneyPE(n: number) {
@@ -216,12 +223,23 @@ export default function ReservaWhatsappModal({
     const [reservaFecha, setReservaFecha] = useState("");
     const [reservaDuracion, setReservaDuracion] = useState(1);
     const [reservaError, setReservaError] = useState<string | null>(null);
+    const [reservaOk, setReservaOk] = useState<string | null>(null);
     const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
     const [horariosSlots, setHorariosSlots] = useState<HorarioSlot[]>(() =>
         DEFAULT_HORARIOS.map((hora) => ({ hora, ocupado: false }))
     );
     const [horariosLoading, setHorariosLoading] = useState(false);
     const [horariosError, setHorariosError] = useState("");
+    const [email, setEmail] = useState("");
+    const [pagando, setPagando] = useState(false);
+    const [culqiReady, setCulqiReady] = useState(false);
+    const culqiRef = useRef<any>(null);
+    const paymentRef = useRef<{
+        cancha_id: number;
+        start_at: string;
+        end_at: string;
+        email: string;
+    } | null>(null);
 
     const canchaSeleccionada = useMemo(() => {
         if (!complejo || !complejo.verificado) return null;
@@ -241,6 +259,8 @@ export default function ReservaWhatsappModal({
     useEffect(() => {
         if (!open || !complejo) return;
         setReservaError(null);
+        setReservaOk(null);
+        setEmail("");
         setReservaDuracion(1);
         setReservaCanchaId(complejo.verificado ? (complejo.canchas[0]?.id ?? null) : null);
         const today = new Date();
@@ -328,6 +348,47 @@ export default function ReservaWhatsappModal({
         return buildHoraRango(start, reservaDuracion, horariosSlots);
     }
 
+    const handleCulqiAction = useCallback(async () => {
+        const culqi = culqiRef.current;
+        if (!culqi) return;
+
+        if (culqi.error) {
+            const msg = culqi.error.user_message || culqi.error.message || "No se pudo procesar el pago.";
+            setReservaError(msg);
+            setPagando(false);
+            return;
+        }
+
+        if (culqi.token?.id && paymentRef.current) {
+            try {
+                setReservaError(null);
+                setReservaOk(null);
+                setPagando(true);
+
+                await apiFetch("/payments/culqi/charge", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        token_id: culqi.token.id,
+                        cancha_id: paymentRef.current.cancha_id,
+                        start_at: paymentRef.current.start_at,
+                        end_at: paymentRef.current.end_at,
+                        email: paymentRef.current.email,
+                    }),
+                });
+
+                setReservaOk("Pago realizado. Tu reserva fue registrada.");
+                if (typeof culqi.close === "function") {
+                    culqi.close();
+                }
+                onClose();
+            } catch (e: any) {
+                setReservaError(e?.message || "No se pudo procesar el pago.");
+            } finally {
+                setPagando(false);
+            }
+        }
+    }, [onClose]);
+
     function confirmarReservaWhatsApp() {
         if (!complejo) return;
         const esEstandar = !complejo.verificado;
@@ -366,6 +427,83 @@ export default function ReservaWhatsappModal({
         onClose();
     }
 
+    function abrirPagoCulqi() {
+        if (!complejo) return;
+        if (!complejo.culqiEnabled || !complejo.culqiPk) {
+            setReservaError("Este complejo no tiene Culqi activo.");
+            return;
+        }
+        if (!culqiReady || typeof window === "undefined") {
+            setReservaError("Culqi no está listo aún. Intenta otra vez.");
+            return;
+        }
+
+        const cancha = canchaSeleccionada;
+        if (!cancha || typeof cancha.precioHora !== "number") {
+            setReservaError("No se encontró la cancha o el precio.");
+            return;
+        }
+        if (!reservaFecha) {
+            setReservaError("Selecciona una fecha.");
+            return;
+        }
+        const horaSeleccionada = selectedSlots[0];
+        if (!horaSeleccionada) {
+            setReservaError("Selecciona una hora en la agenda.");
+            return;
+        }
+        if (!email.trim()) {
+            setReservaError("Ingresa tu correo para el pago.");
+            return;
+        }
+
+        const horas = selectedSlots.length || reservaDuracion;
+        const total = cancha.precioHora * horas;
+        const amountCents = Math.max(1, Math.round(total * 100));
+
+        const startISO = buildDateTimeISO(reservaFecha, horaSeleccionada);
+        const endDate = new Date(new Date(startISO).getTime() + horas * 60 * 60 * 1000);
+        const endISO = endDate.toISOString();
+
+        paymentRef.current = {
+            cancha_id: cancha.id,
+            start_at: startISO,
+            end_at: endISO,
+            email: email.trim(),
+        };
+
+        const CulqiCheckout = (window as any).CulqiCheckout;
+        if (!CulqiCheckout) {
+            setReservaError("No se pudo cargar Culqi Checkout.");
+            return;
+        }
+
+        const config = {
+            settings: {
+                title: complejo.nombre,
+                currency: "PEN",
+                amount: amountCents,
+            },
+            options: {
+                lang: "es",
+                installments: false,
+                paymentMethods: {
+                    tarjeta: true,
+                    yape: false,
+                    bancaMovil: false,
+                    agente: false,
+                    billetera: false,
+                    cuotealo: false,
+                },
+            },
+        };
+
+        const instance = new CulqiCheckout(complejo.culqiPk, config);
+        instance.culqi = handleCulqiAction;
+        culqiRef.current = instance;
+        instance.open();
+    }
+
     if (!open || !complejo) return null;
 
     return (
@@ -379,13 +517,16 @@ export default function ReservaWhatsappModal({
                 if (e.target === e.currentTarget) onClose();
             }}
         >
+            <Script src="https://js.culqi.com/checkout-js" strategy="afterInteractive" onLoad={() => setCulqiReady(true)} />
             <div className={`card border-0 shadow-lg ${styles.modalCard} ${styles.modalCardLarge}`}>
                 <div className={`d-flex gap-3 justify-content-between align-items-start ${styles.modalHeader}`}>
                     <div>
-                        <p className={styles.modalKicker}>Reservar por WhatsApp</p>
+                        <p className={styles.modalKicker}>Reservar</p>
                         <h3 className={styles.modalTitle}>{complejo.nombre}</h3>
                         <p className={styles.modalSub}>
-                            {complejo.verificado
+                            {complejo.culqiEnabled && complejo.culqiPk
+                                ? "Elige la cancha, fecha y hora. Luego podrás pagar en línea."
+                                : complejo.verificado
                                 ? "Elige la cancha, fecha y hora. Se enviará en el mensaje al propietario."
                                 : "Elige fecha y hora. Se enviará en el mensaje al propietario."}
                         </p>
@@ -400,6 +541,12 @@ export default function ReservaWhatsappModal({
                     <div className={`alert alert-danger d-flex align-items-start gap-2 rounded-4 ${styles.modalError}`}>
                         <i className="bi bi-exclamation-triangle-fill mt-1" aria-hidden="true"></i>
                         <span>{reservaError}</span>
+                    </div>
+                ) : null}
+                {reservaOk ? (
+                    <div className={`alert alert-success d-flex align-items-start gap-2 rounded-4 ${styles.modalError}`}>
+                        <i className="bi bi-check-circle-fill mt-1" aria-hidden="true"></i>
+                        <span>{reservaOk}</span>
                     </div>
                 ) : null}
 
@@ -468,6 +615,22 @@ export default function ReservaWhatsappModal({
                                 </select>
                             </label>
 
+                            {complejo.culqiEnabled && complejo.culqiPk ? (
+                                <label className={styles.modalField}>
+                                    <span className={styles.modalLabel}>
+                                        <i className="bi bi-envelope me-2" aria-hidden="true"></i>
+                                        Correo
+                                    </span>
+                                    <input
+                                        className="form-control form-control-sm rounded-3"
+                                        type="email"
+                                        placeholder="tucorreo@ejemplo.com"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                    />
+                                </label>
+                            ) : null}
+
                             <div className={styles.modalField}>
                                 <span className={styles.modalLabel}>Hora seleccionada</span>
                                 <div className={styles.modalStatic}>
@@ -534,13 +697,29 @@ export default function ReservaWhatsappModal({
                     <button className="btn btn-outline-secondary rounded-pill px-3" type="button" onClick={onClose}>
                         Cancelar
                     </button>
-                    <button className={`btn rounded-pill px-3 ${styles.ctaGreen}`} type="button" onClick={confirmarReservaWhatsApp}>
-                        <i className="bi bi-whatsapp me-2" aria-hidden="true"></i>
-                        Enviar WhatsApp
-                    </button>
+                    {complejo.culqiEnabled && complejo.culqiPk ? (
+                        <button
+                            className={`btn rounded-pill px-3 ${styles.ctaGreen}`}
+                            type="button"
+                            onClick={abrirPagoCulqi}
+                            disabled={pagando}
+                        >
+                            <i className="bi bi-credit-card-2-front me-2" aria-hidden="true"></i>
+                            {pagando ? "Procesando..." : "Pagar con Culqi"}
+                        </button>
+                    ) : (
+                        <button className={`btn rounded-pill px-3 ${styles.ctaGreen}`} type="button" onClick={confirmarReservaWhatsApp}>
+                            <i className="bi bi-whatsapp me-2" aria-hidden="true"></i>
+                            Enviar WhatsApp
+                        </button>
+                    )}
                 </div>
 
-                <p className={styles.modalTiny}>Tip: puedes editar el texto antes de enviarlo en WhatsApp.</p>
+                <p className={styles.modalTiny}>
+                    {complejo.culqiEnabled && complejo.culqiPk
+                        ? "Tu pago se procesará de forma segura con Culqi."
+                        : "Tip: puedes editar el texto antes de enviarlo en WhatsApp."}
+                </p>
             </div>
         </div>
     );

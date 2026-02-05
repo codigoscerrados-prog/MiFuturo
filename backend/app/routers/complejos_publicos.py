@@ -9,7 +9,7 @@ from app.core.deps import get_db, get_usuario_actual, require_role
 from app.core.images import resize_square_image, safe_unlink_upload, save_upload
 from app.core.seguridad import decodificar_token
 from app.core.slug import slugify
-from app.modelos.modelos import Complejo, ComplejoImagen, ComplejoLike, Cancha, Reserva, User
+from app.modelos.modelos import Complejo, ComplejoImagen, ComplejoLike, Cancha, Reserva, User, PaymentIntegration
 from app.esquemas.esquemas import ComplejoPerfilOut, ComplejoActualizar, ComplejoImagenOut
 
 router = APIRouter(prefix="", tags=["public-complejos"])
@@ -108,6 +108,16 @@ def obtener_complejo_publico(
             is not None
         )
 
+    culqi_pk = None
+    if c.owner_id:
+        integ = (
+            db.query(PaymentIntegration)
+            .filter(PaymentIntegration.user_id == c.owner_id, PaymentIntegration.enabled == True)
+            .first()
+        )
+        if integ:
+            culqi_pk = integ.culqi_pk
+
     return {
         "id": c.id,
         "nombre": c.nombre,
@@ -128,6 +138,8 @@ def obtener_complejo_publico(
         "is_active": c.is_active,
         "owner_id": c.owner_id,
         "owner_phone": c.owner_phone,
+        "culqi_enabled": bool(culqi_pk),
+        "culqi_pk": culqi_pk,
         "imagenes": imagenes,
         "canchas": canchas,
         "caracteristicas": caracteristicas_de(c),
@@ -304,6 +316,15 @@ def actualizar_complejo_publico(
     )
     canchas = [cx for cx in (c.canchas or []) if cx.is_active]
     likes_count = db.query(ComplejoLike).filter(ComplejoLike.complejo_id == c.id).count()
+    culqi_pk = None
+    if c.owner_id:
+        integ = (
+            db.query(PaymentIntegration)
+            .filter(PaymentIntegration.user_id == c.owner_id, PaymentIntegration.enabled == True)
+            .first()
+        )
+        if integ:
+            culqi_pk = integ.culqi_pk
 
     return {
         "id": c.id,
@@ -325,6 +346,8 @@ def actualizar_complejo_publico(
         "is_active": c.is_active,
         "owner_id": c.owner_id,
         "owner_phone": c.owner_phone,
+        "culqi_enabled": bool(culqi_pk),
+        "culqi_pk": culqi_pk,
         "imagenes": imagenes,
         "canchas": canchas,
         "caracteristicas": caracteristicas_de(c),

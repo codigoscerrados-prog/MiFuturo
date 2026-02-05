@@ -37,6 +37,8 @@ type Complejo = {
     longitud?: number | null;
     lat?: number | null;
     lng?: number | null;
+    culqiEnabled?: boolean;
+    culqiPk?: string | null;
 };
 
 type CanchaOut = {
@@ -79,6 +81,8 @@ type ComplejoApi = {
     foto_url?: string | null;
     owner_phone?: string | null;
     owner_id?: number | null;
+    culqi_enabled?: boolean | null;
+    culqi_pk?: string | null;
     canchas?: CanchaOut[];
 };
 
@@ -228,6 +232,8 @@ function mapComplejosFromApi(complejos: ComplejoApi[]) {
             propietarioPhone: cx.owner_phone ?? canchasRaw[0]?.propietario_phone ?? null,
             canchas,
             verificado,
+            culqiEnabled: Boolean(cx.culqi_enabled),
+            culqiPk: cx.culqi_pk ?? null,
         };
     });
 
@@ -733,6 +739,8 @@ export default function SeccionLoNuevo() {
                   propietarioPhone: activo.propietarioPhone ?? null,
                   precioMin: activo.precioMin ?? null,
                   precioMax: activo.precioMax ?? null,
+                  culqiEnabled: activo.culqiEnabled,
+                  culqiPk: activo.culqiPk ?? null,
                   canchas: activo.canchas.map((c) => ({
                       id: c.id,
                       nombre: c.nombre,

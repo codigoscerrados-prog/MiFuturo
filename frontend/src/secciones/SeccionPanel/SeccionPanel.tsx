@@ -12,9 +12,11 @@ import BrandLogo from "@/components/BrandLogo";
 
 import PanelReservasPropietario from "./SeccionReservas";
 import PanelCanchasPropietario from "./SeccionCanchas";
+import SeccionPagos from "./SeccionPagos";
 
 import SeccionPerfil from "./SeccionPerfil";
 import SeccionComplejos from "./SeccionComplejos";
+import SeccionUtilitarios from "./SeccionUtilitarios";
 
 export type Role = "usuario" | "propietario" | "admin";
 
@@ -37,6 +39,8 @@ type HistorialRegistro = {
     hora_fin: string;
     estado: string;
     precio: number;
+    metodo?: string | null;
+    referencia?: string | null;
     startAt?: string | null;
     endAt?: string | null;
 };
@@ -95,7 +99,9 @@ const ICON_BY_TAB: Record<string, string> = {
     "mi-complejo": "bi-building",
     "mis-canchas": "bi-grid-1x2",
     reservas: "bi-calendar2-check",
+    pagos: "bi-credit-card-2-front",
     historial: "bi-clock-history",
+    utilitarios: "bi-tools",
     admin: "bi-shield-check",
 };
 
@@ -321,7 +327,9 @@ export default function SeccionPanel({
                 { key: "mi-complejo", label: "Mi Complejo", locked: false },
                 { key: "mis-canchas", label: "Mis Canchas", locked: !isPro },
                 { key: "reservas", label: "Reservas", locked: !isPro },
+                { key: "pagos", label: "Pagos", locked: !isPro },
                 { key: "historial", label: "Historial", locked: !isPro },
+                { key: "utilitarios", label: "Utilitarios", locked: !isPro },
             ];
         }
         if (role === "usuario") {
@@ -392,6 +400,8 @@ export default function SeccionPanel({
                                 "pendiente"
                             ),
                             precio: Number.isFinite(precioRaw) ? precioRaw : 0,
+                            metodo: (item as any).payment_method || (item as any).metodo || null,
+                            referencia: (item as any).payment_ref || (item as any).referencia || null,
                             startAt: start,
                             endAt: end,
                         };
@@ -535,6 +545,11 @@ export default function SeccionPanel({
                                         <PanelReservasPropietario token={token} />
                                     </div>
                                 ) : null}
+                                {role === "propietario" && tab === "pagos" ? (
+                                    <div className={styles.sectionWrap}>
+                                        {token ? <SeccionPagos token={token} /> : null}
+                                    </div>
+                                ) : null}
                                 {role === "propietario" && tab === "historial" ? (
                                     <div className={styles.sectionWrap}>
                                         <section className={`tarjeta ${styles.historialCard}`}>
@@ -622,6 +637,7 @@ export default function SeccionPanel({
                                                                 <th>Hora inicio</th>
                                                                 <th>Hora fin</th>
                                                                 <th>Precio</th>
+                                                                <th>Pago</th>
                                                                 <th>Estado</th>
                                                             </tr>
                                                         </thead>
@@ -643,6 +659,16 @@ export default function SeccionPanel({
                                                                         <td>{row.hora_fin}</td>
                                                                         <td>{formatMoney(row.precio)}</td>
                                                                         <td>
+                                                                            {row.metodo ? (
+                                                                                <span className={styles.historialMetodo}>
+                                                                                    {row.metodo}
+                                                                                    {row.referencia ? ` • ${row.referencia}` : ""}
+                                                                                </span>
+                                                                            ) : (
+                                                                                <span className={styles.historialMetodo}>-</span>
+                                                                            )}
+                                                                        </td>
+                                                                        <td>
                                                                             <span
                                                                                 className={cn(
                                                                                     styles.historialStatus,
@@ -660,6 +686,17 @@ export default function SeccionPanel({
                                                 </div>
                                             )}
                                         </section>
+                                    </div>
+                                ) : null}
+                                {role === "propietario" && tab === "utilitarios" ? (
+                                    <div className={styles.sectionWrap}>
+                                        {token ? (
+                                            <SeccionUtilitarios token={token} />
+                                        ) : (
+                                            <div className={`tarjeta ${styles.tarjeta}`}>
+                                                <p className={styles.muted}>Inicia sesión para ver utilitarios.</p>
+                                            </div>
+                                        )}
                                     </div>
                                 ) : null}
 

@@ -25,6 +25,7 @@ services:
       - key: CULQI_PUBLIC_KEY
       - key: CULQI_SECRET_KEY
       - key: CULQI_PLAN_ID
+      - key: DATA_ENCRYPTION_KEY
   - name: miffuturo
     type: web
     env: node

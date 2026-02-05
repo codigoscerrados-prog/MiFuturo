@@ -40,6 +40,9 @@ class Settings(BaseSettings):
     CULQI_SECRET_KEY: str = ""
     CULQI_PLAN_ID: str = ""
 
+    # ---- Seguridad ----
+    DATA_ENCRYPTION_KEY: str = ""
+
     # ✅ No crashea si aparecen variables extra en .env (por ejemplo NEXT_PUBLIC_*)
     model_config = SettingsConfigDict(
         env_file=(".env", ".env.local"),

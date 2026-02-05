@@ -47,6 +47,8 @@ type ComplejoPerfil = {
     cafeteria: boolean;
     foto_url?: string | null;
     owner_phone?: string | null;
+    culqi_enabled?: boolean | null;
+    culqi_pk?: string | null;
     imagenes: ComplejoImagen[];
     canchas: Cancha[];
     caracteristicas: string[];
@@ -600,6 +602,8 @@ export default function ComplejoPublicoPage() {
                               propietarioPhone: data.owner_phone ?? null,
                               precioMin: precioStats.min,
                               precioMax: precioStats.max,
+                              culqiEnabled: Boolean(data.culqi_enabled),
+                              culqiPk: data.culqi_pk ?? null,
                               canchas: data.canchas.map((c) => ({
                                   id: c.id,
                                   nombre: c.nombre,

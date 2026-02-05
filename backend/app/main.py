@@ -18,6 +18,7 @@ from app.routers.perfil import router as perfil_router
 from app.routers.panel_propietario import router as panel_router
 from app.routers.ubigeo import router as ubigeo_router
 from app.routers.pagos_culqi import router as pagos_culqi_router
+from app.routers.utilitarios import router as utilitarios_router
 
 app = FastAPI(title="Backend ProyectoCanchas", version="1.0.0")
 
@@ -65,6 +66,7 @@ app.include_router(perfil_router)
 app.include_router(panel_router)
 app.include_router(ubigeo_router)
 app.include_router(pagos_culqi_router)
+app.include_router(utilitarios_router)
 
 @app.get("/healthz")
 def health():

@@ -35,6 +35,22 @@ def init_db() -> None:
     try:
         with engine.begin() as conn:
             conn.execute(text("ALTER TABLE public.reservas ADD COLUMN IF NOT EXISTS payment_ref VARCHAR(120)"))
+            conn.execute(
+                text(
+                    "CREATE TABLE IF NOT EXISTS public.payment_integrations ("
+                    "id BIGSERIAL PRIMARY KEY, "
+                    "user_id BIGINT NOT NULL UNIQUE REFERENCES public.users(id) ON DELETE CASCADE, "
+                    "provider VARCHAR(20) NOT NULL DEFAULT 'culqi', "
+                    "enabled BOOLEAN NOT NULL DEFAULT FALSE, "
+                    "culqi_pk TEXT NOT NULL, "
+                    "culqi_sk_enc TEXT NOT NULL, "
+                    "created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), "
+                    "updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()"
+                    ")"
+                )
+            )
+            conn.execute(text("ALTER TABLE public.payment_integrations ADD COLUMN IF NOT EXISTS culqi_pk TEXT"))
+            conn.execute(text("ALTER TABLE public.payment_integrations ADD COLUMN IF NOT EXISTS culqi_sk_enc TEXT"))
     except Exception as exc:
         logger.warning("Add payment_ref failed: %s", exc)
     try:

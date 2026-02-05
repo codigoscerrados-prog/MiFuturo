@@ -51,6 +51,31 @@ def init_db() -> None:
             )
             conn.execute(text("ALTER TABLE public.payment_integrations ADD COLUMN IF NOT EXISTS culqi_pk TEXT"))
             conn.execute(text("ALTER TABLE public.payment_integrations ADD COLUMN IF NOT EXISTS culqi_sk_enc TEXT"))
+            conn.execute(
+                text(
+                    """
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'payment_integrations'
+          AND column_name = 'culqi_sk'
+    ) AND NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'payment_integrations'
+          AND column_name = 'culqi_sk_enc'
+    ) THEN
+        ALTER TABLE public.payment_integrations RENAME COLUMN culqi_sk TO culqi_sk_enc;
+    END IF;
+END $$;
+                    """
+                )
+            )
+            conn.execute(text("ALTER TABLE public.payment_integrations DROP COLUMN IF EXISTS culqi_sk"))
     except Exception as exc:
         logger.warning("Add payment_ref failed: %s", exc)
     try:

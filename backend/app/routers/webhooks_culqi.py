@@ -35,7 +35,7 @@ def _require_basic_auth(request: Request) -> None:
 def _find_subscription_id(value: object) -> str | None:
     if isinstance(value, dict):
         for k, v in value.items():
-            if k in {"subscription_id", "subscriptionId"} and isinstance(v, str) and v.startswith("sxn_"):
+            if k in {"subscription_id", "subscriptionId", "subsId"} and isinstance(v, str) and v.startswith("sxn_"):
                 return v
             if k == "id" and isinstance(v, str) and v.startswith("sxn_"):
                 return v

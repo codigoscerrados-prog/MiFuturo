@@ -84,14 +84,38 @@ def mi_plan(db: Session = Depends(get_db), u: User = Depends(get_usuario_actual)
         .first()
     )
 
+    trial_used = (
+        db.query(Suscripcion)
+        .filter(Suscripcion.user_id == u.id, Suscripcion.proveedor == "trial")
+        .first()
+        is not None
+    )
+    trial_disponible = not trial_used
+
     # si no hay suscripción: propietario debe elegir plan, usuario cae a FREE
     if not fila:
         if u.role == "propietario":
-            return PlanActualOut(plan_id=0, plan_codigo="sin_plan", plan_nombre="Sin plan", estado="pendiente")
+            return PlanActualOut(
+                plan_id=0,
+                plan_codigo="sin_plan",
+                plan_nombre="Sin plan",
+                estado="pendiente",
+                proveedor=None,
+                trial_disponible=trial_disponible,
+                trial_expirado=False,
+            )
         p = db.query(Plan).filter(Plan.codigo == "free").first() or db.query(Plan).filter(Plan.id == 1).first()
         if not p:
             raise HTTPException(status_code=500, detail="No existe el plan FREE")
-        return PlanActualOut(plan_id=p.id, plan_codigo=p.codigo, plan_nombre=p.nombre, estado="activa", proveedor=None)
+        return PlanActualOut(
+            plan_id=p.id,
+            plan_codigo=p.codigo,
+            plan_nombre=p.nombre,
+            estado="activa",
+            proveedor=None,
+            trial_disponible=trial_disponible,
+            trial_expirado=False,
+        )
 
     s, p = fila
 
@@ -121,6 +145,8 @@ def mi_plan(db: Session = Depends(get_db), u: User = Depends(get_usuario_actual)
             plan_nombre=free.nombre,
             estado=nuevo.estado,
             proveedor=nuevo.proveedor,
+            trial_disponible=trial_disponible,
+            trial_expirado=True,
             inicio=nuevo.inicio,
             fin=nuevo.fin,
         )
@@ -129,12 +155,25 @@ def mi_plan(db: Session = Depends(get_db), u: User = Depends(get_usuario_actual)
     if s.fin:
         dias = max(0, math.ceil((s.fin - now).total_seconds() / 86400))
 
+    trial_expirado = False
+    if p.codigo == "free" and trial_used:
+        ultimo_trial = (
+            db.query(Suscripcion)
+            .filter(Suscripcion.user_id == u.id, Suscripcion.proveedor == "trial")
+            .order_by(Suscripcion.inicio.desc())
+            .first()
+        )
+        if ultimo_trial and ultimo_trial.fin and ultimo_trial.fin <= now:
+            trial_expirado = True
+
     return PlanActualOut(
         plan_id=p.id,
         plan_codigo=p.codigo,
         plan_nombre=p.nombre,
         estado=s.estado,
         proveedor=s.proveedor,
+        trial_disponible=trial_disponible,
+        trial_expirado=trial_expirado,
         inicio=s.inicio,
         fin=s.fin,
         dias_restantes=dias,

@@ -40,6 +40,8 @@ class PlanActualOut(BaseModel):
     plan_nombre: str
     estado: str
     proveedor: Optional[str] = None
+    trial_disponible: Optional[bool] = None
+    trial_expirado: Optional[bool] = None
     inicio: Optional[datetime] = None
     fin: Optional[datetime] = None
     dias_restantes: Optional[int] = None

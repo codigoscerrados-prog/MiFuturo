@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Script from "next/script";
 import { useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { useRouter } from "next/navigation";
 
@@ -18,6 +19,10 @@ import SeccionFacturacion from "./SeccionFacturacion";
 import SeccionPerfil from "./SeccionPerfil";
 import SeccionComplejos from "./SeccionComplejos";
 import SeccionUtilitarios from "./SeccionUtilitarios";
+import SeccionFacturacion from "./SeccionFacturacion";
+
+const PRO_PRICE_TEXT = "S/ 50.00 / mes";
+const PRO_AMOUNT_CENTS = 5000;
 
 export type Role = "usuario" | "propietario" | "admin";
 
@@ -27,6 +32,8 @@ export type PlanActual = {
     plan_nombre?: string | null;
     estado?: string | null;
     proveedor?: string | null;
+    trial_disponible?: boolean | null;
+    trial_expirado?: boolean | null;
     inicio?: string | null;
     fin?: string | null;
     dias_restantes?: number | null;
@@ -144,6 +151,7 @@ export default function SeccionPanel({
 
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [ok, setOk] = useState<string | null>(null);
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     const [perfil, setPerfil] = useState<Perfil | null>(() => perfilProp ?? null);
@@ -160,9 +168,91 @@ export default function SeccionPanel({
         []
     );
 
+    const [showProModal, setShowProModal] = useState(false);
+    const autoOpenedRef = useRef(false);
+    const [culqiReady, setCulqiReady] = useState(false);
+    const [pagandoPro, setPagandoPro] = useState(false);
+    const [activandoTrial, setActivandoTrial] = useState(false);
+    const culqiRef = useRef<any>(null);
+
     useEffect(() => {
         if (perfilProp) setPerfil(perfilProp);
     }, [perfilProp]);
+
+    useEffect(() => {
+        if (autoOpenedRef.current) return;
+        if (role === "propietario" && !isPro && plan?.trial_expirado) {
+            autoOpenedRef.current = true;
+            setShowProModal(true);
+        }
+    }, [role, isPro, plan?.trial_expirado]);
+
+    useEffect(() => {
+        if (!showProModal || !culqiReady || typeof window === "undefined") return;
+        const pk = process.env.NEXT_PUBLIC_CULQI_PUBLIC_KEY || "";
+        if (!pk) {
+            setError("Falta configurar la llave pública de Culqi.");
+            return;
+        }
+        const CulqiCheckout = (window as any).CulqiCheckout;
+        if (!CulqiCheckout) {
+            setError("No se pudo cargar Culqi Checkout.");
+            return;
+        }
+
+        const config = {
+            settings: {
+                title: "Plan PRO",
+                currency: "PEN",
+                amount: PRO_AMOUNT_CENTS,
+            },
+            options: {
+                lang: "es",
+                installments: false,
+                paymentMethods: {
+                    tarjeta: true,
+                    yape: true,
+                    bancaMovil: false,
+                    agente: false,
+                    billetera: false,
+                    cuotealo: false,
+                },
+            },
+        };
+
+        const instance = new CulqiCheckout(pk, config);
+        instance.culqi = async () => {
+            const culqi = instance;
+            if (culqi.error) {
+                const msg = culqi.error.user_message || culqi.error.message || "No se pudo procesar el pago.";
+                setError(msg);
+                setPagandoPro(false);
+                return;
+            }
+            if (!culqi.token?.id) return;
+            const t = token || getToken();
+            if (!t) {
+                router.push("/iniciar-sesion");
+                return;
+            }
+            try {
+                setPagandoPro(true);
+                await apiFetch("/payments/culqi/subscribe", {
+                    token: t,
+                    method: "POST",
+                    body: JSON.stringify({ token_id: culqi.token.id }),
+                });
+                setShowProModal(false);
+                const p = await apiFetch<PlanActual>("/perfil/plan", { token: t });
+                setPlan(p);
+            } catch (e: any) {
+                setError(e?.message || "No se pudo activar PRO.");
+            } finally {
+                setPagandoPro(false);
+            }
+        };
+        culqiRef.current = instance;
+    }, [showProModal, culqiReady, router, token]);
 
     const isPro = useMemo(() => {
         if (!plan) return false;
@@ -309,6 +399,29 @@ export default function SeccionPanel({
             URL.revokeObjectURL(link.href);
         } catch (e: any) {
             setHistorialError(e?.message || "No se pudo exportar el archivo.");
+        }
+    }
+
+    function openProModal() {
+        setError(null);
+        setShowProModal(true);
+    }
+
+    async function activarTrialDesdePanel() {
+        const t = token || getToken();
+        if (!t) return router.push("/iniciar-sesion");
+        try {
+            setError(null);
+            setOk(null);
+            setActivandoTrial(true);
+            await apiFetch("/perfil/plan/activar-pro-trial", { token: t, method: "POST" });
+            const p = await apiFetch<PlanActual>("/perfil/plan", { token: t });
+            setPlan(p);
+            setOk("Listo ✅ Activaste tu prueba PRO.");
+        } catch (e: any) {
+            setError(e?.message || "No se pudo activar la prueba PRO.");
+        } finally {
+            setActivandoTrial(false);
         }
     }
 
@@ -504,10 +617,22 @@ export default function SeccionPanel({
                                     <i className={`bi ${sidebarOpen ? "bi-layout-sidebar-inset" : "bi-layout-sidebar"}`} aria-hidden="true"></i>
                                     {sidebarOpen ? "Ocultar menú" : "Mostrar menú"}
                                 </button>
-                                {role === "propietario" && !planLoading && !isPro ? (
-                                    <Link href="/plan-premium" className={`boton botonPrimario ${styles.upgradeBtn}`}>
+                                {role === "propietario" && !planLoading && !isPro && plan?.trial_disponible ? (
+                                    <button
+                                        type="button"
+                                        className={`boton botonPrimario ${styles.upgradeBtn}`}
+                                        onClick={activarTrialDesdePanel}
+                                    >
+                                        {activandoTrial ? "Activando…" : "Prueba PRO 30 días gratis"}
+                                    </button>
+                                ) : role === "propietario" && !planLoading && !isPro ? (
+                                    <button
+                                        type="button"
+                                        className={`boton botonPrimario ${styles.upgradeBtn}`}
+                                        onClick={openProModal}
+                                    >
                                         Subir a PRO
-                                    </Link>
+                                    </button>
                                 ) : null}
                             </div>
                         </div>
@@ -531,6 +656,43 @@ export default function SeccionPanel({
                         ) : null}
 
                         {error ? <div className={styles.alertError}>{error}</div> : null}
+                        {ok ? <div className={styles.alertOk}>{ok}</div> : null}
+
+                        {showProModal ? (
+                            <div className={styles.proModalOverlay} onMouseDown={(e) => e.target === e.currentTarget && setShowProModal(false)}>
+                                <Script src="https://js.culqi.com/checkout-js" strategy="afterInteractive" onLoad={() => setCulqiReady(true)} />
+                                <div className={styles.proModal}>
+                                    <div className={styles.proModalHeader}>
+                                        <h3>Plan PRO</h3>
+                                        <button type="button" className={styles.proModalClose} onClick={() => setShowProModal(false)}>
+                                            Cerrar
+                                        </button>
+                                    </div>
+                                    <div className={styles.proModalBody}>
+                                        <div className={styles.proBenefits}>
+                                            <p className={styles.proPrice}>Luego {PRO_PRICE_TEXT}</p>
+                                            <ul className={styles.proList}>
+                                                <li>Publica más complejos y canchas</li>
+                                                <li>Reservas y pagos en línea</li>
+                                                <li>Panel con historial y pagos</li>
+                                                <li>Soporte prioritario</li>
+                                            </ul>
+                                        </div>
+                                        <div className={styles.proCheckout}>
+                                            <p className={styles.proCheckoutText}>Paga con Culqi y activa PRO al instante.</p>
+                                            <button
+                                                type="button"
+                                                className={`boton botonPrimario ${styles.proPayBtn}`}
+                                                onClick={() => culqiRef.current?.open?.()}
+                                                disabled={!culqiReady || pagandoPro}
+                                            >
+                                                {pagandoPro ? "Procesando..." : `Pagar ${PRO_PRICE_TEXT}`}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : null}
 
                         
                         {cargando ? (

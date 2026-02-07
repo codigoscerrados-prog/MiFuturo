@@ -15,6 +15,8 @@ type PlanActual = {
     plan_nombre?: string | null;
     estado?: string | null;
     proveedor?: string | null;
+    trial_disponible?: boolean | null;
+    trial_expirado?: boolean | null;
     inicio?: string | null;
     fin?: string | null;
     dias_restantes?: number | null;
@@ -297,35 +299,10 @@ export default function SeccionPlanesPropietario() {
                                                     <i className={`bi bi-stars ${styles.planIcon}`} aria-hidden="true"></i>Pro
                                                 </span>
                                                 <span className={styles.planPrice}>S/ 0.00 <span className={styles.smallMuted}>• 30 días gratis</span></span>
-                                                <span className={styles.smallMuted}>Luego {PRO_PRICE_TEXT}</span>
-                                                <button className={`btn btn-primary btn-sm ${styles.ctaInline}`} onClick={activarProTrial} disabled={activando || isPro}>
+                                                <button className={`btn btn-primary btn-sm ${styles.ctaInline}`} onClick={activarProTrial} disabled={activando || isPro || plan?.trial_disponible === false}>
                                                     {isPro ? "Ya activo" : activando ? "Activando…" : "30 días gratis"}
                                                 </button>
-                                                <button
-                                                    className={`btn btn-dark btn-sm ${styles.ctaInline}`}
-                                                    onClick={() => abrirCheckout("suscripcion")}
-                                                    disabled={pagando || isPro}
-                                                >
-                                                    {isPro ? "Ya activo" : pagando ? "Procesando…" : `Suscribirme (${PRO_PRICE_TEXT})`}
-                                                </button>
-                                                <button
-                                                    className={`btn btn-sm ${styles.ctaInline} ${styles.yapeBtn}`}
-                                                    onClick={() => abrirCheckout("mensual")}
-                                                    disabled={pagando || isPro}
-                                                >
-                                                    {isPro || pagando ? (
-                                                        isPro ? "Ya activo" : "Procesando…"
-                                                    ) : (
-                                                        <>
-                                                            <img
-                                                                src="/assets/yape.svg"
-                                                                alt="Yape"
-                                                                className={styles.yapeLogoImg}
-                                                            />
-                                                            <span>Pagar mensual</span>
-                                                        </>
-                                                    )}
-                                                </button>
+                                                {/* Solo prueba PRO desde /panel/planes */}
                                             </div>
                                         </th>
 

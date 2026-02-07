@@ -289,6 +289,15 @@ def _get_active_culqi_subscription(db: Session, user_id: int) -> Suscripcion:
     return fila
 
 
+def _get_latest_culqi_subscription(db: Session, user_id: int) -> Suscripcion | None:
+    return (
+        db.query(Suscripcion)
+        .filter(Suscripcion.user_id == user_id, Suscripcion.proveedor == "culqi")
+        .order_by(Suscripcion.inicio.desc())
+        .first()
+    )
+
+
 @router.post("/subscribe", response_model=CulqiSubscribeOut)
 def subscribe(
     payload: CulqiSubscribeIn,
@@ -311,6 +320,15 @@ def subscribe(
             raise HTTPException(status_code=409, detail="Ya tienes PRO activo")
 
         secret_key = _require_secret_key(settings.CULQI_SECRET_KEY, label="backend")
+
+        existing = _get_latest_culqi_subscription(db, u.id)
+        if existing and existing.proveedor_ref:
+            return CulqiSubscribeOut(
+                suscripcion_id=existing.id,
+                estado=existing.estado,
+                proveedor_ref=existing.proveedor_ref,
+                plan_id=existing.plan_id,
+            )
 
         customer_email = (payload.email or u.email or "").strip()
         if not customer_email:
@@ -351,15 +369,27 @@ def subscribe(
         if not card_id:
             raise HTTPException(status_code=502, detail="Culqi no devolvió card_id")
 
-        subscription = _culqi_post(
-            secret_key,
-            "/v2/recurrent/subscriptions/create",
-            {
-                "card_id": card_id,
-                "plan_id": settings.CULQI_PLAN_ID,
-                "tyc": True,
-            },
-        )
+        try:
+            subscription = _culqi_post(
+                secret_key,
+                "/v2/recurrent/subscriptions/create",
+                {
+                    "card_id": card_id,
+                    "plan_id": settings.CULQI_PLAN_ID,
+                    "tyc": True,
+                },
+            )
+        except HTTPException as e:
+            if "Ya te encuentras registrado a este plan" in str(e.detail):
+                existing = _get_latest_culqi_subscription(db, u.id)
+                if existing and existing.proveedor_ref:
+                    return CulqiSubscribeOut(
+                        suscripcion_id=existing.id,
+                        estado=existing.estado,
+                        proveedor_ref=existing.proveedor_ref,
+                        plan_id=existing.plan_id,
+                    )
+            raise
         subscription_id = subscription.get("id")
         if not subscription_id:
             raise HTTPException(status_code=502, detail="Culqi no devolvió subscription_id")

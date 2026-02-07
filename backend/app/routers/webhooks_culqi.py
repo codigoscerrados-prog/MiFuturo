@@ -32,13 +32,34 @@ def _require_basic_auth(request: Request) -> None:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
 
+def _find_subscription_id(value: object) -> str | None:
+    if isinstance(value, dict):
+        for k, v in value.items():
+            if k in {"subscription_id", "subscriptionId"} and isinstance(v, str) and v.startswith("sxn_"):
+                return v
+            if k == "id" and isinstance(v, str) and v.startswith("sxn_"):
+                return v
+            found = _find_subscription_id(v)
+            if found:
+                return found
+    elif isinstance(value, list):
+        for item in value:
+            found = _find_subscription_id(item)
+            if found:
+                return found
+    return None
+
+
 def _extract_subscription_id(payload: dict) -> str | None:
     if not payload:
         return None
+    found = _find_subscription_id(payload)
+    if found:
+        return found
     data = payload.get("data") or {}
     if isinstance(data, dict):
-        return data.get("id") or data.get("subscription_id")
-    return payload.get("id") or payload.get("subscription_id")
+        return data.get("subscription_id") or data.get("id")
+    return payload.get("subscription_id")
 
 
 def _extend_fin(s: Suscripcion, now: datetime) -> None:

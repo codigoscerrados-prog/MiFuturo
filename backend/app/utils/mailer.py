@@ -1,5 +1,6 @@
 import logging
 import smtplib
+import logging
 from email.message import EmailMessage
 from typing import Optional
 
@@ -17,11 +18,16 @@ def _is_configured() -> bool:
         return False
     if settings.SMTP_USER and not settings.SMTP_PASS:
         return False
+    if settings.SMTP_DISABLED:
+        return False
     return True
 
 
 def send_email(to_email: str, subject: str, text: str, html: str | None = None) -> None:
     from_email = _get_from_email()
+    if settings.SMTP_DISABLED:
+        logger.info("SMTP deshabilitado (se omitió el envío a %s)", to_email)
+        return
     if not _is_configured() or not from_email:
         logger.warning("SMTP no configurado (se omitió el envío a %s)", to_email)
         return

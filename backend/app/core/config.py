@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     SMTP_PORT: int = 587
     SMTP_USER: str = ""
     SMTP_PASS: str = ""
+    SMTP_DISABLED: bool = False
     FROM_EMAIL: str = ""
     SMTP_FROM: str = ""
     SMTP_USE_TLS: bool = True

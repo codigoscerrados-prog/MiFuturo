@@ -217,6 +217,10 @@ def subscribe(
         }
         if not customer_data.get("address"):
             customer_data["address"] = "Lima, Peru"
+        if not customer_data.get("address_city"):
+            customer_data["address_city"] = "Lima"
+        if not customer_data.get("address_country"):
+            customer_data["address_country"] = "PE"
         phone = (payload.phone_number or u.phone or "").strip()
         if phone:
             customer_data["phone_number"] = phone

@@ -63,10 +63,12 @@ def _plan_actual(db: Session, user_id: int) -> Plan | None:
     )
     if fila:
         return fila[1]
-    return db.query(Plan).filter(Plan.id == 1).first()
+    return None
 
 
 def _limite_complejos(plan: Plan | None) -> int:
+    if plan is None:
+        return 0
     if plan and plan.limite_canchas and int(plan.limite_canchas) > 0:
         return int(plan.limite_canchas)
     codigo = (plan.codigo if plan else "") or ""
@@ -195,6 +197,8 @@ def crear_complejo(payload: ComplejoCrear, db: Session = Depends(get_db), u=Depe
         plan = _plan_actual(db, u.id)
         limite = _limite_complejos(plan)
         total = db.query(Complejo).filter(Complejo.owner_id == u.id).count()
+        if limite == 0:
+            raise HTTPException(status_code=403, detail="Debes elegir un plan antes de crear complejos.")
         if total >= limite:
             raise HTTPException(
                 status_code=403,

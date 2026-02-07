@@ -84,8 +84,10 @@ def mi_plan(db: Session = Depends(get_db), u: User = Depends(get_usuario_actual)
         .first()
     )
 
-    # si no hay suscripción, devolvemos FREE por código (o id=1 si existe)
+    # si no hay suscripción: propietario debe elegir plan, usuario cae a FREE
     if not fila:
+        if u.role == "propietario":
+            return PlanActualOut(plan_id=0, plan_codigo="sin_plan", plan_nombre="Sin plan", estado="pendiente")
         p = db.query(Plan).filter(Plan.codigo == "free").first() or db.query(Plan).filter(Plan.id == 1).first()
         if not p:
             raise HTTPException(status_code=500, detail="No existe el plan FREE")

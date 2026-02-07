@@ -89,9 +89,10 @@ def register(payload: UsuarioCrear, background_tasks: BackgroundTasks, db: Sessi
         if not free_plan:
             raise HTTPException(status_code=500, detail="No existe el plan FREE en la tabla planes")
 
-        if u.role in ("usuario", "propietario"):
-            s = Suscripcion(user_id=u.id, plan_id=free_plan.id, estado="activa")
-            db.add(s)
+        if u.role == "usuario":
+            if requested_role == "usuario":
+                s = Suscripcion(user_id=u.id, plan_id=free_plan.id, estado="activa")
+                db.add(s)
 
         db.commit()
         db.refresh(u)
@@ -244,8 +245,9 @@ def google_callback(
             if not free_plan:
                 raise HTTPException(status_code=500, detail="No existe el plan FREE en la tabla planes")
 
-            s = Suscripcion(user_id=u.id, plan_id=free_plan.id, estado="activa")
-            db.add(s)
+            if u.role == "usuario":
+                s = Suscripcion(user_id=u.id, plan_id=free_plan.id, estado="activa")
+                db.add(s)
 
             db.commit()
             db.refresh(u)

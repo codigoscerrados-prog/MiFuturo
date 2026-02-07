@@ -169,6 +169,15 @@ def _culqi_patch(secret_key: str, path: str, data: dict) -> dict:
     return payload
 
 
+def _culqi_delete(secret_key: str, path: str) -> dict:
+    status, payload = _culqi_request_raw(secret_key, "DELETE", path, None)
+    if status >= 400 or payload.get("object") == "error":
+        msg = payload.get("user_message") or payload.get("merchant_message") or payload.get("message") or "Error en Culqi"
+        logger.error("Culqi error response (status=%s, path=%s): %s", status, path, payload)
+        raise HTTPException(status_code=502, detail=msg)
+    return payload
+
+
 def _culqi_post(secret_key: str, path: str, data: dict) -> dict:
     status, payload = _culqi_post_raw(secret_key, path, data)
     if status >= 400 or payload.get("object") == "error":
@@ -323,12 +332,26 @@ def subscribe(
 
         existing = _get_latest_culqi_subscription(db, u.id)
         if existing and existing.proveedor_ref:
-            return CulqiSubscribeOut(
-                suscripcion_id=existing.id,
-                estado=existing.estado,
-                proveedor_ref=existing.proveedor_ref,
-                plan_id=existing.plan_id,
-            )
+            estado_exist = (existing.estado or "").lower()
+            if estado_exist in {"pendiente", "rechazada"}:
+                try:
+                    _culqi_delete(secret_key, f"/v2/recurrent/subscriptions/{existing.proveedor_ref}")
+                except Exception:
+                    raise HTTPException(
+                        status_code=409,
+                        detail="Ya existe una suscripción pendiente. Espera o intenta más tarde.",
+                    )
+                existing.estado = "cancelada"
+                existing.fin = now_peru()
+                db.add(existing)
+                db.commit()
+            else:
+                return CulqiSubscribeOut(
+                    suscripcion_id=existing.id,
+                    estado=existing.estado,
+                    proveedor_ref=existing.proveedor_ref,
+                    plan_id=existing.plan_id,
+                )
 
         customer_email = (payload.email or u.email or "").strip()
         if not customer_email:

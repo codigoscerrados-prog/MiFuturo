@@ -678,6 +678,21 @@ export default function SeccionPanel({
                             </div>
                         ) : null}
 
+                        {role === "propietario" &&
+                        !isPro &&
+                        (plan?.culqi_estado === "pendiente" || plan?.culqi_estado === "rechazada") ? (
+                            <div className={styles.trialCallout}>
+                                <p className={styles.trialText}>¿Tu pago no se completó? Reintenta con otra tarjeta.</p>
+                                <button
+                                    type="button"
+                                    className={`boton botonPrimario ${styles.trialBtn}`}
+                                    onClick={openProModal}
+                                >
+                                    REINTENTAR PAGO
+                                </button>
+                            </div>
+                        ) : null}
+
                         {error ? <div className={styles.alertError}>{error}</div> : null}
                         {!error && plan?.culqi_mensaje ? (
                             <div className={styles.alertError}>{plan.culqi_mensaje}</div>

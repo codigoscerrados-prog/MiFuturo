@@ -108,7 +108,7 @@ const ICON_BY_TAB: Record<string, string> = {
 const WHATSAPP_PAY_URL =
     "https://wa.me/51922023667?text=Hola%20CanchasPro%2C%20quiero%20pagar%20mi%20plan%20PRO";
 
-const TRIAL_PAYMENT_LABEL = "S/ 69.90";
+const TRIAL_PAYMENT_LABEL = "S/ 50.00";
 
 export default function SeccionPanel({
     token: tokenProp,

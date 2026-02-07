@@ -23,8 +23,8 @@ type Cell = boolean | string;
 
 const SOPORTE_WA = "51922023667";
 const SOPORTE_WA_TEXT = "Hola CanchasPro, quiero el plan empresarial";
-const PRO_PRICE_TEXT = "S/ 69.90 / mes";
-const PRO_AMOUNT_CENTS = 6990;
+const PRO_PRICE_TEXT = "S/ 50.00 / mes";
+const PRO_AMOUNT_CENTS = 5000;
 
 function waUrl() {
     return `https://wa.me/${SOPORTE_WA}?text=${encodeURIComponent(SOPORTE_WA_TEXT)}`;

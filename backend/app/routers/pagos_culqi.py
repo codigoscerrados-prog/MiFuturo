@@ -363,7 +363,7 @@ def charge_pro(payload: CulqiProChargeIn, db: Session = Depends(get_db), u: User
     charge = _culqi_call(
         culqi.charge.create,
         data={
-            "amount": 6990,
+            "amount": 5000,
             "currency_code": "PEN",
             "email": payload.email,
             "source_id": payload.token_id,

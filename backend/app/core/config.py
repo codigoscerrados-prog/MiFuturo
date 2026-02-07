@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     SMTP_USER: str = ""
     SMTP_PASS: str = ""
     SMTP_DISABLED: bool = False
+
+    # Culqi webhooks (basic auth)
+    CULQI_WEBHOOK_USER: str = ""
+    CULQI_WEBHOOK_PASS: str = ""
     FROM_EMAIL: str = ""
     SMTP_FROM: str = ""
     SMTP_USE_TLS: bool = True

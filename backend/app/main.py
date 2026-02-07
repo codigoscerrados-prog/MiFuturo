@@ -20,6 +20,7 @@ from app.routers.panel_propietario import router as panel_router
 from app.routers.ubigeo import router as ubigeo_router
 from app.routers.pagos_culqi import router as pagos_culqi_router
 from app.routers.utilitarios import router as utilitarios_router
+from app.routers.webhooks_culqi import router as webhooks_culqi_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("app")
@@ -71,6 +72,7 @@ app.include_router(panel_router)
 app.include_router(ubigeo_router)
 app.include_router(pagos_culqi_router)
 app.include_router(utilitarios_router)
+app.include_router(webhooks_culqi_router)
 
 @app.get("/healthz")
 def health():

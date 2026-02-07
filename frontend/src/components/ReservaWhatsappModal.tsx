@@ -489,7 +489,7 @@ export default function ReservaWhatsappModal({
                 installments: false,
                 paymentMethods: {
                     tarjeta: true,
-                    yape: false,
+                    yape: true,
                     bancaMovil: false,
                     agente: false,
                     billetera: false,

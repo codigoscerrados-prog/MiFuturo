@@ -319,7 +319,7 @@ export default function PanelReservasPropietario({ token }: { token: string }) {
         if (!selectedCourtId && activas.length) setSelectedCourtId(activas[0].id);
     }, [token, selectedCourtId]);
 
-    // âœ… dÃ­a puntual (fallback/refresh)
+    // ? d?a puntual (fallback/refresh)
     const fetchDay = useCallback(
         async (dateStr: string) => {
             const data = await apiFetch<Reserva[]>(
@@ -345,7 +345,7 @@ export default function PanelReservasPropietario({ token }: { token: string }) {
         [fetchDay]
     );
 
-    // âœ… mes completo en 1 request
+    // ? mes completo en 1 request
     const fetchMonthRange = useCallback(
         async (fromStr: string, toStr: string) => {
             const data = await apiFetch<Reserva[]>(
@@ -372,7 +372,7 @@ export default function PanelReservasPropietario({ token }: { token: string }) {
         setCurrentMonth(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1));
     }, [selectedDate]);
 
-    // âœ… carga mes (1 llamada) y llena dayCache por fecha
+    // ? carga mes (1 llamada) y llena dayCache por fecha
     useEffect(() => {
         (async () => {
             setLoadingMonth(true);
@@ -392,7 +392,7 @@ export default function PanelReservasPropietario({ token }: { token: string }) {
                     grouped[ds].push(r);
                 }
 
-                // asegÃºrate que todos los dÃ­as del mes existan (aunque sea vacÃ­o)
+                // aseg?rate que todos los d?as del mes existan (aunque sea vac?o)
                 for (let d = 1; d <= lastDay; d++) {
                     const ds = `${y}-${pad2(m + 1)}-${pad2(d)}`;
                     if (!grouped[ds]) grouped[ds] = [];
@@ -407,7 +407,7 @@ export default function PanelReservasPropietario({ token }: { token: string }) {
         })();
     }, [currentMonth, fetchMonthRange]);
 
-    // âœ… si el dÃ­a seleccionado no estÃ¡ (ej. cambio rÃ¡pido), fallback a fetch puntual
+    // ? si el d?a seleccionado no est? (ej. cambio r?pido), fallback a fetch puntual
     useEffect(() => {
         (async () => {
             try {
@@ -606,7 +606,7 @@ function moveWeek(delta: number) {
         if (!selectedOption || selectedOption.disabled) {
             return showToast("Horario no disponible. Elige otro horario.", "error");
         }
-        if (!formName.trim() || !formPhone.trim()) return showToast("Completa Nombre y TelÃ©fono", "error");
+        if (!formName.trim() || !formPhone.trim()) return showToast("Completa Nombre y Tel?fono", "error");
 
         const cancha = canchaById.get(formCourtId);
         const total = cancha ? Number(cancha.precio_hora || 0) * (formDuration / 60) : 0;
@@ -652,7 +652,7 @@ function moveWeek(delta: number) {
                 await apiFetch(`/panel/reservas/${original.id}/cancelar`, { token, method: "PUT" });
                 await apiFetch("/panel/reservas", { token, method: "POST", body: JSON.stringify(payload) });
                 await fetchDaySafe(ymd(new Date(start_at)));
-                showToast("Reserva actualizada âœ…", "success");
+                showToast("Reserva actualizada ?", "success");
                 openWhatsAppConfirmation({
                     name: formName,
                     phone: formPhone,
@@ -768,7 +768,7 @@ function moveWeek(delta: number) {
                 <div>
                     <p className={styles.kicker}>Panel propietario</p>
                     <h1 className={styles.titulo}>Sistema de Reservas</h1>
-                    <p className={styles.muted}>Agenda por cancha â€¢ calendario + horarios + reservas del dÃ­a</p>
+                    <p className={styles.muted}>Agenda por cancha • calendario + horarios + reservas del día</p>
                 </div>
 
                 <div className={styles.headerBtns}>
@@ -795,10 +795,10 @@ function moveWeek(delta: number) {
             {/* Main Grid */}
             <div className={styles.mainGrid}>
 
-                {/* Lista del dÃ‡Ã°a */}
+                {/* Lista del día */}
                 <section className={cn(styles.card, styles.cardList)}>
                     <div className={styles.listTop}>
-                        <h2 className={styles.cardTitle}>Reservas del dÃ­a</h2>
+                        <h2 className={styles.cardTitle}>Reservas del d?a</h2>
                         <span className={styles.counter}>{reservationsForList.length}</span>
                     </div>
 
@@ -1096,7 +1096,7 @@ function moveWeek(delta: number) {
                         <div className={styles.modalHeader}>
                             <h3 className={styles.modalTitle}>{editReserva ? "Editar reserva" : "Nueva reserva"}</h3>
                             <button type="button" className={styles.modalClose} onClick={() => setModalOpen(false)} aria-label="Cerrar">
-                                âœ•
+                                ?
                             </button>
                         </div>
 
@@ -1162,12 +1162,12 @@ function moveWeek(delta: number) {
             </div>
 
             <div className={styles.field}>
-                <label className={styles.label}>TelÃ©fono</label>
+                <label className={styles.label}>Tel?fono</label>
                 <input
                     type="tel"
                     value={formPhone}
                     onChange={(e) => setFormPhone(e.target.value)}
-                    placeholder="NÃºmero de contacto"
+                    placeholder="N?mero de contacto"
                     className={styles.input}
                 />
             </div>
@@ -1178,14 +1178,14 @@ function moveWeek(delta: number) {
                     rows={3}
                     value={formNotes}
                     onChange={(e) => setFormNotes(e.target.value)}
-                    placeholder="InformaciÃ³n adicionalâ€¦"
+                    placeholder="Informaci?n adicional?"
                     className={styles.textarea}
                 />
             </div>
         </div>
 
         <div className={styles.agendaPanel}>
-            <h4 className={styles.agendaTitle}>Agenda del dÃ­a</h4>
+            <h4 className={styles.agendaTitle}>Agenda del d?a</h4>
             <div className={styles.agendaList}>
                 {timeOptions.map((t) => {
                     const isSelected = t.slot === formTime;
@@ -1238,14 +1238,14 @@ function moveWeek(delta: number) {
                 </div>
             ) : null}
 
-            {/* ConfirmaciÃ³n cancelar */}
+            {/* Confirmaci?n cancelar */}
             {deleteOpen && deleteTarget ? (
                 <div className={styles.overlay} role="dialog" aria-modal="true">
                     <div className={styles.backdrop} onClick={() => setDeleteOpen(false)} />
                     <div className={styles.confirm}>
                         <div className={styles.confirmIcon}>!</div>
-                        <h3 className={styles.confirmTitle}>Â¿Cancelar reserva?</h3>
-                        <p className={styles.confirmText}>Esta acciÃ³n no se puede deshacer.</p>
+                        <h3 className={styles.confirmTitle}>?Cancelar reserva?</h3>
+                        <p className={styles.confirmText}>Esta acci?n no se puede deshacer.</p>
 
                         <div className={styles.modalActions}>
                             <button type="button" className={styles.btnGhost} onClick={() => setDeleteOpen(false)}>
@@ -1275,7 +1275,7 @@ function moveWeek(delta: number) {
             {/* Toast */}
             {toast ? (
                 <div className={cn(styles.toastWrap, toast.type === "error" ? styles.toastError : styles.toastOk)}>
-                    <div className={styles.toastIcon}>{toast.type === "error" ? "âœ•" : "âœ“"}</div>
+                    <div className={styles.toastIcon}>{toast.type === "error" ? "✖" : "✓"}</div>
                     <div className={styles.toastText}>{toast.msg}</div>
                 </div>
             ) : null}

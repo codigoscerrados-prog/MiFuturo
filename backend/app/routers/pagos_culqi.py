@@ -13,7 +13,7 @@ from app.modelos.modelos import Cancha, Complejo, PaymentIntegration, Plan, Rese
 
 try:
     from culqi2.client import Culqi
-except Exception:  # pragma: no cover - si la dependencia no estÃ¡ instalada
+except Exception:  # pragma: no cover - si la dependencia no est? instalada
     Culqi = None
 
 logger = logging.getLogger(__name__)
@@ -162,7 +162,7 @@ def subscribe(
     customer = _culqi_call(culqi.customer.create, data=customer_data)
     customer_id = customer.get("id")
     if not customer_id:
-        raise HTTPException(status_code=502, detail="Culqi no devolviÃ³ customer_id")
+        raise HTTPException(status_code=502, detail="Culqi no devolvi? customer_id")
 
     card = _culqi_call(
         culqi.card.create,
@@ -173,7 +173,7 @@ def subscribe(
     )
     card_id = card.get("id")
     if not card_id:
-        raise HTTPException(status_code=502, detail="Culqi no devolviÃ³ card_id")
+        raise HTTPException(status_code=502, detail="Culqi no devolvi? card_id")
 
     subscription = _culqi_call(
         culqi.subscription.create,
@@ -185,7 +185,7 @@ def subscribe(
     )
     subscription_id = subscription.get("id")
     if not subscription_id:
-        raise HTTPException(status_code=502, detail="Culqi no devolviÃ³ subscription_id")
+        raise HTTPException(status_code=502, detail="Culqi no devolvi? subscription_id")
 
     now = datetime.now(timezone.utc)
     s = Suscripcion(

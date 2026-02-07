@@ -39,9 +39,11 @@
     background: var(--panel-bg);
 }
 
-.layout:has(.sidebar:hover),
-.layout:has(.sidebar:focus-within) {
+.layoutOpen {
     --sidebar-w: 260px;
+}
+
+.layoutCollapsed {
 }
 
 .sidebar {
@@ -90,6 +92,18 @@
     display: flex;
     justify-content: flex-end;
     align-items: center;
+}
+
+.sidebarToggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--panel-border);
+    background: var(--panel-surface);
+    color: var(--panel-text);
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 13px;
 }
 
 .main > * {
@@ -627,11 +641,11 @@
 }
 
 /* Sidebar colapsado (solo iconos) */
-.sidebar:not(:hover):not(:focus-within) .brandTitle,
-.sidebar:not(:hover):not(:focus-within) .kicker,
-.sidebar:not(:hover):not(:focus-within) .userInfo,
-.sidebar:not(:hover):not(:focus-within) .userMeta,
-.sidebar:not(:hover):not(:focus-within) .lockBadge {
+.layoutCollapsed .sidebar .brandTitle,
+.layoutCollapsed .sidebar .kicker,
+.layoutCollapsed .sidebar .userInfo,
+.layoutCollapsed .sidebar .userMeta,
+.layoutCollapsed .sidebar .lockBadge {
     opacity: 0;
     max-width: 0;
     width: 0;
@@ -639,33 +653,33 @@
     pointer-events: none;
 }
 
-.sidebar:not(:hover):not(:focus-within) .brand {
+.layoutCollapsed .sidebar .brand {
     justify-content: center;
 }
 
-.sidebar:not(:hover):not(:focus-within) .brandLogo {
+.layoutCollapsed .sidebar .brandLogo {
     width: 22px;
     height: 22px;
 }
 
-.sidebar:not(:hover):not(:focus-within) .userCard {
+.layoutCollapsed .sidebar .userCard {
     padding: 10px;
 }
 
-.sidebar:not(:hover):not(:focus-within) .tab {
+.layoutCollapsed .sidebar .tab {
     justify-content: center;
 }
 
-.sidebar:not(:hover):not(:focus-within) .tabLeft span {
+.layoutCollapsed .sidebar .tabLeft span {
     opacity: 0;
     max-width: 0;
 }
 
-.sidebar:not(:hover):not(:focus-within) .tabIcon {
+.layoutCollapsed .sidebar .tabIcon {
     color: var(--panel-text);
 }
 
-.sidebar:not(:hover):not(:focus-within) .sidebarLogoutText {
+.layoutCollapsed .sidebar .sidebarLogoutText {
     opacity: 0;
     max-width: 0;
     width: 0;

@@ -120,10 +120,10 @@ export default function SeccionPlanesPropietario() {
                     body: JSON.stringify({ token_id: culqi.token.id }),
                 });
 
-                setOk("SuscripciÃ³n PRO activada. âœ…");
+                setOk("Suscripci?n PRO activada. ?");
                 router.push("/panel");
             } catch (e: any) {
-                setError(e?.message || "No se pudo activar la suscripciÃ³n.");
+                setError(e?.message || "No se pudo activar la suscripci?n.");
             } finally {
                 setPagando(false);
             }
@@ -135,7 +135,7 @@ export default function SeccionPlanesPropietario() {
 
         const pk = process.env.NEXT_PUBLIC_CULQI_PUBLIC_KEY || "";
         if (!pk) {
-            setError("Falta configurar la llave pÃºblica de Culqi.");
+            setError("Falta configurar la llave p?blica de Culqi.");
             return;
         }
 
@@ -156,7 +156,7 @@ export default function SeccionPlanesPropietario() {
                 installments: false,
                 paymentMethods: {
                     tarjeta: true,
-                    yape: false,
+                    yape: true,
                     bancaMovil: false,
                     agente: false,
                     billetera: false,
@@ -190,7 +190,7 @@ export default function SeccionPlanesPropietario() {
         const t = token || getToken();
         if (!t) return router.push("/iniciar-sesion");
         if (!culqiRef.current) {
-            setError("Culqi no estÃ¡ listo aÃºn. Intenta otra vez.");
+            setError("Culqi no est? listo a?n. Intenta otra vez.");
             return;
         }
         setError(null);

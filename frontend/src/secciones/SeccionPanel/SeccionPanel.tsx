@@ -142,6 +142,7 @@ export default function SeccionPanel({
 
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [sidebarOpen, setSidebarOpen] = useState(true);
 
     const [perfil, setPerfil] = useState<Perfil | null>(() => perfilProp ?? null);
     const [plan, setPlan] = useState<PlanActual | null>(null);
@@ -442,7 +443,7 @@ export default function SeccionPanel({
     return (
         <section className={styles.seccion}>
             <div className={styles.contenedor}>
-                <div className={styles.layout}>
+                <div className={`${styles.layout} ${sidebarOpen ? styles.layoutOpen : styles.layoutCollapsed}`}>
                     <aside className={styles.sidebar}>
                         <div className={styles.sidebarCard}>
                             <Link className={styles.brandLink} href="/" aria-label="Ir al inicio">
@@ -495,6 +496,14 @@ export default function SeccionPanel({
                             
 
                             <div className={styles.headerBtns}>
+                                <button
+                                    type="button"
+                                    className={styles.sidebarToggle}
+                                    onClick={() => setSidebarOpen((v) => !v)}
+                                >
+                                    <i className={`bi ${sidebarOpen ? "bi-layout-sidebar-inset" : "bi-layout-sidebar"}`} aria-hidden="true"></i>
+                                    {sidebarOpen ? "Ocultar menú" : "Mostrar menú"}
+                                </button>
                                 {role === "propietario" && !planLoading && !isPro ? (
                                     <Link href="/plan-premium" className={`boton botonPrimario ${styles.upgradeBtn}`}>
                                         Subir a PRO

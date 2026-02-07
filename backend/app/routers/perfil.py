@@ -91,7 +91,7 @@ def mi_plan(db: Session = Depends(get_db), u: User = Depends(get_usuario_actual)
         p = db.query(Plan).filter(Plan.codigo == "free").first() or db.query(Plan).filter(Plan.id == 1).first()
         if not p:
             raise HTTPException(status_code=500, detail="No existe el plan FREE")
-        return PlanActualOut(plan_id=p.id, plan_codigo=p.codigo, plan_nombre=p.nombre, estado="activa")
+        return PlanActualOut(plan_id=p.id, plan_codigo=p.codigo, plan_nombre=p.nombre, estado="activa", proveedor=None)
 
     s, p = fila
 
@@ -120,6 +120,7 @@ def mi_plan(db: Session = Depends(get_db), u: User = Depends(get_usuario_actual)
             plan_codigo=free.codigo,
             plan_nombre=free.nombre,
             estado=nuevo.estado,
+            proveedor=nuevo.proveedor,
             inicio=nuevo.inicio,
             fin=nuevo.fin,
         )
@@ -133,6 +134,7 @@ def mi_plan(db: Session = Depends(get_db), u: User = Depends(get_usuario_actual)
         plan_codigo=p.codigo,
         plan_nombre=p.nombre,
         estado=s.estado,
+        proveedor=s.proveedor,
         inicio=s.inicio,
         fin=s.fin,
         dias_restantes=dias,

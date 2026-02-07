@@ -13,6 +13,7 @@ import BrandLogo from "@/components/BrandLogo";
 import PanelReservasPropietario from "./SeccionReservas";
 import PanelCanchasPropietario from "./SeccionCanchas";
 import SeccionPagos from "./SeccionPagos";
+import SeccionFacturacion from "./SeccionFacturacion";
 
 import SeccionPerfil from "./SeccionPerfil";
 import SeccionComplejos from "./SeccionComplejos";
@@ -25,6 +26,7 @@ export type PlanActual = {
     plan_codigo?: string | null;
     plan_nombre?: string | null;
     estado?: string | null;
+    proveedor?: string | null;
     inicio?: string | null;
     fin?: string | null;
     dias_restantes?: number | null;
@@ -164,15 +166,9 @@ export default function SeccionPanel({
 
     const isPro = useMemo(() => {
         if (!plan) return false;
-
-        const planId = Number((plan as any).plan_id);
-        const st = normalizeStatus((plan as any).status);
-        const name = String((plan as any).plan_name || "").toLowerCase();
-
-        if (planId === 2) return st === "active" || st === "" || st === "null";
-        if (name.includes("pro")) return true;
-
-        return false;
+        const codigo = String(plan.plan_codigo || "").toLowerCase();
+        const nombre = String(plan.plan_nombre || "").toLowerCase();
+        return plan.plan_id === 2 || codigo.includes("pro") || nombre.includes("pro");
     }, [plan]);
 
     const nombreCompleto = useMemo(() => {
@@ -192,8 +188,9 @@ export default function SeccionPanel({
     }, [nombreCompleto, perfil?.business_name, perfil?.username, perfil?.email]);
 
     const normalizedPlanStatus = normalizeStatus(plan?.estado);
+    const isTrial = (plan?.proveedor || "").toLowerCase() === "trial";
     const showTrialCallout =
-        isPro && normalizedPlanStatus === "activa" && plan?.dias_restantes != null && plan.dias_restantes > 0;
+        isPro && isTrial && normalizedPlanStatus === "activa" && plan?.dias_restantes != null && plan.dias_restantes > 0;
     const planLabel = useMemo(() => {
         if (planLoading) return "...";
         if (!isPro) return "FREE";
@@ -260,7 +257,7 @@ export default function SeccionPanel({
         if (
             role === "propietario" &&
             !isPro &&
-            (nextTab === "mis-canchas" || nextTab === "reservas" || nextTab === "historial")
+            (nextTab === "mis-canchas" || nextTab === "reservas" || nextTab === "historial" || nextTab === "facturacion")
         ) {
             router.push("/plan-premium");
             return;
@@ -329,6 +326,7 @@ export default function SeccionPanel({
                 { key: "mis-canchas", label: "Mis Canchas", locked: !isPro },
                 { key: "reservas", label: "Reservas", locked: !isPro },
                 { key: "pagos", label: "Pagos", locked: !isPro },
+                { key: "facturacion", label: "Facturación", locked: !isPro },
                 { key: "historial", label: "Historial", locked: !isPro },
                 { key: "utilitarios", label: "Utilitarios", locked: !isPro },
             ];
@@ -559,6 +557,11 @@ export default function SeccionPanel({
                                 {role === "propietario" && tab === "pagos" ? (
                                     <div className={styles.sectionWrap}>
                                         {token ? <SeccionPagos token={token} /> : null}
+                                    </div>
+                                ) : null}
+                                {role === "propietario" && tab === "facturacion" ? (
+                                    <div className={styles.sectionWrap}>
+                                        {token ? <SeccionFacturacion token={token} /> : null}
                                     </div>
                                 ) : null}
                                 {role === "propietario" && tab === "historial" ? (

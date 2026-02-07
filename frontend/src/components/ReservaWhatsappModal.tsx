@@ -233,6 +233,7 @@ export default function ReservaWhatsappModal({
     const [email, setEmail] = useState("");
     const [pagando, setPagando] = useState(false);
     const [culqiReady, setCulqiReady] = useState(false);
+    const [deviceId, setDeviceId] = useState("");
     const culqiRef = useRef<any>(null);
     const paymentRef = useRef<{
         cancha_id: number;
@@ -365,16 +366,39 @@ export default function ReservaWhatsappModal({
                 setReservaOk(null);
                 setPagando(true);
 
-                await apiFetch("/payments/culqi/charge", {
-                    method: "POST",
-                    body: JSON.stringify({
-                        token_id: culqi.token.id,
-                        cancha_id: paymentRef.current.cancha_id,
-                        start_at: paymentRef.current.start_at,
-                        end_at: paymentRef.current.end_at,
-                        email: paymentRef.current.email,
-                    }),
-                });
+                try {
+                    await apiFetch("/payments/culqi/charge", {
+                        method: "POST",
+                        body: JSON.stringify({
+                            token_id: culqi.token.id,
+                            cancha_id: paymentRef.current.cancha_id,
+                            start_at: paymentRef.current.start_at,
+                            end_at: paymentRef.current.end_at,
+                            email: paymentRef.current.email,
+                            device_id: deviceId,
+                        }),
+                    });
+                } catch (err: any) {
+                    if (err?.message === "3DS_REQUIRED") {
+                        const culqi3ds = (window as any).Culqi3DS;
+                        if (!culqi3ds) throw err;
+                        const auth = await culqi3ds.initAuthentication(culqi.token.id);
+                        await apiFetch("/payments/culqi/charge", {
+                            method: "POST",
+                            body: JSON.stringify({
+                                token_id: culqi.token.id,
+                                cancha_id: paymentRef.current.cancha_id,
+                                start_at: paymentRef.current.start_at,
+                                end_at: paymentRef.current.end_at,
+                                email: paymentRef.current.email,
+                                device_id: deviceId,
+                                authentication_3ds: auth,
+                            }),
+                        });
+                    } else {
+                        throw err;
+                    }
+                }
 
                 setReservaOk("Pago realizado. Tu reserva fue registrada.");
                 if (typeof culqi.close === "function") {
@@ -526,6 +550,12 @@ export default function ReservaWhatsappModal({
                     const culqi3ds = (window as any).Culqi3DS;
                     if (pk && culqi3ds) {
                         culqi3ds.publicKey = pk;
+                        const maybe = culqi3ds.generateDevice?.();
+                        if (maybe && typeof maybe.then === "function") {
+                            maybe.then((id: string) => setDeviceId(id)).catch(() => {});
+                        } else if (typeof maybe === "string") {
+                            setDeviceId(maybe);
+                        }
                     }
                 }}
             />

@@ -37,6 +37,11 @@ class CulqiChargeIn(BaseModel):
     start_at: datetime
     end_at: datetime
     email: EmailStr
+    device_id: str | None = None
+    first_name: str | None = None
+    last_name: str | None = None
+    phone: str | None = None
+    authentication_3ds: dict | None = None
 
 
 class CulqiChargeOut(BaseModel):
@@ -48,6 +53,8 @@ class CulqiChargeOut(BaseModel):
 class CulqiProChargeIn(BaseModel):
     token_id: str = Field(..., min_length=10)
     email: EmailStr
+    device_id: str | None = None
+    authentication_3ds: dict | None = None
 
 
 class CulqiProChargeOut(BaseModel):
@@ -55,6 +62,23 @@ class CulqiProChargeOut(BaseModel):
     suscripcion_id: int
     inicio: datetime
     fin: datetime | None
+
+
+class CulqiSubscriptionOut(BaseModel):
+    subscription_id: str
+    status: str | None = None
+    email: EmailStr | None = None
+    card_id: str | None = None
+    plan_id: str | None = None
+    customer_id: str | None = None
+
+
+class CulqiSubscriptionCardIn(BaseModel):
+    token_id: str = Field(..., min_length=10)
+
+
+class CulqiSubscriptionEmailIn(BaseModel):
+    email: EmailStr
 
 
 CULQI_API_BASE = "https://api.culqi.com"
@@ -87,17 +111,17 @@ def _require_secret_key(secret_key: str | None, *, label: str) -> str:
     return secret_key
 
 
-def _culqi_post(secret_key: str, path: str, data: dict) -> dict:
+def _culqi_request_raw(secret_key: str, method: str, path: str, data: dict | None = None) -> tuple[int, dict]:
     url = f"{CULQI_API_BASE}{path}"
     headers = {
         "Authorization": f"Bearer {secret_key}",
         "Content-Type": "application/json",
     }
-    safe_data = _redact(data)
+    safe_data = _redact(data or {})
     try:
-        resp = requests.post(url, json=data, headers=headers, timeout=20)
+        resp = requests.request(method, url, json=data, headers=headers, timeout=20)
     except Exception as exc:
-        logger.exception("Culqi request error (path=%s, data=%s)", path, safe_data)
+        logger.exception("Culqi request error (method=%s, path=%s, data=%s)", method, path, safe_data)
         raise HTTPException(status_code=502, detail=f"Error al comunicarse con Culqi: {exc}")
 
     try:
@@ -106,12 +130,54 @@ def _culqi_post(secret_key: str, path: str, data: dict) -> dict:
         logger.error("Culqi response no JSON (status=%s): %s", resp.status_code, resp.text)
         raise HTTPException(status_code=502, detail="Respuesta inesperada de Culqi")
 
-    if resp.status_code >= 400 or payload.get("object") == "error":
-        msg = payload.get("user_message") or payload.get("merchant_message") or payload.get("message") or "Error en Culqi"
-        logger.error("Culqi error response (status=%s, path=%s, data=%s): %s", resp.status_code, path, safe_data, payload)
-        raise HTTPException(status_code=502, detail=msg)
+    return resp.status_code, payload
 
+
+def _culqi_post_raw(secret_key: str, path: str, data: dict) -> tuple[int, dict]:
+    return _culqi_request_raw(secret_key, "POST", path, data)
+
+
+def _culqi_get(secret_key: str, path: str) -> dict:
+    status, payload = _culqi_request_raw(secret_key, "GET", path, None)
+    if status >= 400 or payload.get("object") == "error":
+        msg = payload.get("user_message") or payload.get("merchant_message") or payload.get("message") or "Error en Culqi"
+        logger.error("Culqi error response (status=%s, path=%s): %s", status, path, payload)
+        raise HTTPException(status_code=502, detail=msg)
     return payload
+
+
+def _culqi_patch(secret_key: str, path: str, data: dict) -> dict:
+    status, payload = _culqi_request_raw(secret_key, "PATCH", path, data)
+    if status >= 400 or payload.get("object") == "error":
+        msg = payload.get("user_message") or payload.get("merchant_message") or payload.get("message") or "Error en Culqi"
+        logger.error("Culqi error response (status=%s, path=%s, data=%s): %s", status, path, _redact(data), payload)
+        raise HTTPException(status_code=502, detail=msg)
+    return payload
+
+
+def _culqi_post(secret_key: str, path: str, data: dict) -> dict:
+    status, payload = _culqi_post_raw(secret_key, path, data)
+    if status >= 400 or payload.get("object") == "error":
+        msg = payload.get("user_message") or payload.get("merchant_message") or payload.get("message") or "Error en Culqi"
+        logger.error("Culqi error response (status=%s, path=%s, data=%s): %s", status, path, _redact(data), payload)
+        raise HTTPException(status_code=502, detail=msg)
+    return payload
+
+
+def _build_antifraud_details(device_id: str | None, *, email: str, first_name: str | None, last_name: str | None, phone: str | None) -> dict | None:
+    if not device_id:
+        return None
+    details = {
+        "device_finger_print_id": device_id,
+        "email": email,
+    }
+    if first_name:
+        details["first_name"] = first_name
+    if last_name:
+        details["last_name"] = last_name
+    if phone:
+        details["phone_number"] = phone
+    return details
 
 
 def _get_pro_plan(db: Session) -> Plan:
@@ -184,6 +250,18 @@ def _require_owner_pro(db: Session, owner_id: int) -> None:
     _, plan = fila
     if "pro" not in (plan.codigo or "").lower():
         raise HTTPException(status_code=403, detail="El propietario no tiene PRO activo")
+
+
+def _get_active_culqi_subscription(db: Session, user_id: int) -> Suscripcion:
+    fila = (
+        db.query(Suscripcion)
+        .filter(Suscripcion.user_id == user_id, Suscripcion.estado == "activa", Suscripcion.proveedor == "culqi")
+        .order_by(Suscripcion.inicio.desc())
+        .first()
+    )
+    if not fila or not fila.proveedor_ref:
+        raise HTTPException(status_code=404, detail="No hay suscripci?n Culqi activa")
+    return fila
 
 
 @router.post("/subscribe", response_model=CulqiSubscribeOut)
@@ -336,24 +414,42 @@ def charge(payload: CulqiChargeIn, db: Session = Depends(get_db)):
         if amount_cents <= 0:
             raise HTTPException(status_code=400, detail="Monto inválido")
 
-        charge = _culqi_post(
+        charge_body = {
+            "amount": amount_cents,
+            "currency_code": "PEN",
+            "email": payload.email,
+            "source_id": payload.token_id,
+            "description": f"Reserva cancha #{cancha.id}",
+            "metadata": {
+                "cancha_id": cancha.id,
+                "complejo_id": cancha.complejo_id,
+                "owner_id": owner_id,
+                "start_at": payload.start_at.isoformat(),
+                "end_at": payload.end_at.isoformat(),
+            },
+        }
+        antifraud = _build_antifraud_details(
+            payload.device_id,
+            email=payload.email,
+            first_name=payload.first_name,
+            last_name=payload.last_name,
+            phone=payload.phone,
+        )
+        if antifraud:
+            charge_body["antifraud_details"] = antifraud
+        if payload.authentication_3ds:
+            charge_body["authentication_3DS"] = payload.authentication_3ds
+
+        status, charge = _culqi_post_raw(
             _require_secret_key(sk, label="propietario"),
             "/v2/charges",
-            {
-                "amount": amount_cents,
-                "currency_code": "PEN",
-                "email": payload.email,
-                "source_id": payload.token_id,
-                "description": f"Reserva cancha #{cancha.id}",
-                "metadata": {
-                    "cancha_id": cancha.id,
-                    "complejo_id": cancha.complejo_id,
-                    "owner_id": owner_id,
-                    "start_at": payload.start_at.isoformat(),
-                    "end_at": payload.end_at.isoformat(),
-                },
-            },
+            charge_body,
         )
+        if status == 200 and charge.get("action_code") == "REVIEW":
+            raise HTTPException(status_code=409, detail="3DS_REQUIRED")
+        if status >= 400 or charge.get("object") == "error":
+            msg = charge.get("user_message") or charge.get("merchant_message") or charge.get("message") or "Error en Culqi"
+            raise HTTPException(status_code=502, detail=msg)
 
         charge_id = charge.get("id")
         if not charge_id:
@@ -392,18 +488,36 @@ def charge_pro(payload: CulqiProChargeIn, db: Session = Depends(get_db), u: User
         pro = _get_pro_plan(db)
 
         secret_key = _require_secret_key(settings.CULQI_SECRET_KEY, label="backend")
-        charge = _culqi_post(
+        charge_body = {
+            "amount": 5000,
+            "currency_code": "PEN",
+            "email": payload.email,
+            "source_id": payload.token_id,
+            "description": "Pago mensual PRO (manual)",
+            "metadata": {"user_id": u.id, "plan": "pro"},
+        }
+        antifraud = _build_antifraud_details(
+            payload.device_id,
+            email=payload.email,
+            first_name=u.first_name,
+            last_name=u.last_name,
+            phone=u.phone,
+        )
+        if antifraud:
+            charge_body["antifraud_details"] = antifraud
+        if payload.authentication_3ds:
+            charge_body["authentication_3DS"] = payload.authentication_3ds
+
+        status, charge = _culqi_post_raw(
             secret_key,
             "/v2/charges",
-            {
-                "amount": 5000,
-                "currency_code": "PEN",
-                "email": payload.email,
-                "source_id": payload.token_id,
-                "description": "Pago mensual PRO (manual)",
-                "metadata": {"user_id": u.id, "plan": "pro"},
-            },
+            charge_body,
         )
+        if status == 200 and charge.get("action_code") == "REVIEW":
+            raise HTTPException(status_code=409, detail="3DS_REQUIRED")
+        if status >= 400 or charge.get("object") == "error":
+            msg = charge.get("user_message") or charge.get("merchant_message") or charge.get("message") or "Error en Culqi"
+            raise HTTPException(status_code=502, detail=msg)
 
         charge_id = charge.get("id")
         if not charge_id:
@@ -427,3 +541,55 @@ def charge_pro(payload: CulqiProChargeIn, db: Session = Depends(get_db), u: User
         logger.exception("Error interno en charge_pro")
         raise HTTPException(status_code=500, detail=f"Error interno en pago PRO: {exc}")
 
+
+
+@router.get("/subscription", response_model=CulqiSubscriptionOut)
+def subscription_status(db: Session = Depends(get_db), u: User = Depends(get_usuario_actual)):
+    s = _get_active_culqi_subscription(db, u.id)
+    secret_key = _require_secret_key(settings.CULQI_SECRET_KEY, label="backend")
+    data = _culqi_get(secret_key, f"/v2/recurrent/subscriptions/{s.proveedor_ref}")
+
+    customer = data.get("customer") or {}
+    return CulqiSubscriptionOut(
+        subscription_id=s.proveedor_ref,
+        status=str(data.get("status")) if data.get("status") is not None else None,
+        email=customer.get("email"),
+        card_id=data.get("active_card") or data.get("card_id"),
+        plan_id=(data.get("plan") or {}).get("plan_id") or data.get("plan_id"),
+        customer_id=customer.get("id") or data.get("customer_id"),
+    )
+
+
+@router.put("/subscription/card")
+def update_subscription_card(payload: CulqiSubscriptionCardIn, db: Session = Depends(get_db), u: User = Depends(get_usuario_actual)):
+    s = _get_active_culqi_subscription(db, u.id)
+    secret_key = _require_secret_key(settings.CULQI_SECRET_KEY, label="backend")
+
+    sub = _culqi_get(secret_key, f"/v2/recurrent/subscriptions/{s.proveedor_ref}")
+    customer = sub.get("customer") or {}
+    customer_id = customer.get("id") or sub.get("customer_id")
+    if not customer_id:
+        raise HTTPException(status_code=502, detail="Culqi no devolvi? customer_id")
+
+    card = _culqi_post(secret_key, "/v2/cards", {"customer_id": customer_id, "token_id": payload.token_id})
+    card_id = card.get("id")
+    if not card_id:
+        raise HTTPException(status_code=502, detail="Culqi no devolvi? card_id")
+
+    _culqi_patch(secret_key, f"/v2/recurrent/subscriptions/{s.proveedor_ref}", {"card_id": card_id})
+    return {"ok": True}
+
+
+@router.put("/subscription/email")
+def update_subscription_email(payload: CulqiSubscriptionEmailIn, db: Session = Depends(get_db), u: User = Depends(get_usuario_actual)):
+    s = _get_active_culqi_subscription(db, u.id)
+    secret_key = _require_secret_key(settings.CULQI_SECRET_KEY, label="backend")
+
+    sub = _culqi_get(secret_key, f"/v2/recurrent/subscriptions/{s.proveedor_ref}")
+    customer = sub.get("customer") or {}
+    customer_id = customer.get("id") or sub.get("customer_id")
+    if not customer_id:
+        raise HTTPException(status_code=502, detail="Culqi no devolvi? customer_id")
+
+    _culqi_patch(secret_key, f"/v2/customers/{customer_id}", {"email": payload.email})
+    return {"ok": True}

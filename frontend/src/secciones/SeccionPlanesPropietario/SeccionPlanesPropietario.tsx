@@ -14,6 +14,7 @@ type PlanActual = {
     plan_codigo?: string | null;
     plan_nombre?: string | null;
     estado?: string | null;
+    proveedor?: string | null;
     inicio?: string | null;
     fin?: string | null;
     dias_restantes?: number | null;
@@ -90,6 +91,7 @@ export default function SeccionPlanesPropietario() {
     }, [plan]);
 
     const [proPagoModo, setProPagoModo] = useState<"suscripcion" | "mensual">("suscripcion");
+    const [deviceId, setDeviceId] = useState<string>("");
 
     const handleCulqiAction = useCallback(async () => {
         const culqi = culqiRef.current;
@@ -123,11 +125,31 @@ export default function SeccionPlanesPropietario() {
                         body: JSON.stringify({ token_id: culqi.token.id }),
                     });
                 } else {
-                    await apiFetch("/payments/culqi/charge-pro", {
-                        token: t,
-                        method: "POST",
-                        body: JSON.stringify({ token_id: culqi.token.id, email: "" }),
-                    });
+                    try {
+                        await apiFetch("/payments/culqi/charge-pro", {
+                            token: t,
+                            method: "POST",
+                            body: JSON.stringify({ token_id: culqi.token.id, email: "", device_id: deviceId }),
+                        });
+                    } catch (err: any) {
+                        if (err?.message === "3DS_REQUIRED") {
+                            const culqi3ds = (window as any).Culqi3DS;
+                            if (!culqi3ds) throw err;
+                            const auth = await culqi3ds.initAuthentication(culqi.token.id);
+                            await apiFetch("/payments/culqi/charge-pro", {
+                                token: t,
+                                method: "POST",
+                                body: JSON.stringify({
+                                    token_id: culqi.token.id,
+                                    email: "",
+                                    device_id: deviceId,
+                                    authentication_3ds: auth,
+                                }),
+                            });
+                        } else {
+                            throw err;
+                        }
+                    }
                 }
 
                 setOk(proPagoModo === "suscripcion" ? "Suscripción PRO activada. ✅" : "Pago mensual PRO registrado. ✅");
@@ -220,6 +242,12 @@ export default function SeccionPlanesPropietario() {
                     const culqi3ds = (window as any).Culqi3DS;
                     if (pk && culqi3ds) {
                         culqi3ds.publicKey = pk;
+                        const maybe = culqi3ds.generateDevice?.();
+                        if (maybe && typeof maybe.then === "function") {
+                            maybe.then((id: string) => setDeviceId(id)).catch(() => {});
+                        } else if (typeof maybe === "string") {
+                            setDeviceId(maybe);
+                        }
                     }
                 }}
             />

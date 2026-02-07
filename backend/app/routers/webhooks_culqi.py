@@ -1,6 +1,7 @@
 from datetime import datetime, timezone, timedelta
 import base64
 import logging
+from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
@@ -76,9 +77,22 @@ async def culqi_webhook(request: Request, db: Session = Depends(get_db)):
         db.commit()
         return {"ok": True}
 
-    # Por defecto, si es update/creation succeeded, extender 30 dias
+    # Por defecto, si es update/creation succeeded, extender 30 dias y activar
     _extend_fin(sus, now)
     sus.estado = "activa"
+
+    # Cancelar otros planes activos del mismo usuario (ej: FREE)
+    if sus.user_id:
+        otros = (
+            db.query(Suscripcion)
+            .filter(Suscripcion.user_id == sus.user_id, Suscripcion.estado == "activa", Suscripcion.id != sus.id)
+            .all()
+        )
+        for o in otros:
+            o.estado = "cancelada"
+            if not o.fin or o.fin > now:
+                o.fin = now
+            db.add(o)
     db.add(sus)
     db.commit()
 

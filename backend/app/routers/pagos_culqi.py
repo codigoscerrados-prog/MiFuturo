@@ -365,23 +365,12 @@ def subscribe(
             raise HTTPException(status_code=502, detail="Culqi no devolvió subscription_id")
 
         now = now_peru()
-        fin = now + timedelta(days=30)
-        # cancelar FREE activo (u otro plan) antes de activar PRO
-        actual = (
-            db.query(Suscripcion)
-            .filter(Suscripcion.user_id == u.id, Suscripcion.estado == "activa")
-            .order_by(Suscripcion.inicio.desc())
-            .first()
-        )
-        if actual and actual.plan_id != pro.id:
-            actual.estado = "cancelada"
-            db.add(actual)
         s = Suscripcion(
             user_id=u.id,
             plan_id=pro.id,
-            estado="activa",
+            estado="pendiente",
             inicio=now,
-            fin=fin,
+            fin=None,
             proveedor="culqi",
             proveedor_ref=subscription_id,
         )

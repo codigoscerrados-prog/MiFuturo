@@ -264,7 +264,7 @@ export default function SeccionPanel({
                 });
                 const p = await apiFetch<PlanActual>("/perfil/plan", { token: t });
                 setPlan(p);
-                setOk("Pago realizado. Ya estás en PRO ✅");
+                setOk("Pago en proceso. Te avisaremos cuando se active PRO.");
                 setShowProModal(false);
                 router.refresh();
             } catch (e: any) {

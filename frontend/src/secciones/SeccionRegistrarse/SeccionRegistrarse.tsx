@@ -270,22 +270,56 @@ export default function SeccionRegistrarse({
                             <div className={styles.filas}>
                                 <label className={styles.campo}>
                                     <span className={styles.label}>Nombres</span>
-                                    <input className={styles.input} value={first_name} onChange={(e) => setFirst(e.target.value)} required />
+                                    <input
+                                        id="first_name"
+                                        name="first_name"
+                                        autoComplete="given-name"
+                                        className={styles.input}
+                                        value={first_name}
+                                        onChange={(e) => setFirst(e.target.value)}
+                                        required
+                                    />
                                 </label>
 
                                 <label className={styles.campo}>
                                     <span className={styles.label}>Apellidos</span>
-                                    <input className={styles.input} value={last_name} onChange={(e) => setLast(e.target.value)} required />
+                                    <input
+                                        id="last_name"
+                                        name="last_name"
+                                        autoComplete="family-name"
+                                        className={styles.input}
+                                        value={last_name}
+                                        onChange={(e) => setLast(e.target.value)}
+                                        required
+                                    />
                                 </label>
 
                                 <label className={styles.campo}>
                                     <span className={styles.label}>Correo</span>
-                                    <input className={styles.input} value={email} onChange={(e) => setEmail(e.target.value)} type="email" required />
+                                    <input
+                                        id="email"
+                                        name="email"
+                                        autoComplete="email"
+                                        className={styles.input}
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        type="email"
+                                        required
+                                    />
                                 </label>
 
                                 <label className={styles.campo}>
                                     <span className={styles.label}>Teléfono</span>
-                                    <input className={styles.input} value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" placeholder="Ej: 922023667" />
+                                    <input
+                                        id="phone"
+                                        name="phone"
+                                        autoComplete="tel"
+                                        className={styles.input}
+                                        value={phone}
+                                        onChange={(e) => setPhone(e.target.value)}
+                                        inputMode="tel"
+                                        placeholder="Ej: 922023667"
+                                    />
                                 </label>
 
                                 <label className={styles.campo}>
@@ -297,6 +331,9 @@ export default function SeccionRegistrarse({
                                             onChange={(e) => setPass(e.target.value)}
                                             type={showPass ? "text" : "password"}
                                             required
+                                            id="password"
+                                            name="password"
+                                            autoComplete="new-password"
                                         />
                                         <button
                                             type="button"
@@ -320,6 +357,9 @@ export default function SeccionRegistrarse({
                                             onChange={(e) => setPass2(e.target.value)}
                                             type={showPass2 ? "text" : "password"}
                                             required
+                                            id="password_confirm"
+                                            name="password_confirm"
+                                            autoComplete="new-password"
                                         />
                                         <button
                                             type="button"
@@ -336,7 +376,15 @@ export default function SeccionRegistrarse({
                                 {role === "propietario" && (
                                     <label className={styles.campoFull}>
                                         <span className={styles.label}>Nombre del negocio *</span>
-                                        <input className={styles.input} value={business_name} onChange={(e) => setBusiness(e.target.value)} required />
+                                        <input
+                                            id="business_name"
+                                            name="business_name"
+                                            autoComplete="organization"
+                                            className={styles.input}
+                                            value={business_name}
+                                            onChange={(e) => setBusiness(e.target.value)}
+                                            required
+                                        />
                                     </label>
                                 )}
                             </div>

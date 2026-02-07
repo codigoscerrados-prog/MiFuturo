@@ -254,17 +254,23 @@ export default function SeccionPanel({
             }
             try {
                 setPagandoPro(true);
+                setError(null);
+                setOk(null);
+                culqiRef.current?.close?.();
                 await apiFetch("/payments/culqi/subscribe", {
                     token: t,
                     method: "POST",
                     body: JSON.stringify({ token_id: culqi.token.id }),
                 });
-                setShowProModal(false);
                 const p = await apiFetch<PlanActual>("/perfil/plan", { token: t });
                 setPlan(p);
+                setOk("Pago realizado. Ya estás en PRO ✅");
+                setShowProModal(false);
+                router.refresh();
             } catch (e: any) {
                 setError(e?.message || "No se pudo activar PRO.");
             } finally {
+                culqiRef.current?.close?.();
                 setPagandoPro(false);
             }
         };

@@ -216,6 +216,17 @@ def _extend_or_create_pro(db: Session, user_id: int, pro_id: int) -> Suscripcion
         db.refresh(actual)
         return actual
 
+    # cancelar cualquier plan activo que no sea PRO
+    other = (
+        db.query(Suscripcion)
+        .filter(Suscripcion.user_id == user_id, Suscripcion.estado == "activa", Suscripcion.plan_id != pro_id)
+        .order_by(Suscripcion.inicio.desc())
+        .first()
+    )
+    if other:
+        other.estado = "cancelada"
+        db.add(other)
+
     fin = now + timedelta(days=30)
     s = Suscripcion(
         user_id=user_id,
@@ -355,6 +366,16 @@ def subscribe(
 
         now = now_peru()
         fin = now + timedelta(days=30)
+        # cancelar FREE activo (u otro plan) antes de activar PRO
+        actual = (
+            db.query(Suscripcion)
+            .filter(Suscripcion.user_id == u.id, Suscripcion.estado == "activa")
+            .order_by(Suscripcion.inicio.desc())
+            .first()
+        )
+        if actual and actual.plan_id != pro.id:
+            actual.estado = "cancelada"
+            db.add(actual)
         s = Suscripcion(
             user_id=u.id,
             plan_id=pro.id,

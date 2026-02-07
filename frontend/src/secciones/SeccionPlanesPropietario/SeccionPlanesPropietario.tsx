@@ -58,6 +58,7 @@ export default function SeccionPlanesPropietario() {
     const [plan, setPlan] = useState<PlanActual | null>(null);
     const [cargando, setCargando] = useState(true);
     const [activando, setActivando] = useState(false);
+    const [activandoFree, setActivandoFree] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [ok, setOk] = useState<string | null>(null);
 
@@ -103,6 +104,22 @@ export default function SeccionPlanesPropietario() {
         }
     }
 
+    async function activarFree() {
+        const t = token || getToken();
+        if (!t) return router.push("/iniciar-sesion");
+        try {
+            setError(null);
+            setOk(null);
+            setActivandoFree(true);
+            await apiFetch("/perfil/plan/activar-free", { token: t, method: "POST" });
+            router.push("/panel");
+        } catch (e: any) {
+            setError(e?.message || "No se pudo activar el plan FREE.");
+        } finally {
+            setActivandoFree(false);
+        }
+    }
+
     return (
         <section className={styles.seccion}>
             <div className="container-fluid px-3 px-lg-5">
@@ -139,8 +156,12 @@ export default function SeccionPlanesPropietario() {
                                             <div className={styles.colHead}>
                                                 <span className={styles.planName}>Free</span>
                                                 <span className={styles.planPrice}>S/ 0</span>
-                                                <button className={`btn btn-outline-primary btn-sm ${styles.ctaInline}`} onClick={() => router.push("/panel")}>
-                                                    Continuar
+                                                <button
+                                                    className={`btn btn-outline-primary btn-sm ${styles.ctaInline}`}
+                                                    onClick={activarFree}
+                                                    disabled={activandoFree}
+                                                >
+                                                    {activandoFree ? "Activando…" : "Continuar"}
                                                 </button>
                                             </div>
                                         </th>

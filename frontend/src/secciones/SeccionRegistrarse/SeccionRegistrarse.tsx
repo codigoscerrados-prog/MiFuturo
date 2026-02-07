@@ -60,6 +60,19 @@ export default function SeccionRegistrarse({
     const [cargando, setCargando] = useState(false);
     const [error, setError] = useState("");
 
+    const passwordError = useMemo(() => {
+        if (!password) return "";
+        if (password.length < 6) return "Mínimo 6 caracteres.";
+        if (!/[@#]/.test(password)) return "Debe incluir al menos @ o #.";
+        return "";
+    }, [password]);
+
+    const password2Error = useMemo(() => {
+        if (!password2) return "";
+        if (password !== password2) return "Las contraseñas no coinciden.";
+        return "";
+    }, [password, password2]);
+
     useEffect(() => {
         if (defaultRole) setRole(defaultRole);
     }, [defaultRole]);
@@ -265,13 +278,6 @@ export default function SeccionRegistrarse({
                                     <input className={styles.input} value={last_name} onChange={(e) => setLast(e.target.value)} required />
                                 </label>
 
-                                {role === "propietario" && (
-                                    <label className={styles.campoFull}>
-                                        <span className={styles.label}>Nombre del negocio *</span>
-                                        <input className={styles.input} value={business_name} onChange={(e) => setBusiness(e.target.value)} required />
-                                    </label>
-                                )}
-
                                 <label className={styles.campo}>
                                     <span className={styles.label}>Correo</span>
                                     <input className={styles.input} value={email} onChange={(e) => setEmail(e.target.value)} type="email" required />
@@ -302,6 +308,7 @@ export default function SeccionRegistrarse({
                                         </button>
                                     </div>
                                     <span className={styles.hint}>Mínimo 6 caracteres, incluye @ o #.</span>
+                                    {passwordError ? <span className={styles.hintBad}>{passwordError}</span> : null}
                                 </label>
 
                                 <label className={styles.campo}>
@@ -323,8 +330,15 @@ export default function SeccionRegistrarse({
                                             <i className={`bi ${showPass2 ? "bi-eye-slash" : "bi-eye"}`} aria-hidden="true"></i>
                                         </button>
                                     </div>
-                                    {password2 && password !== password2 && <span className={styles.hintBad}>Las contraseñas no coinciden.</span>}
+                                    {password2Error ? <span className={styles.hintBad}>{password2Error}</span> : null}
                                 </label>
+
+                                {role === "propietario" && (
+                                    <label className={styles.campoFull}>
+                                        <span className={styles.label}>Nombre del negocio *</span>
+                                        <input className={styles.input} value={business_name} onChange={(e) => setBusiness(e.target.value)} required />
+                                    </label>
+                                )}
                             </div>
 
                             <div className={styles.acciones}>

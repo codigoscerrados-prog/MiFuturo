@@ -226,6 +226,11 @@ def activar_pro_trial(db: Session = Depends(get_db), u: User = Depends(get_usuar
             dias_restantes=dias,
         )
 
+    # cancelar FREE activo (si existiera)
+    if actual and actual.plan_id != pro.id:
+        actual.estado = "cancelada"
+        db.add(actual)
+
     fin = now + timedelta(days=30)
     s = Suscripcion(
         user_id=u.id,
@@ -250,6 +255,72 @@ def activar_pro_trial(db: Session = Depends(get_db), u: User = Depends(get_usuar
         inicio=s.inicio,
         fin=s.fin,
         dias_restantes=dias,
+    )
+
+
+@router.post("/plan/activar-free", response_model=PlanActualOut)
+def activar_free(db: Session = Depends(get_db), u: User = Depends(get_usuario_actual)):
+    if u.role != "propietario":
+        raise HTTPException(status_code=403, detail="Solo propietarios pueden activar FREE")
+
+    now = now_peru()
+    free = db.query(Plan).filter(Plan.codigo == "free").first() or db.query(Plan).filter(Plan.id == 1).first()
+    if not free:
+        raise HTTPException(status_code=500, detail="No existe el plan FREE")
+
+    actual = (
+        db.query(Suscripcion)
+        .filter(Suscripcion.user_id == u.id, Suscripcion.estado == "activa")
+        .order_by(Suscripcion.inicio.desc())
+        .first()
+    )
+    if actual:
+        # si ya tiene FREE activo, devolvemos ese plan
+        if actual.plan_id == free.id:
+            return PlanActualOut(
+                plan_id=free.id,
+                plan_codigo=free.codigo,
+                plan_nombre=free.nombre,
+                estado=actual.estado,
+                proveedor=actual.proveedor,
+                inicio=actual.inicio,
+                fin=actual.fin,
+            )
+        # si tiene PRO activo, no degradar
+        pro = db.query(Plan).filter(Plan.codigo == "pro").first() or db.query(Plan).filter(Plan.id == 2).first()
+        if pro and actual.plan_id == pro.id and (actual.fin is None or actual.fin > now):
+            return PlanActualOut(
+                plan_id=pro.id,
+                plan_codigo=pro.codigo,
+                plan_nombre=pro.nombre,
+                estado=actual.estado,
+                proveedor=actual.proveedor,
+                inicio=actual.inicio,
+                fin=actual.fin,
+            )
+
+        # cancelar otro plan activo para activar FREE
+        actual.estado = "cancelada"
+        db.add(actual)
+
+    nuevo = Suscripcion(
+        user_id=u.id,
+        plan_id=free.id,
+        estado="activa",
+        inicio=now,
+    )
+    db.add(nuevo)
+    db.commit()
+    db.refresh(nuevo)
+
+    return PlanActualOut(
+        plan_id=free.id,
+        plan_codigo=free.codigo,
+        plan_nombre=free.nombre,
+        estado=nuevo.estado,
+        proveedor=nuevo.proveedor,
+        inicio=nuevo.inicio,
+        fin=nuevo.fin,
     )
 
 

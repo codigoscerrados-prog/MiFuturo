@@ -53,6 +53,23 @@ def _find_subscription_id(value: object) -> str | None:
 def _extract_subscription_id(payload: dict) -> str | None:
     if not payload:
         return None
+    # Algunos webhooks envían data como string JSON
+    data = payload.get("data")
+    if isinstance(data, str):
+        try:
+            import json
+            parsed = json.loads(data)
+            found = _find_subscription_id(parsed)
+            if found:
+                return found
+        except Exception:
+            pass
+    # Otros envían message.object con subsId
+    message = payload.get("message")
+    if isinstance(message, dict):
+        found = _find_subscription_id(message)
+        if found:
+            return found
     found = _find_subscription_id(payload)
     if found:
         return found

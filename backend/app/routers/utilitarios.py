@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.core.crypto import decrypt_secret, encrypt_secret
 from app.core.deps import get_db, get_usuario_actual
 from app.modelos.modelos import PaymentIntegration, Plan, Suscripcion, User
+from app.utils.time import now_peru
 
 router = APIRouter(prefix="/panel/utilitarios", tags=["utilitarios"])
 
@@ -25,7 +26,7 @@ class CulqiConfigIn(BaseModel):
 
 
 def _require_pro(db: Session, user_id: int) -> None:
-    now = datetime.now(timezone.utc)
+    now = now_peru()
     fila = (
         db.query(Suscripcion, Plan)
         .join(Plan, Plan.id == Suscripcion.plan_id)

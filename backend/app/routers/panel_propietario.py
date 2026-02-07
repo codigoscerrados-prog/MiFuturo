@@ -17,6 +17,7 @@ from app.core.deps import get_db, require_role, get_usuario_actual
 from app.core.images import resize_square_image, save_upload, safe_unlink_upload
 from app.core.slug import slugify
 from app.modelos.modelos import Complejo, Cancha, CanchaImagen, Reserva, Plan, Suscripcion, User
+from app.utils.time import now_peru
 from app.esquemas.esquemas import (
     ComplejoCrear,
     ComplejoActualizar,
@@ -49,7 +50,7 @@ def _slug_base(nombre: str) -> str:
     return base or "complejo"
 
 def _plan_actual(db: Session, user_id: int) -> Plan | None:
-    now = datetime.now(timezone.utc)
+    now = now_peru()
     fila = (
         db.query(Suscripcion, Plan)
         .join(Plan, Plan.id == Suscripcion.plan_id)

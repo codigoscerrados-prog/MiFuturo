@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from app.core.deps import get_db, require_role, get_usuario_actual
 from app.modelos.modelos import ReclamoCancha, Cancha, User
 from app.esquemas.esquemas import ReclamoCrear, ReclamoOut, ReclamoResolver
+from app.utils.time import now_peru
 
 router = APIRouter(prefix="/reclamos", tags=["reclamos"])
 
@@ -38,7 +39,7 @@ def resolver(reclamo_id: int, payload: ReclamoResolver, db: Session = Depends(ge
 
     r.estado = payload.estado
     r.resuelto_por = admin.id
-    r.resuelto_en = datetime.now(timezone.utc)
+    r.resuelto_en = now_peru()
 
     if payload.estado == "aprobado":
         if not payload.nuevo_owner_id:

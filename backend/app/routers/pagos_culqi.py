@@ -12,6 +12,7 @@ from app.core.config import settings
 from app.core.crypto import decrypt_secret
 from app.core.deps import get_db, get_usuario_actual
 from app.modelos.modelos import Cancha, Complejo, PaymentIntegration, Plan, Reserva, Suscripcion, User
+from app.utils.time import now_peru
 
 logger = logging.getLogger(__name__)
 
@@ -201,7 +202,7 @@ def _get_pro_plan(db: Session) -> Plan:
 
 
 def _extend_or_create_pro(db: Session, user_id: int, pro_id: int) -> Suscripcion:
-    now = datetime.now(timezone.utc)
+    now = now_peru()
     actual = (
         db.query(Suscripcion)
         .filter(Suscripcion.user_id == user_id, Suscripcion.plan_id == pro_id, Suscripcion.estado == "activa")
@@ -231,7 +232,7 @@ def _extend_or_create_pro(db: Session, user_id: int, pro_id: int) -> Suscripcion
 
 
 def _has_active_pro(db: Session, user_id: int, pro_id: int) -> bool:
-    now = datetime.now(timezone.utc)
+    now = now_peru()
     actual = (
         db.query(Suscripcion)
         .filter(Suscripcion.user_id == user_id, Suscripcion.estado == "activa")
@@ -246,7 +247,7 @@ def _has_active_pro(db: Session, user_id: int, pro_id: int) -> bool:
 
 
 def _require_owner_pro(db: Session, owner_id: int) -> None:
-    now = datetime.now(timezone.utc)
+    now = now_peru()
     fila = (
         db.query(Suscripcion, Plan)
         .join(Plan, Plan.id == Suscripcion.plan_id)
@@ -352,7 +353,7 @@ def subscribe(
         if not subscription_id:
             raise HTTPException(status_code=502, detail="Culqi no devolvió subscription_id")
 
-        now = datetime.now(timezone.utc)
+        now = now_peru()
         fin = now + timedelta(days=30)
         s = Suscripcion(
             user_id=u.id,

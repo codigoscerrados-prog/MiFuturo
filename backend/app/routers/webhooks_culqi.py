@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.deps import get_db
 from app.modelos.modelos import Suscripcion
+from app.utils.time import now_peru
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +66,7 @@ async def culqi_webhook(request: Request, db: Session = Depends(get_db)):
         logger.warning("Webhook sin suscripcion local: %s", sub_id)
         return {"ok": True}
 
-    now = datetime.now(timezone.utc)
+    now = now_peru()
 
     if "cancel" in event_type or status == "failed":
         sus.estado = "cancelada"

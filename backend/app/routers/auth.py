@@ -14,6 +14,7 @@ from app.core.config import settings
 from app.core.seguridad import hash_password, verify_password, crear_token
 from app.modelos.modelos import User, Plan, Suscripcion, LoginOtp
 from app.utils.mailer import send_email
+from app.utils.time import now_peru
 from app.esquemas.esquemas import (
     UsuarioCrear,
     UsuarioOut,
@@ -96,7 +97,7 @@ def register(payload: UsuarioCrear, background_tasks: BackgroundTasks, db: Sessi
 
         db.commit()
         db.refresh(u)
-        registered_at = datetime.now(timezone.utc)
+        registered_at = now_peru()
         background_tasks.add_task(
             send_email,
             u.email,
@@ -301,7 +302,7 @@ def request_otp(payload: OtpRequestIn, background_tasks: BackgroundTasks, db: Se
     code = f"{secrets.randbelow(1_000_000):06d}"
     code_hash = hash_password(code)
 
-    now = datetime.now(timezone.utc)
+    now = now_peru()
     expires_at = now + timedelta(minutes=10)
 
     otp = db.query(LoginOtp).filter(LoginOtp.email == email).first()
@@ -353,7 +354,7 @@ def verify_otp(payload: OtpVerifyIn, db: Session = Depends(get_db)):
     if otp.attempts >= 5:
         raise HTTPException(status_code=429, detail="Demasiados intentos. Solicita otro codigo.")
 
-    now = datetime.now(timezone.utc)
+    now = now_peru()
     if otp.expires_at < now:
         db.delete(otp)
         db.commit()

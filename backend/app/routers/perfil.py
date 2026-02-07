@@ -8,6 +8,7 @@ from app.core.deps import get_db, get_usuario_actual
 from app.core.images import safe_unlink_upload, save_upload
 from app.modelos.modelos import User, Suscripcion, Plan
 from app.esquemas.panel import PerfilOut, PerfilUpdate, PlanActualOut
+from app.utils.time import now_peru
 
 
 router = APIRouter(prefix="/perfil", tags=["perfil"])
@@ -74,7 +75,7 @@ async def subir_avatar(
 
 @router.get("/plan", response_model=PlanActualOut)
 def mi_plan(db: Session = Depends(get_db), u: User = Depends(get_usuario_actual)):
-    now = datetime.now(timezone.utc)
+    now = now_peru()
 
     fila = (
         db.query(Suscripcion, Plan)
@@ -184,7 +185,7 @@ def activar_pro_trial(db: Session = Depends(get_db), u: User = Depends(get_usuar
     if u.role != "propietario":
         raise HTTPException(status_code=403, detail="Solo propietarios pueden activar PRO")
 
-    now = datetime.now(timezone.utc)
+    now = now_peru()
 
     # buscamos el plan PRO por código (recomendado) o por id=2 como fallback
     pro = db.query(Plan).filter(Plan.codigo == "pro").first() or db.query(Plan).filter(Plan.id == 2).first()

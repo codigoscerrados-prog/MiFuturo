@@ -146,6 +146,19 @@ def _culqi_get(secret_key: str, path: str) -> dict:
     return payload
 
 
+def _culqi_get_customer_by_email(secret_key: str, email: str) -> str | None:
+    from urllib.parse import quote
+
+    if not email:
+        return None
+    data = _culqi_get(secret_key, f"/v2/customers?email={quote(email)}")
+    items = data.get("data") if isinstance(data, dict) else None
+    if isinstance(items, list) and items:
+        item = items[0] or {}
+        return item.get("id")
+    return None
+
+
 def _culqi_patch(secret_key: str, path: str, data: dict) -> dict:
     status, payload = _culqi_request_raw(secret_key, "PATCH", path, data)
     if status >= 400 or payload.get("object") == "error":
@@ -287,10 +300,14 @@ def subscribe(
 
         secret_key = _require_secret_key(settings.CULQI_SECRET_KEY, label="backend")
 
+        customer_email = (payload.email or u.email or "").strip()
+        if not customer_email:
+            raise HTTPException(status_code=400, detail="Falta email para crear customer en Culqi")
+
         customer_data = {
             "first_name": u.first_name,
             "last_name": u.last_name,
-            "email": payload.email or u.email,
+            "email": customer_email,
             "country_code": "PE",
         }
         if not customer_data.get("address"):
@@ -303,8 +320,10 @@ def subscribe(
         if phone:
             customer_data["phone_number"] = phone
 
-        customer = _culqi_post(secret_key, "/v2/customers", customer_data)
-        customer_id = customer.get("id")
+        customer_id = _culqi_get_customer_by_email(secret_key, customer_email)
+        if not customer_id:
+            customer = _culqi_post(secret_key, "/v2/customers", customer_data)
+            customer_id = customer.get("id")
         if not customer_id:
             raise HTTPException(status_code=502, detail="Culqi no devolvió customer_id")
 

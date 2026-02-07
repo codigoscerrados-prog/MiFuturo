@@ -668,13 +668,27 @@ export default function SeccionPanel({
                                     </div>
                                     <div className={styles.proModalBody}>
                                         <div className={styles.proBenefits}>
+                                            <div className={styles.proBadge}>PRO</div>
+                                            <h4 className={styles.proTitle}>Eleva tu complejo</h4>
                                             <p className={styles.proPrice}>Luego {PRO_PRICE_TEXT}</p>
-                                            <ul className={styles.proList}>
-                                                <li>Publica más complejos y canchas</li>
-                                                <li>Reservas y pagos en línea</li>
-                                                <li>Panel con historial y pagos</li>
-                                                <li>Soporte prioritario</li>
-                                            </ul>
+                                            <div className={styles.proList}>
+                                                <div className={styles.proItem}>
+                                                    <span className={styles.proIcon}><i className="bi bi-building" aria-hidden="true"></i></span>
+                                                    <span>Publica más complejos y canchas</span>
+                                                </div>
+                                                <div className={styles.proItem}>
+                                                    <span className={styles.proIcon}><i className="bi bi-credit-card" aria-hidden="true"></i></span>
+                                                    <span>Reservas y pagos en línea</span>
+                                                </div>
+                                                <div className={styles.proItem}>
+                                                    <span className={styles.proIcon}><i className="bi bi-graph-up" aria-hidden="true"></i></span>
+                                                    <span>Historial y reportes en el panel</span>
+                                                </div>
+                                                <div className={styles.proItem}>
+                                                    <span className={styles.proIcon}><i className="bi bi-headset" aria-hidden="true"></i></span>
+                                                    <span>Soporte prioritario</span>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div className={styles.proCheckout}>
                                             <p className={styles.proCheckoutText}>Paga con Culqi y activa PRO al instante.</p>
@@ -686,6 +700,7 @@ export default function SeccionPanel({
                                             >
                                                 {pagandoPro ? "Procesando..." : `Pagar ${PRO_PRICE_TEXT}`}
                                             </button>
+                                            <p className={styles.proNote}>Cancelas cuando quieras. Sin permanencia.</p>
                                         </div>
                                     </div>
                                 </div>

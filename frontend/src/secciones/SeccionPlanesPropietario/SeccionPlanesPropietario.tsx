@@ -212,6 +212,17 @@ export default function SeccionPlanesPropietario() {
     return (
         <section className={styles.seccion}>
             <Script src="https://js.culqi.com/checkout-js" strategy="afterInteractive" onLoad={() => setCulqiReady(true)} />
+            <Script
+                src="https://3ds.culqi.com"
+                strategy="afterInteractive"
+                onLoad={() => {
+                    const pk = process.env.NEXT_PUBLIC_CULQI_PUBLIC_KEY || "";
+                    const culqi3ds = (window as any).Culqi3DS;
+                    if (pk && culqi3ds) {
+                        culqi3ds.publicKey = pk;
+                    }
+                }}
+            />
             <div className="container-fluid px-3 px-lg-5">
                 <div className={styles.head}>
                     <p className={styles.kicker}>Planes para propietarios</p>

@@ -518,6 +518,17 @@ export default function ReservaWhatsappModal({
             }}
         >
             <Script src="https://js.culqi.com/checkout-js" strategy="afterInteractive" onLoad={() => setCulqiReady(true)} />
+            <Script
+                src="https://3ds.culqi.com"
+                strategy="afterInteractive"
+                onLoad={() => {
+                    const pk = complejo?.culqiPk || "";
+                    const culqi3ds = (window as any).Culqi3DS;
+                    if (pk && culqi3ds) {
+                        culqi3ds.publicKey = pk;
+                    }
+                }}
+            />
             <div className={`card border-0 shadow-lg ${styles.modalCard} ${styles.modalCardLarge}`}>
                 <div className={`d-flex gap-3 justify-content-between align-items-start ${styles.modalHeader}`}>
                     <div>

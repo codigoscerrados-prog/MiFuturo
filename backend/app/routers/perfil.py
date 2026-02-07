@@ -77,6 +77,26 @@ async def subir_avatar(
 def mi_plan(db: Session = Depends(get_db), u: User = Depends(get_usuario_actual)):
     now = now_peru()
 
+    # info de ultimo intento Culqi (para mostrar mensajes)
+    culqi_estado = None
+    culqi_mensaje = None
+    ultimo_culqi = (
+        db.query(Suscripcion)
+        .filter(Suscripcion.user_id == u.id, Suscripcion.proveedor == "culqi")
+        .order_by(Suscripcion.inicio.desc())
+        .first()
+    )
+    if ultimo_culqi:
+        estado_c = (ultimo_culqi.estado or "").lower()
+        if estado_c in {"pendiente", "rechazada", "cancelada"}:
+            culqi_estado = estado_c
+            if estado_c == "pendiente":
+                culqi_mensaje = "Pago en proceso. Espera la confirmación de Culqi."
+            elif estado_c == "rechazada":
+                culqi_mensaje = "Culqi rechazó el pago. Intenta nuevamente o usa otra tarjeta."
+            elif estado_c == "cancelada":
+                culqi_mensaje = "La suscripción Culqi fue cancelada."
+
     fila = (
         db.query(Suscripcion, Plan)
         .join(Plan, Plan.id == Suscripcion.plan_id)
@@ -104,6 +124,8 @@ def mi_plan(db: Session = Depends(get_db), u: User = Depends(get_usuario_actual)
                 proveedor=None,
                 trial_disponible=trial_disponible,
                 trial_expirado=False,
+                culqi_estado=culqi_estado,
+                culqi_mensaje=culqi_mensaje,
             )
         p = db.query(Plan).filter(Plan.codigo == "free").first() or db.query(Plan).filter(Plan.id == 1).first()
         if not p:
@@ -116,6 +138,8 @@ def mi_plan(db: Session = Depends(get_db), u: User = Depends(get_usuario_actual)
             proveedor=None,
             trial_disponible=trial_disponible,
             trial_expirado=False,
+            culqi_estado=culqi_estado,
+            culqi_mensaje=culqi_mensaje,
         )
 
     s, p = fila
@@ -150,6 +174,8 @@ def mi_plan(db: Session = Depends(get_db), u: User = Depends(get_usuario_actual)
             trial_expirado=True,
             inicio=nuevo.inicio,
             fin=nuevo.fin,
+            culqi_estado=culqi_estado,
+            culqi_mensaje=culqi_mensaje,
         )
 
     dias = None
@@ -178,6 +204,8 @@ def mi_plan(db: Session = Depends(get_db), u: User = Depends(get_usuario_actual)
         inicio=s.inicio,
         fin=s.fin,
         dias_restantes=dias,
+        culqi_estado=culqi_estado,
+        culqi_mensaje=culqi_mensaje,
     )
 
 @router.post("/plan/activar-pro-trial", response_model=PlanActualOut)

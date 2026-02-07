@@ -107,7 +107,15 @@ async def culqi_webhook(request: Request, db: Session = Depends(get_db)):
 
     now = now_peru()
 
-    if "cancel" in event_type or status == "failed":
+    if status == "failed":
+        sus.estado = "rechazada"
+        if not sus.fin or sus.fin > now:
+            sus.fin = now
+        db.add(sus)
+        db.commit()
+        return {"ok": True}
+
+    if "cancel" in event_type:
         sus.estado = "cancelada"
         if not sus.fin or sus.fin > now:
             sus.fin = now
@@ -115,7 +123,14 @@ async def culqi_webhook(request: Request, db: Session = Depends(get_db)):
         db.commit()
         return {"ok": True}
 
-    # Por defecto, si es update/creation succeeded, extender 30 dias y activar
+    # Si es creation.succeeded, solo dejamos pendiente (no activamos hasta primer cobro)
+    if "creation" in event_type:
+        sus.estado = "pendiente"
+        db.add(sus)
+        db.commit()
+        return {"ok": True}
+
+    # Para update.succeeded, extender 30 dias y activar
     _extend_fin(sus, now)
     sus.estado = "activa"
 

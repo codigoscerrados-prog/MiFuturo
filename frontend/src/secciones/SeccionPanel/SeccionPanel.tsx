@@ -42,6 +42,8 @@ export type PlanActual = {
     inicio?: string | null;
     fin?: string | null;
     dias_restantes?: number | null;
+    culqi_estado?: string | null;
+    culqi_mensaje?: string | null;
 };
 
 type HistorialRegistro = {
@@ -677,6 +679,9 @@ export default function SeccionPanel({
                         ) : null}
 
                         {error ? <div className={styles.alertError}>{error}</div> : null}
+                        {!error && plan?.culqi_mensaje ? (
+                            <div className={styles.alertError}>{plan.culqi_mensaje}</div>
+                        ) : null}
                         {ok ? <div className={styles.alertOk}>{ok}</div> : null}
 
                         {showProModal ? (

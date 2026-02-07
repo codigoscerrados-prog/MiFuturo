@@ -14,8 +14,14 @@ from app.modelos.modelos import Cancha, Complejo, PaymentIntegration, Plan, Rese
 
 try:
     from culqi2.client import Culqi
-except Exception:  # pragma: no cover - si la dependencia no est? instalada
-    Culqi = None
+except Exception:  # pragma: no cover - fallback a otros imports
+    try:
+        from culqi import Culqi
+    except Exception:
+        try:
+            from culqi.client import Culqi
+        except Exception:
+            Culqi = None
 
 logger = logging.getLogger(__name__)
 

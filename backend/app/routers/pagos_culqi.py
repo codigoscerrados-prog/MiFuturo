@@ -59,6 +59,27 @@ class CulqiProChargeOut(BaseModel):
 
 CULQI_API_BASE = "https://api.culqi.com"
 
+SENSITIVE_KEYS = {"token_id", "source_id", "card_number", "cvv", "password"}
+
+
+def _redact(data: dict) -> dict:
+    def _mask(value: str) -> str:
+        if not value:
+            return value
+        if len(value) <= 6:
+            return "***"
+        return f"{value[:3]}***{value[-3:]}"
+
+    redacted = {}
+    for k, v in (data or {}).items():
+        if k in SENSITIVE_KEYS and isinstance(v, str):
+            redacted[k] = _mask(v)
+        elif isinstance(v, dict):
+            redacted[k] = _redact(v)
+        else:
+            redacted[k] = v
+    return redacted
+
 
 def _require_secret_key(secret_key: str | None, *, label: str) -> str:
     if not secret_key:
@@ -72,10 +93,11 @@ def _culqi_post(secret_key: str, path: str, data: dict) -> dict:
         "Authorization": f"Bearer {secret_key}",
         "Content-Type": "application/json",
     }
+    safe_data = _redact(data)
     try:
         resp = requests.post(url, json=data, headers=headers, timeout=20)
     except Exception as exc:
-        logger.exception("Culqi request error (path=%s, data=%s)", path, data)
+        logger.exception("Culqi request error (path=%s, data=%s)", path, safe_data)
         raise HTTPException(status_code=502, detail=f"Error al comunicarse con Culqi: {exc}")
 
     try:
@@ -86,7 +108,7 @@ def _culqi_post(secret_key: str, path: str, data: dict) -> dict:
 
     if resp.status_code >= 400 or payload.get("object") == "error":
         msg = payload.get("user_message") or payload.get("merchant_message") or payload.get("message") or "Error en Culqi"
-        logger.error("Culqi error response (status=%s): %s", resp.status_code, payload)
+        logger.error("Culqi error response (status=%s, path=%s, data=%s): %s", resp.status_code, path, safe_data, payload)
         raise HTTPException(status_code=502, detail=msg)
 
     return payload
@@ -193,6 +215,8 @@ def subscribe(
             "email": payload.email or u.email,
             "country_code": "PE",
         }
+        if not customer_data.get("address"):
+            customer_data["address"] = "Lima, Peru"
         phone = (payload.phone_number or u.phone or "").strip()
         if phone:
             customer_data["phone_number"] = phone

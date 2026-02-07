@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -19,6 +19,9 @@ from app.routers.panel_propietario import router as panel_router
 from app.routers.ubigeo import router as ubigeo_router
 from app.routers.pagos_culqi import router as pagos_culqi_router
 from app.routers.utilitarios import router as utilitarios_router
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("app")
 
 app = FastAPI(title="Backend ProyectoCanchas", version="1.0.0")
 

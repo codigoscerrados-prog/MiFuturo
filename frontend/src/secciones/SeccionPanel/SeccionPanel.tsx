@@ -19,7 +19,6 @@ import SeccionFacturacion from "./SeccionFacturacion";
 import SeccionPerfil from "./SeccionPerfil";
 import SeccionComplejos from "./SeccionComplejos";
 import SeccionUtilitarios from "./SeccionUtilitarios";
-import SeccionFacturacion from "./SeccionFacturacion";
 
 const PRO_PRICE_TEXT = "S/ 50.00 / mes";
 const PRO_AMOUNT_CENTS = 5000;

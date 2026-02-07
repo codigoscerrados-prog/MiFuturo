@@ -2,9 +2,17 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import dynamic from "next/dynamic";
 import styles from "./page.module.css";
-import BuscadorCanchas from "@/secciones/BusquedaDeCancha/BuscadorCanchas";
-import BusquedaDeCancha, { type FiltrosBusqueda } from "@/secciones/BusquedaDeCancha/BusquedaDeCancha";
+import type { FiltrosBusqueda } from "@/secciones/BusquedaDeCancha/BusquedaDeCancha";
+
+const BuscadorCanchas = dynamic(() => import("@/secciones/BusquedaDeCancha/BuscadorCanchas"), {
+    loading: () => <div className={styles.loading}>Cargando filtros...</div>,
+});
+
+const BusquedaDeCancha = dynamic(() => import("@/secciones/BusquedaDeCancha/BusquedaDeCancha"), {
+    loading: () => <div className={styles.loading}>Cargando resultados...</div>,
+});
 
 const FILTROS_INICIALES: FiltrosBusqueda = {
     departamento: "Cualquiera",

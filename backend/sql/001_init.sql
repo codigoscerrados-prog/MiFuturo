@@ -154,5 +154,5 @@ END$$;
 INSERT INTO public.planes (codigo, nombre, precio_mensual, limite_canchas, permite_estadisticas, permite_marketing)
 VALUES
 ('free','Free',0,1,false,false),
-('pro','Pro',50.00,10,true,true)
+('pro','Pro',59.90,10,true,true)
 ON CONFLICT (codigo) DO NOTHING;

@@ -54,6 +54,8 @@ export default function SeccionRegistrarse({
     const [business_name, setBusiness] = useState("");
     const [password, setPass] = useState("");
     const [password2, setPass2] = useState("");
+    const [showPass, setShowPass] = useState(false);
+    const [showPass2, setShowPass2] = useState(false);
 
     const [cargando, setCargando] = useState(false);
     const [error, setError] = useState("");
@@ -74,6 +76,7 @@ export default function SeccionRegistrarse({
         if (!first_name.trim() || !last_name.trim()) return false;
         if (!isValidEmail(email)) return false;
         if (!password || password.length < 6) return false;
+        if (!/[@#]/.test(password)) return false;
         if (password !== password2) return false;
         if (role === "propietario" && !business_name.trim()) return false;
         return true;
@@ -262,6 +265,13 @@ export default function SeccionRegistrarse({
                                     <input className={styles.input} value={last_name} onChange={(e) => setLast(e.target.value)} required />
                                 </label>
 
+                                {role === "propietario" && (
+                                    <label className={styles.campoFull}>
+                                        <span className={styles.label}>Nombre del negocio *</span>
+                                        <input className={styles.input} value={business_name} onChange={(e) => setBusiness(e.target.value)} required />
+                                    </label>
+                                )}
+
                                 <label className={styles.campo}>
                                     <span className={styles.label}>Correo</span>
                                     <input className={styles.input} value={email} onChange={(e) => setEmail(e.target.value)} type="email" required />
@@ -272,22 +282,47 @@ export default function SeccionRegistrarse({
                                     <input className={styles.input} value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" placeholder="Ej: 922023667" />
                                 </label>
 
-                                {role === "propietario" && (
-                                    <label className={styles.campoFull}>
-                                        <span className={styles.label}>Nombre del negocio *</span>
-                                        <input className={styles.input} value={business_name} onChange={(e) => setBusiness(e.target.value)} required />
-                                    </label>
-                                )}
-
                                 <label className={styles.campo}>
                                     <span className={styles.label}>Contraseña</span>
-                                    <input className={styles.input} value={password} onChange={(e) => setPass(e.target.value)} type="password" required />
-                                    <span className={styles.hint}>Mínimo 6 caracteres.</span>
+                                    <div className={styles.inputWrap}>
+                                        <input
+                                            className={styles.input}
+                                            value={password}
+                                            onChange={(e) => setPass(e.target.value)}
+                                            type={showPass ? "text" : "password"}
+                                            required
+                                        />
+                                        <button
+                                            type="button"
+                                            className={styles.toggleBtn}
+                                            onClick={() => setShowPass((v) => !v)}
+                                            aria-label={showPass ? "Ocultar contraseña" : "Mostrar contraseña"}
+                                        >
+                                            <i className={`bi ${showPass ? "bi-eye-slash" : "bi-eye"}`} aria-hidden="true"></i>
+                                        </button>
+                                    </div>
+                                    <span className={styles.hint}>Mínimo 6 caracteres, incluye @ o #.</span>
                                 </label>
 
                                 <label className={styles.campo}>
                                     <span className={styles.label}>Confirmar</span>
-                                    <input className={styles.input} value={password2} onChange={(e) => setPass2(e.target.value)} type="password" required />
+                                    <div className={styles.inputWrap}>
+                                        <input
+                                            className={styles.input}
+                                            value={password2}
+                                            onChange={(e) => setPass2(e.target.value)}
+                                            type={showPass2 ? "text" : "password"}
+                                            required
+                                        />
+                                        <button
+                                            type="button"
+                                            className={styles.toggleBtn}
+                                            onClick={() => setShowPass2((v) => !v)}
+                                            aria-label={showPass2 ? "Ocultar contraseña" : "Mostrar contraseña"}
+                                        >
+                                            <i className={`bi ${showPass2 ? "bi-eye-slash" : "bi-eye"}`} aria-hidden="true"></i>
+                                        </button>
+                                    </div>
                                     {password2 && password !== password2 && <span className={styles.hintBad}>Las contraseñas no coinciden.</span>}
                                 </label>
                             </div>

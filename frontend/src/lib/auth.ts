@@ -127,6 +127,26 @@ export function getUserIdFromToken(token: string | null): number | null {
     }
 }
 
+export function getTokenExp(token: string | null): number | null {
+    if (!token) return null;
+    try {
+        const payload = token.split(".")[1];
+        const data = base64UrlToJson(payload);
+        const exp = data?.exp;
+        const n = typeof exp === "string" || typeof exp === "number" ? Number(exp) : NaN;
+        return Number.isFinite(n) ? n : null;
+    } catch {
+        return null;
+    }
+}
+
+export function isTokenExpired(token: string | null): boolean {
+    const exp = getTokenExp(token);
+    if (!exp) return false;
+    const now = Math.floor(Date.now() / 1000);
+    return exp <= now;
+}
+
 export function rutaPorRole(role: string | null): string {
     if (role === "admin") return "/admin/canchas";
     if (role === "propietario") return "/panel";

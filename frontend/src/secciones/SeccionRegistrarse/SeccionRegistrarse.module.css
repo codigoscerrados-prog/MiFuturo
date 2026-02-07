@@ -356,7 +356,7 @@
   background: rgba(14, 20, 35, 0.9);
   color: #e2e8f0;
   height: 48px;
-  padding: 0 14px;
+  padding: 0 44px 0 14px;
   font-size: 14px;
   transition: border-color 180ms ease, box-shadow 200ms ease;
 }
@@ -378,6 +378,39 @@
   font-size: 11px;
   color: rgba(254, 209, 215, 0.9);
   font-weight: 700;
+}
+
+.inputWrap {
+  position: relative;
+  width: 100%;
+}
+
+.toggleBtn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 32px;
+  width: 32px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.toggleBtn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(125, 216, 125, 0.6);
+}
+
+.toggleBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(125, 216, 125, 0.25);
 }
 
 .acciones {

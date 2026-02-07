@@ -4,24 +4,30 @@ import Link from "next/link";
 import Script from "next/script";
 import { useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 
 import styles from "./SeccionPanel.module.css";
 
-import { clearToken, getRoleFromToken, getToken, rutaPorRole } from "@/lib/auth";
+import { clearToken, getRoleFromToken, getToken, isTokenExpired, rutaPorRole } from "@/lib/auth";
 import { apiFetch, apiUrl } from "@/lib/api";
 import BrandLogo from "@/components/BrandLogo";
 
-import PanelReservasPropietario from "./SeccionReservas";
-import PanelCanchasPropietario from "./SeccionCanchas";
-import SeccionPagos from "./SeccionPagos";
-import SeccionFacturacion from "./SeccionFacturacion";
+const SectionFallback = () => (
+    <div className={`tarjeta ${styles.tarjeta}`}>
+        <p className={styles.muted}>Cargando...</p>
+    </div>
+);
 
-import SeccionPerfil from "./SeccionPerfil";
-import SeccionComplejos from "./SeccionComplejos";
-import SeccionUtilitarios from "./SeccionUtilitarios";
+const SeccionPerfil = dynamic(() => import("./SeccionPerfil"), { loading: SectionFallback });
+const SeccionComplejos = dynamic(() => import("./SeccionComplejos"), { loading: SectionFallback });
+const PanelCanchasPropietario = dynamic(() => import("./SeccionCanchas"), { loading: SectionFallback });
+const PanelReservasPropietario = dynamic(() => import("./SeccionReservas"), { loading: SectionFallback });
+const SeccionPagos = dynamic(() => import("./SeccionPagos"), { loading: SectionFallback });
+const SeccionFacturacion = dynamic(() => import("./SeccionFacturacion"), { loading: SectionFallback });
+const SeccionUtilitarios = dynamic(() => import("./SeccionUtilitarios"), { loading: SectionFallback });
 
-const PRO_PRICE_TEXT = "S/ 50.00 / mes";
-const PRO_AMOUNT_CENTS = 5000;
+const PRO_PRICE_TEXT = "S/ 59.90 / mes";
+const PRO_AMOUNT_CENTS = 5990;
 
 export type Role = "usuario" | "propietario" | "admin";
 
@@ -116,7 +122,7 @@ const ICON_BY_TAB: Record<string, string> = {
 const WHATSAPP_PAY_URL =
     "https://wa.me/51922023667?text=Hola%20CanchasPro%2C%20quiero%20pagar%20mi%20plan%20PRO";
 
-const TRIAL_PAYMENT_LABEL = "S/ 50.00";
+const TRIAL_PAYMENT_LABEL = "S/ 59.90";
 
 export default function SeccionPanel({
     token: tokenProp,
@@ -130,8 +136,14 @@ export default function SeccionPanel({
     const [token, setToken] = useState<string | null>(() => tokenProp ?? null);
 
     useEffect(() => {
-        setToken(tokenProp ?? getToken());
-    }, [tokenProp]);
+        const t = tokenProp ?? getToken();
+        if (t && isTokenExpired(t)) {
+            clearToken();
+            router.push("/iniciar-sesion");
+            return;
+        }
+        setToken(t);
+    }, [tokenProp, router]);
 
     const role = useMemo<Role>(() => {
         if (roleProp) return roleProp;

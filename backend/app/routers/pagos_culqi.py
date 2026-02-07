@@ -508,7 +508,7 @@ def charge_pro(payload: CulqiProChargeIn, db: Session = Depends(get_db), u: User
 
         secret_key = _require_secret_key(settings.CULQI_SECRET_KEY, label="backend")
         charge_body = {
-            "amount": 5000,
+                "amount": 5990,
             "currency_code": "PEN",
             "email": payload.email,
             "source_id": payload.token_id,

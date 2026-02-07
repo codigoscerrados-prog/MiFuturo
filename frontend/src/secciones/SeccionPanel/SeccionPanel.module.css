@@ -30,7 +30,7 @@
 }
 
 .layout {
-    --sidebar-w: 72px;
+    --sidebar-w: 0px;
     display: grid;
     grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
     gap: 0;
@@ -44,6 +44,7 @@
 }
 
 .layoutCollapsed {
+    --sidebar-w: 0px;
 }
 
 .sidebar {
@@ -54,6 +55,16 @@
     border-right: 1px solid var(--panel-border);
     background: var(--panel-bg);
     transition: width 0.2s ease;
+}
+
+.layoutCollapsed .sidebar {
+    width: 0;
+    border-right: none;
+}
+
+.layoutCollapsed .sidebarCard {
+    opacity: 0;
+    pointer-events: none;
 }
 
 .sidebarCard {

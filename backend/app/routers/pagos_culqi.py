@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, EmailStr, Field
@@ -48,6 +48,18 @@ class CulqiChargeOut(BaseModel):
     total_amount: float
 
 
+class CulqiProChargeIn(BaseModel):
+    token_id: str = Field(..., min_length=10)
+    email: EmailStr
+
+
+class CulqiProChargeOut(BaseModel):
+    charge_id: str
+    suscripcion_id: int
+    inicio: datetime
+    fin: datetime | None
+
+
 def _require_culqi() -> None:
     if Culqi is None:
         raise HTTPException(status_code=500, detail="Falta instalar la dependencia culqi en el backend")
@@ -90,6 +102,36 @@ def _get_pro_plan(db: Session) -> Plan:
     if not plan:
         raise HTTPException(status_code=500, detail="No existe el plan PRO en la tabla planes")
     return plan
+
+
+def _extend_or_create_pro(db: Session, user_id: int, pro_id: int) -> Suscripcion:
+    now = datetime.now(timezone.utc)
+    actual = (
+        db.query(Suscripcion)
+        .filter(Suscripcion.user_id == user_id, Suscripcion.plan_id == pro_id, Suscripcion.estado == "activa")
+        .order_by(Suscripcion.inicio.desc())
+        .first()
+    )
+    if actual and actual.fin and actual.fin > now:
+        actual.fin = actual.fin + timedelta(days=30)
+        db.add(actual)
+        db.commit()
+        db.refresh(actual)
+        return actual
+
+    fin = now + timedelta(days=30)
+    s = Suscripcion(
+        user_id=user_id,
+        plan_id=pro_id,
+        estado="activa",
+        inicio=now,
+        fin=fin,
+        proveedor="culqi_charge",
+    )
+    db.add(s)
+    db.commit()
+    db.refresh(s)
+    return s
 
 
 def _has_active_pro(db: Session, user_id: int, pro_id: int) -> bool:
@@ -306,3 +348,42 @@ def charge(payload: CulqiChargeIn, db: Session = Depends(get_db)):
     db.refresh(r)
 
     return CulqiChargeOut(charge_id=charge_id, reserva_id=r.id, total_amount=float(total_amount))
+
+
+@router.post("/charge-pro", response_model=CulqiProChargeOut)
+def charge_pro(payload: CulqiProChargeIn, db: Session = Depends(get_db), u: User = Depends(get_usuario_actual)):
+    if u.role != "propietario":
+        raise HTTPException(status_code=403, detail="Solo propietarios pueden pagar PRO")
+
+    pro = _get_pro_plan(db)
+
+    # Pago único (mensual manual) con Culqi
+    culqi = _culqi_client()
+    charge = _culqi_call(
+        culqi.charge.create,
+        data={
+            "amount": 6990,
+            "currency_code": "PEN",
+            "email": payload.email,
+            "source_id": payload.token_id,
+            "description": "Pago mensual PRO (manual)",
+            "metadata": {"user_id": u.id, "plan": "pro"},
+        },
+    )
+
+    charge_id = charge.get("id")
+    if not charge_id:
+        raise HTTPException(status_code=502, detail="Culqi no devolvió charge_id")
+
+    s = _extend_or_create_pro(db, u.id, pro.id)
+    s.proveedor_ref = charge_id
+    db.add(s)
+    db.commit()
+    db.refresh(s)
+
+    return CulqiProChargeOut(
+        charge_id=charge_id,
+        suscripcion_id=s.id,
+        inicio=s.inicio,
+        fin=s.fin,
+    )

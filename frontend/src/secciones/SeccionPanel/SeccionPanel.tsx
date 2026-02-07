@@ -142,7 +142,7 @@ export default function SeccionPanel({
 
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     const [perfil, setPerfil] = useState<Perfil | null>(() => perfilProp ?? null);
     const [plan, setPlan] = useState<PlanActual | null>(null);
@@ -444,7 +444,7 @@ export default function SeccionPanel({
         <section className={styles.seccion}>
             <div className={styles.contenedor}>
                 <div className={`${styles.layout} ${sidebarOpen ? styles.layoutOpen : styles.layoutCollapsed}`}>
-                    <aside className={styles.sidebar}>
+                    <aside id="panel-sidebar" className={styles.sidebar}>
                         <div className={styles.sidebarCard}>
                             <Link className={styles.brandLink} href="/" aria-label="Ir al inicio">
                                 <div className={styles.brand}>
@@ -500,6 +500,8 @@ export default function SeccionPanel({
                                     type="button"
                                     className={styles.sidebarToggle}
                                     onClick={() => setSidebarOpen((v) => !v)}
+                                    aria-expanded={sidebarOpen}
+                                    aria-controls="panel-sidebar"
                                 >
                                     <i className={`bi ${sidebarOpen ? "bi-layout-sidebar-inset" : "bi-layout-sidebar"}`} aria-hidden="true"></i>
                                     {sidebarOpen ? "Ocultar menú" : "Mostrar menú"}

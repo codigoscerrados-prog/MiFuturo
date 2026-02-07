@@ -89,6 +89,8 @@ export default function SeccionPlanesPropietario() {
         return plan?.plan_id === 2 || codigo.includes("pro");
     }, [plan]);
 
+    const [proPagoModo, setProPagoModo] = useState<"suscripcion" | "mensual">("suscripcion");
+
     const handleCulqiAction = useCallback(async () => {
         const culqi = culqiRef.current;
         if (!culqi) return;
@@ -114,21 +116,29 @@ export default function SeccionPlanesPropietario() {
                     return;
                 }
 
-                await apiFetch("/payments/culqi/subscribe", {
-                    token: t,
-                    method: "POST",
-                    body: JSON.stringify({ token_id: culqi.token.id }),
-                });
+                if (proPagoModo === "suscripcion") {
+                    await apiFetch("/payments/culqi/subscribe", {
+                        token: t,
+                        method: "POST",
+                        body: JSON.stringify({ token_id: culqi.token.id }),
+                    });
+                } else {
+                    await apiFetch("/payments/culqi/charge-pro", {
+                        token: t,
+                        method: "POST",
+                        body: JSON.stringify({ token_id: culqi.token.id, email: "" }),
+                    });
+                }
 
-                setOk("Suscripci?n PRO activada. ?");
+                setOk(proPagoModo === "suscripcion" ? "Suscripción PRO activada. ✅" : "Pago mensual PRO registrado. ✅");
                 router.push("/panel");
             } catch (e: any) {
-                setError(e?.message || "No se pudo activar la suscripci?n.");
+                setError(e?.message || "No se pudo activar la suscripción.");
             } finally {
                 setPagando(false);
             }
         }
-    }, [router, token]);
+    }, [router, token, proPagoModo]);
 
     useEffect(() => {
         if (!culqiReady || typeof window === "undefined") return;
@@ -186,13 +196,14 @@ export default function SeccionPlanesPropietario() {
         }
     }
 
-    function abrirCheckout() {
+    function abrirCheckout(modo: "suscripcion" | "mensual") {
         const t = token || getToken();
         if (!t) return router.push("/iniciar-sesion");
         if (!culqiRef.current) {
             setError("Culqi no est? listo a?n. Intenta otra vez.");
             return;
         }
+        setProPagoModo(modo);
         setError(null);
         setOk(null);
         culqiRef.current.open();

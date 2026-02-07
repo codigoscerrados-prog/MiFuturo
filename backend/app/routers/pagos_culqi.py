@@ -256,11 +256,13 @@ def subscribe(
             raise HTTPException(status_code=502, detail="Culqi no devolvió subscription_id")
 
         now = datetime.now(timezone.utc)
+        fin = now + timedelta(days=30)
         s = Suscripcion(
             user_id=u.id,
             plan_id=pro.id,
             estado="activa",
             inicio=now,
+            fin=fin,
             proveedor="culqi",
             proveedor_ref=subscription_id,
         )

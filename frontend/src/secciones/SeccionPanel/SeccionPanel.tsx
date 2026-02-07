@@ -635,7 +635,7 @@ export default function SeccionPanel({
                                     >
                                         {activandoTrial ? "Activando…" : "Prueba PRO 30 días gratis"}
                                     </button>
-                                ) : role === "propietario" && !planLoading && !isPro ? (
+                                ) : role === "propietario" && !planLoading && !isPro && !plan?.trial_expirado ? (
                                     <button
                                         type="button"
                                         className={`boton botonPrimario ${styles.upgradeBtn}`}
@@ -654,14 +654,19 @@ export default function SeccionPanel({
                                         ? "Queda 1 día de trial PRO."
                                         : `Tu prueba PRO termina en ${trialDaysRemaining} días.`}
                                 </p>
-                                <a
+                            </div>
+                        ) : null}
+
+                        {role === "propietario" && !isPro && plan?.trial_expirado ? (
+                            <div className={styles.trialCallout}>
+                                <p className={styles.trialText}>Tu prueba PRO terminó. Activa PRO para continuar.</p>
+                                <button
+                                    type="button"
                                     className={`boton botonPrimario ${styles.trialBtn}`}
-                                    href={WHATSAPP_PAY_URL}
-                                    target="_blank"
-                                    rel="noreferrer"
+                                    onClick={openProModal}
                                 >
                                     PAGAR AHORA · {TRIAL_PAYMENT_LABEL}
-                                </a>
+                                </button>
                             </div>
                         ) : null}
 

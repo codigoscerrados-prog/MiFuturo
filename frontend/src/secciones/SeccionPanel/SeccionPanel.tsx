@@ -178,6 +178,12 @@ export default function SeccionPanel({
         if (perfilProp) setPerfil(perfilProp);
     }, [perfilProp]);
 
+    const isPro = useMemo(() => {
+        if (!plan) return false;
+        const codigo = String(plan.plan_codigo || "").toLowerCase();
+        const nombre = String(plan.plan_nombre || "").toLowerCase();
+        return plan.plan_id === 2 || codigo.includes("pro") || nombre.includes("pro");
+    }, [plan]);
     useEffect(() => {
         if (autoOpenedRef.current) return;
         if (role === "propietario" && !isPro && plan?.trial_expirado) {
@@ -252,13 +258,6 @@ export default function SeccionPanel({
         };
         culqiRef.current = instance;
     }, [showProModal, culqiReady, router, token]);
-
-    const isPro = useMemo(() => {
-        if (!plan) return false;
-        const codigo = String(plan.plan_codigo || "").toLowerCase();
-        const nombre = String(plan.plan_nombre || "").toLowerCase();
-        return plan.plan_id === 2 || codigo.includes("pro") || nombre.includes("pro");
-    }, [plan]);
 
     const nombreCompleto = useMemo(() => {
         const first = (perfil?.first_name || "").trim();

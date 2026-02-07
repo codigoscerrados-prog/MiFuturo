@@ -264,10 +264,28 @@ export default function SeccionPlanesPropietario() {
                                                 </button>
                                                 <button
                                                     className={`btn btn-dark btn-sm ${styles.ctaInline}`}
-                                                    onClick={abrirCheckout}
+                                                    onClick={() => abrirCheckout("suscripcion")}
                                                     disabled={pagando || isPro}
                                                 >
                                                     {isPro ? "Ya activo" : pagando ? "Procesando…" : `Suscribirme (${PRO_PRICE_TEXT})`}
+                                                </button>
+                                                <button
+                                                    className={`btn btn-sm ${styles.ctaInline} ${styles.yapeBtn}`}
+                                                    onClick={() => abrirCheckout("mensual")}
+                                                    disabled={pagando || isPro}
+                                                >
+                                                    {isPro || pagando ? (
+                                                        isPro ? "Ya activo" : "Procesando…"
+                                                    ) : (
+                                                        <>
+                                                            <img
+                                                                src="/assets/yape.svg"
+                                                                alt="Yape"
+                                                                className={styles.yapeLogoImg}
+                                                            />
+                                                            <span>Pagar mensual</span>
+                                                        </>
+                                                    )}
                                                 </button>
                                             </div>
                                         </th>

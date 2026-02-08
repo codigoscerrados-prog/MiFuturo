@@ -83,7 +83,7 @@ def _extract_subscription_id(payload: dict) -> str | None:
 def _find_sxn_id(value: object) -> str | None:
     if isinstance(value, dict):
         for k, v in value.items():
-            if k in {"sxn_id", "subscription_id", "subsId"} and isinstance(v, str) and v.startswith("sxn_"):
+            if k in {"sxn_id", "sxnId", "subscription_id", "subsId"} and isinstance(v, str) and v.startswith("sxn_"):
                 return v
             found = _find_sxn_id(v)
             if found:

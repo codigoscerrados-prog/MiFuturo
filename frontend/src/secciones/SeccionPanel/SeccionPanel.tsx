@@ -269,6 +269,30 @@ export default function SeccionPanel({
                 setOk("Pago en proceso. Te avisaremos cuando se active PRO.");
                 setShowProModal(false);
                 router.refresh();
+                if (typeof window !== "undefined") {
+                    const startedAt = Date.now();
+                    const interval = window.setInterval(async () => {
+                        if (!token) return;
+                        try {
+                            const latest = await apiFetch<PlanActual>("/perfil/plan", { token });
+                            setPlan(latest);
+                            const codigo = String(latest?.plan_codigo || "").toLowerCase();
+                            const nombre = String(latest?.plan_nombre || "").toLowerCase();
+                            const isProNow =
+                                latest?.plan_id === 2 || codigo.includes("pro") || nombre.includes("pro");
+                            if (isProNow && (latest?.estado || "").toLowerCase() === "activa") {
+                                window.clearInterval(interval);
+                                window.location.reload();
+                                return;
+                            }
+                        } catch {
+                            // ignore and keep polling
+                        }
+                        if (Date.now() - startedAt > 60000) {
+                            window.clearInterval(interval);
+                        }
+                    }, 4000);
+                }
             } catch (e: any) {
                 setError(e?.message || "No se pudo activar PRO.");
             } finally {

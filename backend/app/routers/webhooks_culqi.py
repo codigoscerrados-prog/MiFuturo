@@ -230,11 +230,18 @@ def _extract_charge_id(payload: dict) -> str | None:
     return found
 
 
-def _extend_fin(s: Suscripcion, now: datetime) -> None:
+def _apply_renewal(s: Suscripcion, now: datetime, days: int = 30) -> bool:
+    # Evita doble conteo por reintentos o webhooks duplicados
+    if s.ultimo_cobro_at and (now - s.ultimo_cobro_at) < timedelta(hours=12):
+        return False
     if s.fin and s.fin > now:
-        s.fin = s.fin + timedelta(days=30)
+        s.fin = s.fin + timedelta(days=days)
     else:
-        s.fin = now + timedelta(days=30)
+        s.fin = now + timedelta(days=days)
+    s.ultimo_cobro_at = now
+    s.renovaciones = int(s.renovaciones or 0) + 1
+    s.dias_pagados = int(s.dias_pagados or 0) + days
+    return True
 
 
 @router.post("")
@@ -320,7 +327,7 @@ async def culqi_webhook(request: Request, db: Session = Depends(get_db)):
         outcome_type = str(outcome.get("type") or "").lower()
         if paid is False and outcome_type not in {"venta_autorizada", "venta_aprobada", "venta_exitosa"}:
             return {"ok": True}
-        _extend_fin(sus, now)
+        _apply_renewal(sus, now)
         sus.estado = "activa"
         if sus.user_id:
             otros = (
@@ -355,7 +362,7 @@ async def culqi_webhook(request: Request, db: Session = Depends(get_db)):
         return {"ok": True}
 
     # Para update.succeeded, extender 30 dias y activar
-    _extend_fin(sus, now)
+    _apply_renewal(sus, now)
     sus.estado = "activa"
 
     # Cancelar otros planes activos del mismo usuario (ej: FREE)

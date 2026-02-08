@@ -418,6 +418,9 @@ class Suscripcion(Base):
     proveedor_ref = Column(String(120))
     proveedor_customer = Column(String(120))
     proveedor_email = Column(String(255))
+    renovaciones = Column(Integer, nullable=False, default=0)
+    dias_pagados = Column(Integer, nullable=False, default=0)
+    ultimo_cobro_at = Column(DateTime(timezone=True))
 
     user = relationship("User", back_populates="suscripciones")
     plan = relationship("Plan")

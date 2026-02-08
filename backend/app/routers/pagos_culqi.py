@@ -426,6 +426,8 @@ def subscribe(
             fin=None,
             proveedor="culqi",
             proveedor_ref=subscription_id,
+            proveedor_customer=customer_id,
+            proveedor_email=customer_email.lower(),
         )
         db.add(s)
         db.commit()

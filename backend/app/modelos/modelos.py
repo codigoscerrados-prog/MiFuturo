@@ -416,6 +416,8 @@ class Suscripcion(Base):
 
     proveedor = Column(String(40))
     proveedor_ref = Column(String(120))
+    proveedor_customer = Column(String(120))
+    proveedor_email = Column(String(255))
 
     user = relationship("User", back_populates="suscripciones")
     plan = relationship("Plan")

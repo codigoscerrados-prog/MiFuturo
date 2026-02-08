@@ -161,6 +161,40 @@ def _extract_email(payload: dict) -> str | None:
     return _find_email(payload)
 
 
+def _extract_customer_id(payload: dict) -> str | None:
+    def _find_customer(v: object) -> str | None:
+        if isinstance(v, dict):
+            for k, val in v.items():
+                if k in {"customer_id", "customerId"} and isinstance(val, str) and val.startswith("cus_"):
+                    return val
+                found = _find_customer(val)
+                if found:
+                    return found
+        elif isinstance(v, list):
+            for item in v:
+                found = _find_customer(item)
+                if found:
+                    return found
+        return None
+
+    data = payload.get("data")
+    if isinstance(data, str):
+        try:
+            import json
+            parsed = json.loads(data)
+            found = _find_customer(parsed)
+            if found:
+                return found
+        except Exception:
+            pass
+    message = payload.get("message")
+    if isinstance(message, dict):
+        found = _find_customer(message)
+        if found:
+            return found
+    return _find_customer(payload)
+
+
 def _extract_charge_id(payload: dict) -> str | None:
     def _find_charge(v: object) -> str | None:
         if isinstance(v, dict):
@@ -226,6 +260,19 @@ async def culqi_webhook(request: Request, db: Session = Depends(get_db)):
                     logger.info("Webhook charge: sxn_id resuelto desde chargeId=%s -> %s", charge_id, sub_id)
 
     sus = db.query(Suscripcion).filter(Suscripcion.proveedor_ref == sub_id).first() if sub_id else None
+    if not sus:
+        # fallback: buscar por email si es evento de cargo
+        customer_id = _extract_customer_id(payload)
+        if customer_id:
+            sus = (
+                db.query(Suscripcion)
+                .filter(Suscripcion.proveedor_customer == customer_id)
+                .order_by(Suscripcion.inicio.desc())
+                .first()
+            )
+            if sus:
+                logger.info("Webhook: suscripcion %s resuelta por customer_id=%s", sus.proveedor_ref, customer_id)
+
     if not sus:
         # fallback: buscar por email si es evento de cargo
         email = _extract_email(payload)

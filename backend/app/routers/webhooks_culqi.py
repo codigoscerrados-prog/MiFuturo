@@ -2,6 +2,7 @@ from datetime import datetime, timezone, timedelta
 import base64
 import logging
 from datetime import datetime, timedelta
+import requests
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
@@ -121,6 +122,26 @@ def _extract_sxn_id(payload: dict) -> str | None:
     return None
 
 
+def _fetch_charge_sxn_id(charge_id: str) -> str | None:
+    secret_key = settings.CULQI_SECRET_KEY
+    if not secret_key:
+        return None
+    try:
+        resp = requests.get(
+            f"https://api.culqi.com/v2/charges/{charge_id}",
+            headers={"Authorization": f"Bearer {secret_key}"},
+            timeout=15,
+        )
+        data = resp.json() if resp.content else {}
+    except Exception:
+        return None
+    if isinstance(data, dict):
+        found = _find_sxn_id(data)
+        if found:
+            return found
+    return None
+
+
 def _extract_email(payload: dict) -> str | None:
     def _find_email(v: object) -> str | None:
         if isinstance(v, dict):
@@ -162,6 +183,12 @@ async def culqi_webhook(request: Request, db: Session = Depends(get_db)):
     # Si es evento de cargo, usar sxn_id para ubicar la suscripción
     if not sub_id and "charge" in event_type:
         sub_id = _extract_sxn_id(payload)
+        if not sub_id:
+            charge_id = payload.get("chargeId") or payload.get("id")
+            if isinstance(charge_id, str):
+                sub_id = _fetch_charge_sxn_id(charge_id)
+                if sub_id:
+                    logger.info("Webhook charge: sxn_id resuelto desde chargeId=%s -> %s", charge_id, sub_id)
 
     if not sub_id:
         logger.warning("Webhook sin subscription id: %s", payload)

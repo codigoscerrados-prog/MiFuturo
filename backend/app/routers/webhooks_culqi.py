@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.deps import get_db
-from app.modelos.modelos import Suscripcion
+from app.modelos.modelos import Suscripcion, User
 from app.utils.time import now_peru
 
 logger = logging.getLogger(__name__)
@@ -121,6 +121,25 @@ def _extract_sxn_id(payload: dict) -> str | None:
     return None
 
 
+def _extract_email(payload: dict) -> str | None:
+    def _find_email(v: object) -> str | None:
+        if isinstance(v, dict):
+            for k, val in v.items():
+                if k.lower() == "email" and isinstance(val, str) and "@" in val:
+                    return val.strip().lower()
+                found = _find_email(val)
+                if found:
+                    return found
+        elif isinstance(v, list):
+            for item in v:
+                found = _find_email(item)
+                if found:
+                    return found
+        return None
+
+    return _find_email(payload)
+
+
 def _extend_fin(s: Suscripcion, now: datetime) -> None:
     if s.fin and s.fin > now:
         s.fin = s.fin + timedelta(days=30)
@@ -135,8 +154,10 @@ async def culqi_webhook(request: Request, db: Session = Depends(get_db)):
     payload = await request.json()
 
     sub_id = _extract_subscription_id(payload)
-    event_type = (payload.get("type") or "").lower()
+    event_type = (payload.get("type") or payload.get("action") or "").lower()
     status = str(payload.get("status") or payload.get("result") or "").lower()
+    if not event_type and payload.get("object") == "charge":
+        event_type = "charge.creation.succeeded"
 
     # Si es evento de cargo, usar sxn_id para ubicar la suscripción
     if not sub_id and "charge" in event_type:
@@ -146,7 +167,19 @@ async def culqi_webhook(request: Request, db: Session = Depends(get_db)):
         logger.warning("Webhook sin subscription id: %s", payload)
         return {"ok": True}
 
-    sus = db.query(Suscripcion).filter(Suscripcion.proveedor_ref == sub_id).first()
+    sus = db.query(Suscripcion).filter(Suscripcion.proveedor_ref == sub_id).first() if sub_id else None
+    if not sus:
+        # fallback: buscar por email si es evento de cargo
+        email = _extract_email(payload)
+        if email:
+            u = db.query(User).filter(User.email == email).first()
+            if u:
+                sus = (
+                    db.query(Suscripcion)
+                    .filter(Suscripcion.user_id == u.id, Suscripcion.proveedor == "culqi")
+                    .order_by(Suscripcion.inicio.desc())
+                    .first()
+                )
     if not sus:
         logger.warning("Webhook sin suscripcion local: %s", sub_id)
         return {"ok": True}
@@ -163,6 +196,11 @@ async def culqi_webhook(request: Request, db: Session = Depends(get_db)):
 
     # Si es charge.succeeded, activar inmediatamente
     if "charge" in event_type and "succeeded" in event_type:
+        outcome = payload.get("outcome") or {}
+        paid = payload.get("paid")
+        outcome_type = str(outcome.get("type") or "").lower()
+        if paid is False and outcome_type not in {"venta_autorizada", "venta_aprobada"}:
+            return {"ok": True}
         _extend_fin(sus, now)
         sus.estado = "activa"
         if sus.user_id:

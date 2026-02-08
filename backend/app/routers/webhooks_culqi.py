@@ -161,6 +161,41 @@ def _extract_email(payload: dict) -> str | None:
     return _find_email(payload)
 
 
+def _extract_charge_id(payload: dict) -> str | None:
+    def _find_charge(v: object) -> str | None:
+        if isinstance(v, dict):
+            for k, val in v.items():
+                if k in {"chargeId", "charge_id", "id"} and isinstance(val, str) and val.startswith("chr_"):
+                    return val
+                found = _find_charge(val)
+                if found:
+                    return found
+        elif isinstance(v, list):
+            for item in v:
+                found = _find_charge(item)
+                if found:
+                    return found
+        return None
+
+    data = payload.get("data")
+    if isinstance(data, str):
+        try:
+            import json
+            parsed = json.loads(data)
+            found = _find_charge(parsed)
+            if found:
+                return found
+        except Exception:
+            pass
+    message = payload.get("message")
+    if isinstance(message, dict):
+        found = _find_charge(message)
+        if found:
+            return found
+    found = _find_charge(payload)
+    return found
+
+
 def _extend_fin(s: Suscripcion, now: datetime) -> None:
     if s.fin and s.fin > now:
         s.fin = s.fin + timedelta(days=30)
@@ -184,7 +219,7 @@ async def culqi_webhook(request: Request, db: Session = Depends(get_db)):
     if not sub_id and "charge" in event_type:
         sub_id = _extract_sxn_id(payload)
         if not sub_id:
-            charge_id = payload.get("chargeId") or payload.get("id")
+            charge_id = _extract_charge_id(payload)
             if isinstance(charge_id, str):
                 sub_id = _fetch_charge_sxn_id(charge_id)
                 if sub_id:
@@ -219,6 +254,7 @@ async def culqi_webhook(request: Request, db: Session = Depends(get_db)):
             sus.fin = now
         db.add(sus)
         db.commit()
+        logger.info("Webhook: suscripcion %s marcada rechazada", sus.proveedor_ref)
         return {"ok": True}
 
     # Si es charge.succeeded, activar inmediatamente
@@ -243,6 +279,7 @@ async def culqi_webhook(request: Request, db: Session = Depends(get_db)):
                 db.add(o)
         db.add(sus)
         db.commit()
+        logger.info("Webhook: suscripcion %s activada por charge", sus.proveedor_ref)
         return {"ok": True}
 
     if "cancel" in event_type:
@@ -251,6 +288,7 @@ async def culqi_webhook(request: Request, db: Session = Depends(get_db)):
             sus.fin = now
         db.add(sus)
         db.commit()
+        logger.info("Webhook: suscripcion %s cancelada", sus.proveedor_ref)
         return {"ok": True}
 
     # Si es creation.succeeded, solo dejamos pendiente (no activamos hasta primer cobro)
@@ -278,6 +316,7 @@ async def culqi_webhook(request: Request, db: Session = Depends(get_db)):
             db.add(o)
     db.add(sus)
     db.commit()
+    logger.info("Webhook: suscripcion %s activada por subscription update", sus.proveedor_ref)
 
     return {"ok": True}
 

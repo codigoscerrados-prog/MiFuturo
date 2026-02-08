@@ -225,10 +225,6 @@ async def culqi_webhook(request: Request, db: Session = Depends(get_db)):
                 if sub_id:
                     logger.info("Webhook charge: sxn_id resuelto desde chargeId=%s -> %s", charge_id, sub_id)
 
-    if not sub_id:
-        logger.warning("Webhook sin subscription id: %s", payload)
-        return {"ok": True}
-
     sus = db.query(Suscripcion).filter(Suscripcion.proveedor_ref == sub_id).first() if sub_id else None
     if not sus:
         # fallback: buscar por email si es evento de cargo
@@ -238,12 +234,16 @@ async def culqi_webhook(request: Request, db: Session = Depends(get_db)):
             if u:
                 sus = (
                     db.query(Suscripcion)
-                    .filter(Suscripcion.user_id == u.id, Suscripcion.proveedor == "culqi")
+                    .filter(
+                        Suscripcion.user_id == u.id,
+                        Suscripcion.proveedor == "culqi",
+                        Suscripcion.estado.in_(["pendiente", "rechazada", "activa"]),
+                    )
                     .order_by(Suscripcion.inicio.desc())
                     .first()
                 )
     if not sus:
-        logger.warning("Webhook sin suscripcion local: %s", sub_id)
+        logger.warning("Webhook sin suscripcion local: %s", sub_id or payload)
         return {"ok": True}
 
     now = now_peru()
@@ -255,6 +255,15 @@ async def culqi_webhook(request: Request, db: Session = Depends(get_db)):
         db.add(sus)
         db.commit()
         logger.info("Webhook: suscripcion %s marcada rechazada", sus.proveedor_ref)
+        return {"ok": True}
+
+    if "charge" in event_type and "failed" in event_type:
+        sus.estado = "rechazada"
+        if not sus.fin or sus.fin > now:
+            sus.fin = now
+        db.add(sus)
+        db.commit()
+        logger.info("Webhook: suscripcion %s marcada rechazada por charge", sus.proveedor_ref)
         return {"ok": True}
 
     # Si es charge.succeeded, activar inmediatamente

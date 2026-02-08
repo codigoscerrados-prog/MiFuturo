@@ -199,7 +199,7 @@ async def culqi_webhook(request: Request, db: Session = Depends(get_db)):
         outcome = payload.get("outcome") or {}
         paid = payload.get("paid")
         outcome_type = str(outcome.get("type") or "").lower()
-        if paid is False and outcome_type not in {"venta_autorizada", "venta_aprobada"}:
+        if paid is False and outcome_type not in {"venta_autorizada", "venta_aprobada", "venta_exitosa"}:
             return {"ok": True}
         _extend_fin(sus, now)
         sus.estado = "activa"

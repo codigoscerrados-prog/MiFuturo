@@ -79,6 +79,48 @@ def _extract_subscription_id(payload: dict) -> str | None:
     return payload.get("subscription_id")
 
 
+def _find_sxn_id(value: object) -> str | None:
+    if isinstance(value, dict):
+        for k, v in value.items():
+            if k in {"sxn_id", "subscription_id", "subsId"} and isinstance(v, str) and v.startswith("sxn_"):
+                return v
+            found = _find_sxn_id(v)
+            if found:
+                return found
+    elif isinstance(value, list):
+        for item in value:
+            found = _find_sxn_id(item)
+            if found:
+                return found
+    return None
+
+
+def _extract_sxn_id(payload: dict) -> str | None:
+    if not payload:
+        return None
+    data = payload.get("data")
+    if isinstance(data, str):
+        try:
+            import json
+            parsed = json.loads(data)
+            found = _find_sxn_id(parsed)
+            if found:
+                return found
+        except Exception:
+            pass
+    message = payload.get("message")
+    if isinstance(message, dict):
+        found = _find_sxn_id(message)
+        if found:
+            return found
+    found = _find_sxn_id(payload)
+    if found:
+        return found
+    if isinstance(data, dict):
+        return data.get("sxn_id")
+    return None
+
+
 def _extend_fin(s: Suscripcion, now: datetime) -> None:
     if s.fin and s.fin > now:
         s.fin = s.fin + timedelta(days=30)
@@ -96,6 +138,10 @@ async def culqi_webhook(request: Request, db: Session = Depends(get_db)):
     event_type = (payload.get("type") or "").lower()
     status = str(payload.get("status") or payload.get("result") or "").lower()
 
+    # Si es evento de cargo, usar sxn_id para ubicar la suscripción
+    if not sub_id and "charge" in event_type:
+        sub_id = _extract_sxn_id(payload)
+
     if not sub_id:
         logger.warning("Webhook sin subscription id: %s", payload)
         return {"ok": True}
@@ -111,6 +157,25 @@ async def culqi_webhook(request: Request, db: Session = Depends(get_db)):
         sus.estado = "rechazada"
         if not sus.fin or sus.fin > now:
             sus.fin = now
+        db.add(sus)
+        db.commit()
+        return {"ok": True}
+
+    # Si es charge.succeeded, activar inmediatamente
+    if "charge" in event_type and "succeeded" in event_type:
+        _extend_fin(sus, now)
+        sus.estado = "activa"
+        if sus.user_id:
+            otros = (
+                db.query(Suscripcion)
+                .filter(Suscripcion.user_id == sus.user_id, Suscripcion.estado == "activa", Suscripcion.id != sus.id)
+                .all()
+            )
+            for o in otros:
+                o.estado = "cancelada"
+                if not o.fin or o.fin > now:
+                    o.fin = now
+                db.add(o)
         db.add(sus)
         db.commit()
         return {"ok": True}
